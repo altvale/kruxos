@@ -1,0 +1,171 @@
+site_name: KruxOS Documentation
+site_url: https://docs.kruxos.com
+site_description: "KruxOS — the operating system built for AI agents. Typed APIs, governance, and safety for every agent interaction."
+repo_url: https://github.com/altvale/kruxos
+repo_name: altvale/kruxos
+
+theme:
+  name: material
+  logo: assets/kruxos-icon.svg
+  favicon: assets/favicon-32.png
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.mark
+  - pymdownx.keys
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/altvale/kruxos
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+
+  - Quickstart:
+    - quickstart/index.md
+    - Install KruxOS: quickstart/install.md
+    - Connect Claude Desktop: quickstart/connect-claude.md
+    - Connect Claude Code: quickstart/claude-code.md
+    - Connect OpenAI: quickstart/connect-openai.md
+    - Connect Gemini: quickstart/connect-gemini.md
+    - Connect Local Models: quickstart/connect-local.md
+    - Web Dashboard: quickstart/dashboard.md
+    - CLI Guide: quickstart/cli.md
+    - Connect Gmail: quickstart/gmail.md
+
+  - Guides:
+    - guides/index.md
+    - Model Providers: guides/model-providers.md
+    - Managing Agents: guides/managing-agents.md
+    - Approval Workflow: guides/approval-workflow.md
+    - Policies: guides/policies.md
+    - Monitoring: guides/monitoring.md
+    - Backup & Restore: guides/backup-restore.md
+    - Updating KruxOS: guides/updating.md
+    - Migration from OpenClaw: guides/migration-from-openclaw.md
+    - Autonomous Agents: guides/autonomous-agents.md
+    - Docker Agent Isolation: guides/docker-isolation.md
+    - Slack Integration: guides/slack-integration.md
+    - First Conversation: guides/first-conversation.md
+    - Dashboard Chat: guides/dashboard-chat.md
+    - Troubleshooting: guides/troubleshooting.md
+    - Error Reference: troubleshooting/errors.md
+
+  - Integrations:
+    - Hermes Agent: guides/hermes.md
+    - OpenAI Codex CLI: guides/codex.md
+
+  - Concepts:
+    - Permission Model: concepts/permission-model.md
+
+  - Security:
+    - Security Whitepaper: security/whitepaper.md
+
+  - Enterprise:
+    - enterprise/index.md
+    - Security Model: enterprise/security-model.md
+    - Architecture: enterprise/architecture.md
+    - Compliance: enterprise/compliance.md
+    - Deployment Guide: enterprise/deployment-guide.md
+    - Service Proxy: enterprise/service-proxy.md
+    - Pricing: enterprise/pricing.md
+    - Contact: enterprise/contact.md
+
+  - Developers:
+    - developers/index.md
+    - SDK Guide: developers/sdk-guide.md
+    - Connectors:
+      - Claude (MCP): developers/connectors/claude.md
+      - OpenAI: developers/connectors/openai.md
+      - Gemini: developers/connectors/gemini.md
+      - Local Models: developers/connectors/local.md
+    - Pack Development:
+      - Quickstart: developers/packs/quickstart.md
+      - Documentation Standard: developers/packs/documentation-standard.md
+      - Service Proxy Packs: developers/packs/service-proxy-packs.md
+      - Testing: developers/packs/testing.md
+      - Publishing: developers/packs/publishing.md
+      - Registry: developers/packs/registry.md
+    - API Reference:
+      - Gateway — MCP: developers/api/gateway-mcp.md
+      - Gateway — JSON-RPC: developers/api/gateway-jsonrpc.md
+      - Supervision Events: developers/api/supervision-events.md
+      - Dashboard REST API: developers/api/rest-api.md
+    - Capability Reference:
+      - developers/capabilities/index.md
+      - Filesystem: developers/capabilities/filesystem.md
+      - Process: developers/capabilities/process.md
+      - Network: developers/capabilities/network.md
+      - Git: developers/capabilities/git.md
+      - Scheduler: developers/capabilities/scheduler.md
+      - Alerts: developers/capabilities/alerts.md
+      - System: developers/capabilities/system.md
+      - Agent: developers/capabilities/agent.md
+      - Secrets: developers/capabilities/secrets.md
+      - Communications: developers/capabilities/comms.md
+      - State & Memory: developers/capabilities/state.md
+      - Email: developers/capabilities/email.md
+      - Slack: developers/capabilities/slack.md
+    - Service Proxy Adapters: developers/services.md
+    - Agent Experience: developers/agent-experience.md
+    - Contributing: developers/contributing.md

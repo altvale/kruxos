@@ -1,0 +1,236 @@
+/* ============================================================
+   KruxOS brand theme for mkdocs-material
+   Matches kruxos.com: dark slate surfaces, green as an accent.
+   ============================================================ */
+
+:root {
+  /* KruxOS palette — mirror kruxos.com root vars */
+  --kx-green-50:  #E1F5EE;
+  --kx-green-100: #9FE1CB;
+  --kx-green-200: #5DCAA5;  /* mint — highlights, active, link hover */
+  --kx-green-400: #1D9E75;  /* brand green — primary accent */
+  --kx-green-600: #0F6E56;
+  --kx-green-800: #085041;
+  --kx-green-900: #04342C;
+
+  --kx-slate-950: #08080f;  /* page bg */
+  --kx-slate-900: #10101c;  /* elevated surface, code bg */
+  --kx-slate-800: #1a1a2e;
+  --kx-slate-700: #2d2d44;  /* hairline borders */
+  --kx-slate-600: #454563;
+  --kx-slate-500: #6b6b8a;  /* muted text */
+  --kx-slate-400: #9e9eb8;
+  --kx-slate-300: #cdcde0;  /* body text on dark */
+  --kx-slate-200: #e0e0ec;
+}
+
+/* ============================================================
+   LIGHT SCHEME (fallback / :root)
+   Header is dark slate in both schemes — consistent brand.
+   ============================================================ */
+:root {
+  --md-primary-fg-color:         var(--kx-slate-950);
+  --md-primary-fg-color--light:  var(--kx-slate-900);
+  --md-primary-fg-color--dark:   var(--kx-slate-950);
+  --md-primary-bg-color:         var(--kx-slate-300);
+  --md-primary-bg-color--light:  var(--kx-slate-400);
+
+  --md-accent-fg-color:              var(--kx-green-400);
+  --md-accent-fg-color--transparent: rgba(29, 158, 117, 0.08);
+  --md-accent-bg-color:              #ffffff;
+  --md-accent-bg-color--light:       rgba(255, 255, 255, 0.7);
+
+  --md-typeset-a-color: var(--kx-green-600);
+}
+
+/* ============================================================
+   DARK (SLATE) SCHEME — the on-brand kruxos.com surface
+   ============================================================ */
+[data-md-color-scheme="slate"] {
+  --md-hue: 240;
+
+  --md-default-bg-color:          var(--kx-slate-950);
+  --md-default-bg-color--light:   var(--kx-slate-900);
+  --md-default-bg-color--lighter: var(--kx-slate-800);
+  --md-default-bg-color--lightest:var(--kx-slate-700);
+
+  --md-default-fg-color:          var(--kx-slate-300);
+  --md-default-fg-color--light:   var(--kx-slate-400);
+  --md-default-fg-color--lighter: var(--kx-slate-500);
+  --md-default-fg-color--lightest:var(--kx-slate-700);
+
+  --md-primary-fg-color:         var(--kx-slate-950);
+  --md-primary-fg-color--light:  var(--kx-slate-900);
+  --md-primary-fg-color--dark:   var(--kx-slate-950);
+  --md-primary-bg-color:         var(--kx-slate-300);
+  --md-primary-bg-color--light:  var(--kx-slate-500);
+
+  --md-accent-fg-color:              var(--kx-green-200);
+  --md-accent-fg-color--transparent: rgba(93, 202, 165, 0.12);
+  --md-accent-bg-color:              var(--kx-slate-950);
+  --md-accent-bg-color--light:       var(--kx-slate-900);
+
+  --md-typeset-a-color: var(--kx-green-200);
+
+  --md-code-bg-color: var(--kx-slate-900);
+  --md-code-fg-color: var(--kx-slate-300);
+  --md-code-hl-color: rgba(93, 202, 165, 0.15);
+
+  --md-typeset-mark-color: rgba(93, 202, 165, 0.25);
+  --md-typeset-kbd-color:         var(--kx-slate-800);
+  --md-typeset-kbd-accent-color:  var(--kx-slate-900);
+  --md-typeset-kbd-border-color:  var(--kx-slate-700);
+  --md-typeset-table-color:       var(--kx-slate-700);
+
+  --md-footer-bg-color:       var(--kx-slate-950);
+  --md-footer-bg-color--dark: var(--kx-slate-950);
+}
+
+/* ============================================================
+   Polish — match the kruxos.com nav and typographic feel
+   ============================================================ */
+
+/* Selection: KruxOS green */
+::selection {
+  background: var(--kx-green-400);
+  color: #ffffff;
+}
+
+/* Header: thin hairline border under it, matches kruxos.com nav.scrolled */
+.md-header {
+  background-color: var(--kx-slate-950);
+  border-bottom: 0.5px solid var(--kx-slate-700);
+  box-shadow: none;
+}
+.md-header[data-md-state="shadow"] {
+  box-shadow: none;
+  border-bottom-color: var(--kx-slate-700);
+}
+
+/* Top-level tabs strip: dark slate, mint active-tab color */
+.md-tabs {
+  background-color: var(--kx-slate-950);
+  border-bottom: 0.5px solid var(--kx-slate-700);
+}
+.md-tabs__link {
+  opacity: 1;
+  color: var(--kx-slate-500);
+  font-size: 13px;
+  transition: color 0.2s;
+}
+.md-tabs__link:hover {
+  color: var(--kx-slate-200);
+}
+.md-tabs__link--active {
+  color: var(--kx-green-200);
+  font-weight: 500;
+}
+
+/* Headings — sharp white with slight negative tracking, like kruxos.com */
+[data-md-color-scheme="slate"] .md-typeset h1,
+[data-md-color-scheme="slate"] .md-typeset h2,
+[data-md-color-scheme="slate"] .md-typeset h3,
+[data-md-color-scheme="slate"] .md-typeset h4 {
+  color: #ffffff;
+  letter-spacing: -0.4px;
+}
+[data-md-color-scheme="slate"] .md-typeset h1 {
+  font-weight: 700;
+  letter-spacing: -0.8px;
+}
+
+/* Header brand text colour (next to the mark) */
+.md-header__title,
+.md-header__topic {
+  color: var(--kx-slate-300);
+  font-weight: 500;
+}
+
+/* Search input on dark header */
+.md-search__input {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: var(--kx-slate-300);
+}
+.md-search__input::placeholder {
+  color: var(--kx-slate-500);
+}
+.md-search__input + .md-search__icon {
+  color: var(--kx-slate-500);
+}
+.md-search__input:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Inline code on dark — mint text on slate-900, hairline border */
+[data-md-color-scheme="slate"] .md-typeset code {
+  background-color: var(--kx-slate-900);
+  color: var(--kx-green-200);
+  border: 0.5px solid var(--kx-slate-700);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.88em;
+}
+[data-md-color-scheme="slate"] .md-typeset pre > code,
+[data-md-color-scheme="slate"] .md-typeset pre code {
+  color: var(--kx-slate-300);
+  border: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+[data-md-color-scheme="slate"] .md-typeset pre {
+  border: 0.5px solid var(--kx-slate-700);
+  border-radius: 8px;
+}
+
+/* Links: underline only on hover, like kruxos.com */
+[data-md-color-scheme="slate"] .md-typeset a {
+  text-decoration: none;
+  border-bottom: 0.5px solid rgba(93, 202, 165, 0.3);
+  transition: border-color 0.15s, color 0.15s;
+}
+[data-md-color-scheme="slate"] .md-typeset a:hover {
+  color: var(--kx-green-100);
+  border-bottom-color: var(--kx-green-200);
+}
+
+/* Sidebar nav: mint for active, muted slate for the rest */
+[data-md-color-scheme="slate"] .md-nav__link {
+  color: var(--kx-slate-400);
+}
+[data-md-color-scheme="slate"] .md-nav__link:hover,
+[data-md-color-scheme="slate"] .md-nav__link--active {
+  color: var(--kx-green-200);
+}
+[data-md-color-scheme="slate"] .md-nav__title {
+  color: var(--kx-slate-300);
+  font-weight: 600;
+}
+
+/* Tables: hairline borders, no heavy fills */
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) {
+  background-color: transparent;
+  border: 0.5px solid var(--kx-slate-700);
+}
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background-color: var(--kx-slate-900);
+  color: #ffffff;
+  border-bottom: 0.5px solid var(--kx-slate-700);
+}
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) td {
+  border-top: 0.5px solid var(--kx-slate-700);
+}
+
+/* Footer: keep it consistent with the body */
+[data-md-color-scheme="slate"] .md-footer,
+[data-md-color-scheme="slate"] .md-footer-meta {
+  background-color: var(--kx-slate-950);
+  border-top: 0.5px solid var(--kx-slate-700);
+}
+
+/* Subtle ambient green glow at the top of the page (kruxos.com hero motif) */
+[data-md-color-scheme="slate"] .md-main {
+  background:
+    radial-gradient(ellipse 1200px 600px at 50% -200px,
+      rgba(29, 158, 117, 0.05) 0%,
+      transparent 60%);
+}

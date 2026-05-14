@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 600" role="img" aria-labelledby="diagram-title diagram-desc">
+  <title id="diagram-title">KruxOS Architecture</title>
+  <desc id="diagram-desc">KruxOS architecture: seven horizontal layers — Layer 0 Operating System, Layer 1 Agent Gateway, Layer 2 Capability Registry with parallel Layer 2a Service Proxy, Layer 3 State and Memory, Layer 4 Policy Engine, Layer 5 Supervision — and five cross-cutting pillars that span all layers: Vault, Sandbox, Audit, Comms, Health.</desc>
+
+  <defs>
+    <pattern id="bg-dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.7" fill="#5DCAA5" opacity="0.10"></circle>
+    </pattern>
+    <clipPath id="clip-600"><rect width="600" height="72" rx="8"></rect></clipPath>
+    <clipPath id="clip-360"><rect width="360" height="72" rx="8"></rect></clipPath>
+    <clipPath id="clip-232"><rect width="232" height="72" rx="8"></rect></clipPath>
+  </defs>
+
+  <rect fill="#08080f" width="920" height="600"></rect>
+  <rect width="920" height="600" fill="url(#bg-dots)"></rect>
+
+  <g id="header" transform="translate(40, 36)">
+    <g transform="translate(0, -2)">
+      <circle cx="16" cy="16" r="15" fill="#1D9E75"></circle>
+      <circle cx="16" cy="16" r="7.5" fill="#08080f"></circle>
+      <circle cx="16" cy="16" r="3.5" fill="#5DCAA5"></circle>
+    </g>
+    <text x="44" y="20" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="22" font-weight="600" letter-spacing="-0.4" fill="#f0f0f5">KruxOS <tspan font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="22" font-weight="400" letter-spacing="-0.4" fill="#a0a0b5">Architecture</tspan></text>
+    <text x="44" y="38" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="11" letter-spacing="0.4" fill="#8a8a99">seven layers · five cross-cutting pillars</text>
+    <text x="840" y="20" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="10" font-weight="600" letter-spacing="1.4" fill="#6e6e85" text-anchor="end">SYSTEM TOPOLOGY</text>
+    <text x="840" y="38" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="10" font-weight="600" letter-spacing="1.4" fill="#6e6e85" text-anchor="end" opacity="0.6">v0.0.1</text>
+  </g>
+
+  <line x1="40" y1="84" x2="880" y2="84" stroke="#2d2d44" stroke-width="1"></line>
+
+  <g transform="translate(28, 100)">
+    <text transform="translate(0, 236) rotate(-90)" text-anchor="middle" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="9" font-weight="600" letter-spacing="1.4" fill="#4a4a5e">SUPERVISOR  →  OS</text>
+  </g>
+
+  <g id="layers" transform="translate(40, 100)">
+    <g id="layer-5">
+      <g clip-path="url(#clip-600)">
+        <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="600" height="72"></rect>
+        <rect width="4" height="72" fill="#5DCAA5"></rect>
+      </g>
+      <rect fill="none" stroke="#2d2d44" stroke-width="1" width="600" height="72" rx="8"></rect>
+      <text x="24" y="42" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="11" font-weight="700" letter-spacing="0.6" fill="#5DCAA5">L5</text>
+      <text x="76" y="33" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="-0.2" fill="#f0f0f5">Supervision</text>
+      <text x="76" y="55" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="12" fill="#a0a0b5">Web dashboard, CLI, approval queue</text>
+    </g>
+    <g id="layer-4" transform="translate(0, 80)">
+      <g clip-path="url(#clip-600)">
+        <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="600" height="72"></rect>
+        <rect width="4" height="72" fill="#5DCAA5" opacity="0.88"></rect>
+      </g>
+      <rect fill="none" stroke="#2d2d44" stroke-width="1" width="600" height="72" rx="8"></rect>
+      <text x="24" y="42" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="11" font-weight="700" letter-spacing="0.6" fill="#5DCAA5">L4</text>
+      <text x="76" y="33" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="-0.2" fill="#f0f0f5">Policy Engine</text>
+      <text x="76" y="55" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="12" fill="#a0a0b5">Deterministic governance · no LLM in the hot path</text>
+    </g>
+    <g id="layer-3" transform="translate(0, 160)">
+      <g clip-path="url(#clip-600)">
+        <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="600" height="72"></rect>
+        <rect width="4" height="72" fill="#1D9E75" opacity="0.95"></rect>
+      </g>
+      <rect fill="none" stroke="#2d2d44" stroke-width="1" width="600" height="72" rx="8"></rect>
+      <text x="24" y="42" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="11" font-weight="700" letter-spacing="0.6" fill="#5DCAA5">L3</text>
+      <text x="76" y="33" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="-0.2" fill="#f0f0f5">State &amp; Memory</text>
+      <text x="76" y="55" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="12" fill="#a0a0b5">Session · persistent · shared scopes + snapshots</text>
+    </g>
+
+    <g id="layer-2-group">
+      <rect x="-8" y="232" width="616" height="88" rx="12" fill="none" stroke="#1f4a3a" stroke-width="1" stroke-dasharray="3 3"></rect>
+      <text x="300" y="226" text-anchor="middle" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="9" font-weight="600" letter-spacing="1.4" fill="#5DCAA5">PARALLEL PATHS</text>
+    </g>
+
+    <g id="layer-2" transform="translate(0, 240)">
+      <g clip-path="url(#clip-360)">
+        <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="360" height="72"></rect>
+        <rect width="4" height="72" fill="#1D9E75" opacity="0.80"></rect>
+      </g>
+      <rect fill="none" stroke="#2d2d44" stroke-width="1" width="360" height="72" rx="8"></rect>
+      <text x="24" y="42" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="11" font-weight="700" letter-spacing="0.6" fill="#5DCAA5">L2</text>
+      <text x="76" y="33" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="-0.2" fill="#f0f0f5">Capability Registry</text>
+      <text x="76" y="55" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="12" fill="#a0a0b5">89 typed APIs · MCP-native</text>
+    </g>
+    <g id="layer-2a" transform="translate(368, 240)">
+      <g clip-path="url(#clip-232)">
+        <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="232" height="72"></rect>
+        <rect width="4" height="72" fill="#1D9E75" opacity="0.80"></rect>
+      </g>
+      <rect fill="none" stroke="#2d2d44" stroke-width="1" width="232" height="72" rx="8"></rect>
+      <text x="20" y="42" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="11" font-weight="700" letter-spacing="0.6" fill="#5DCAA5">L2a</text>
+      <text x="66" y="33" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="14" font-weight="600" letter-spacing="-0.2" fill="#f0f0f5">Service Proxy</text>
+      <text x="66" y="55" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="11" fill="#a0a0b5">Safe external intermediation</text>
+    </g>
+
+    <g id="parallel-connector">
+      <line x1="360" y1="276" x2="368" y2="276" stroke="#5DCAA5" stroke-width="1.2" opacity="0.7"></line>
+      <circle cx="360" cy="276" r="1.6" fill="#5DCAA5" opacity="0.85"></circle>
+      <circle cx="368" cy="276" r="1.6" fill="#5DCAA5" opacity="0.85"></circle>
+    </g>
+
+    <g id="layer-1" transform="translate(0, 320)">
+      <g clip-path="url(#clip-600)">
+        <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="600" height="72"></rect>
+        <rect width="4" height="72" fill="#1D9E75" opacity="0.65"></rect>
+      </g>
+      <rect fill="none" stroke="#2d2d44" stroke-width="1" width="600" height="72" rx="8"></rect>
+      <text x="24" y="42" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="11" font-weight="700" letter-spacing="0.6" fill="#5DCAA5">L1</text>
+      <text x="76" y="33" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="-0.2" fill="#f0f0f5">Agent Gateway</text>
+      <text x="76" y="55" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="12" fill="#a0a0b5">Auth · sessions · model providers</text>
+    </g>
+    <g id="layer-0" transform="translate(0, 400)">
+      <g clip-path="url(#clip-600)">
+        <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="600" height="72"></rect>
+        <rect width="4" height="72" fill="#1D9E75" opacity="0.45"></rect>
+      </g>
+      <rect fill="none" stroke="#2d2d44" stroke-width="1" width="600" height="72" rx="8"></rect>
+      <text x="24" y="42" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="11" font-weight="700" letter-spacing="0.6" fill="#5DCAA5">L0</text>
+      <text x="76" y="33" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="-0.2" fill="#f0f0f5">Operating System</text>
+      <text x="76" y="55" font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, &#34;Helvetica Neue&#34;, Arial, sans-serif" font-size="12" fill="#a0a0b5">Hardened immutable base · signed updates</text>
+    </g>
+  </g>
+
+  <g id="cross-cutting" transform="translate(680, 100)">
+    <text x="100" y="-12" text-anchor="middle" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="9" font-weight="600" letter-spacing="1.4" fill="#4a4a5e">CROSS-CUTTING</text>
+
+    <g id="pillar-vault">
+      <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="36" height="472" rx="8"></rect>
+      <g transform="translate(18, 22)">
+        <circle r="6" fill="none" stroke="#5DCAA5" stroke-width="1.5"></circle>
+        <circle r="1.8" fill="#5DCAA5"></circle>
+      </g>
+      <text transform="translate(18, 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="10" font-weight="700" letter-spacing="1.8" fill="#c8c8d5">VAULT</text>
+    </g>
+    <g id="pillar-sandbox" transform="translate(41, 0)">
+      <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="36" height="472" rx="8"></rect>
+      <g transform="translate(18, 22)">
+        <rect x="-6" y="-6" width="12" height="12" rx="1.5" fill="none" stroke="#5DCAA5" stroke-width="1.5" stroke-dasharray="2 1.6"></rect>
+      </g>
+      <text transform="translate(18, 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="10" font-weight="700" letter-spacing="1.8" fill="#c8c8d5">SANDBOX</text>
+    </g>
+    <g id="pillar-audit" transform="translate(82, 0)">
+      <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="36" height="472" rx="8"></rect>
+      <g transform="translate(18, 22)">
+        <rect x="-6" y="-5" width="12" height="1.8" rx="0.9" fill="#5DCAA5"></rect>
+        <rect x="-6" y="-0.9" width="12" height="1.8" rx="0.9" fill="#5DCAA5"></rect>
+        <rect x="-6" y="3.2" width="9" height="1.8" rx="0.9" fill="#5DCAA5" opacity="0.6"></rect>
+      </g>
+      <text transform="translate(18, 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="10" font-weight="700" letter-spacing="1.8" fill="#c8c8d5">AUDIT</text>
+    </g>
+    <g id="pillar-comms" transform="translate(123, 0)">
+      <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="36" height="472" rx="8"></rect>
+      <g transform="translate(18, 22)">
+        <path d="M -6,-3 L 5,-3" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round"></path>
+        <path d="M 3,-5 L 6,-3 L 3,-1" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+        <path d="M 6,3 L -5,3" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round"></path>
+        <path d="M -3,1 L -6,3 L -3,5" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+      </g>
+      <text transform="translate(18, 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="10" font-weight="700" letter-spacing="1.8" fill="#c8c8d5">COMMS</text>
+    </g>
+    <g id="pillar-health" transform="translate(164, 0)">
+      <rect fill="#10101c" stroke="#2d2d44" stroke-width="1" width="36" height="472" rx="8"></rect>
+      <g transform="translate(18, 22)">
+        <polyline points="-7,1 -3,1 -1,-4 1,4 3,-2 5,1 7,1" fill="none" stroke="#5DCAA5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+      </g>
+      <text transform="translate(18, 240) rotate(-90)" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, &#34;SF Mono&#34;, &#34;Cascadia Mono&#34;, &#34;Roboto Mono&#34;, Menlo, Consolas, monospace" font-size="10" font-weight="700" letter-spacing="1.8" fill="#c8c8d5">HEALTH</text>
+    </g>
+  </g>
+</svg>

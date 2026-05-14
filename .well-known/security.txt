@@ -1,0 +1,14 @@
+# KruxOS Security Disclosure
+# RFC 9116 — https://datatracker.ietf.org/doc/html/rfc9116
+#
+# Canonical source-of-truth lives at the repo root:
+#   https://github.com/altvale/kruxos/blob/main/.well-known/security.txt
+# Mirrored at the published docs site by docs/public/wrangler.toml's
+# build command (copies into site/.well-known/ post-mkdocs).
+
+Contact: mailto:security@altvale.com
+Contact: https://github.com/altvale/kruxos/security/advisories/new
+Expires: 2027-04-25T00:00:00Z
+Preferred-Languages: en
+Policy: https://github.com/altvale/kruxos/blob/main/SECURITY.md
+Canonical: https://docs.kruxos.com/.well-known/security.txt

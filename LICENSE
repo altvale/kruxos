@@ -1,0 +1,27 @@
+KruxOS — License
+
+Copyright (c) 2026 KruxOS
+
+The KruxOS appliance is a proprietary product. The binary distribution
+artefacts hosted via this repository's Releases page (`.vmdk`, `.qcow2`,
+`.img.gz`, `.box`, signature bundles, and any other binaries) are
+governed by the KruxOS End User License Agreement at
+https://altvale.com/legal/kruxos-eula.
+
+Open-source extension surfaces and documentation in this repository
+are licensed under the Apache License, Version 2.0. See each
+subdirectory's `LICENSE` file for the full Apache 2.0 text:
+
+  packs/LICENSE        — community capability packs
+  plugins/LICENSE      — community plugins
+  themes/LICENSE       — community dashboard themes
+  docs/public/LICENSE  — public documentation
+
+All other content at the root of this repository (README.md,
+CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, issue templates,
+`.well-known` metadata, and similar repository-meta files) is also
+licensed under the Apache License, Version 2.0.
+
+For licensing inquiries: licensing@kruxos.com
+For security disclosures: security@kruxos.com (RFC 9116;
+see SECURITY.md and .well-known/security.txt)

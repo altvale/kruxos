@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 460" role="img" aria-labelledby="title desc">
+  <title id="title">KruxOS Model Providers</title>
+  <desc id="desc">A grid of six AI model providers supported by KruxOS: Anthropic Claude; OpenAI GPT and Codex; Google Gemini 2.x; OpenRouter, 200-plus models via a single API; Local runtimes including Ollama, vLLM, LM Studio and llama.cpp; and Bring-your-own, any OpenAI-compatible endpoint including DeepSeek, Grok, Mistral, Groq, GLM and custom.</desc>
+
+  <defs>
+    <pattern id="dot-dark" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="1" fill="#1D9E75" fill-opacity="0.1"></circle>
+    </pattern>
+  </defs>
+
+  
+  <rect x="0" y="0" width="920" height="460" fill="#08080f"></rect>
+  <rect x="0" y="0" width="920" height="460" fill="url(#dot-dark)"></rect>
+
+  
+  <g id="header">
+    
+    <g transform="translate(35, 34)">
+      <circle cx="0" cy="0" r="11" fill="#1D9E75"></circle>
+      <circle cx="0" cy="0" r="5.5" fill="#08080f"></circle>
+      <circle cx="0" cy="0" r="2.6" fill="#5DCAA5"></circle>
+    </g>
+    <text x="56" y="39" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="16" font-weight="600" fill="#ededed">Model Providers</text>
+
+    
+    <g transform="translate(812, 22)">
+      <rect x="0" y="0" width="84" height="24" rx="4" ry="4" fill="none" stroke="#2d2d44" stroke-width="1"></rect>
+      <text x="42" y="16" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" letter-spacing="1.4" fill="#9a9aab">v0.0.1</text>
+    </g>
+  </g>
+
+  <g id="provider-grid">
+
+  <g id="provider-anthropic" transform="translate(24, 72)">
+    <rect x="0" y="0" width="280" height="174" rx="8" ry="8" fill="#10101c" stroke="#2d2d44" stroke-width="1"></rect>
+    <rect x="0" y="0" width="4" height="174" rx="2" ry="2" fill="#1D9E75"></rect>
+
+    
+    <g transform="translate(24, 18)">
+      <rect x="0" y="0" width="40" height="40" rx="6" ry="6" fill="#1D9E752E"></rect>
+      <g><text x="20" y="27" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="20" font-weight="700" fill="#1D9E75">A</text></g>
+    </g>
+
+    
+    <text x="24" y="86" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="600" fill="#ededed">Anthropic</text>
+
+    
+    <text x="24" y="108" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="400" fill="#a1a1aa">Claude</text>
+
+    
+    <text x="262" y="158" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" letter-spacing="1.4" fill="#9a9aab">API</text>
+  </g>
+  <g id="provider-openai" transform="translate(320, 72)">
+    <rect x="0" y="0" width="280" height="174" rx="8" ry="8" fill="#10101c" stroke="#2d2d44" stroke-width="1"></rect>
+    <rect x="0" y="0" width="4" height="174" rx="2" ry="2" fill="#1D9E75"></rect>
+
+    
+    <g transform="translate(24, 18)">
+      <rect x="0" y="0" width="40" height="40" rx="6" ry="6" fill="#1D9E752E"></rect>
+      <g><text x="20" y="27" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="20" font-weight="700" fill="#1D9E75">O</text></g>
+    </g>
+
+    
+    <text x="24" y="86" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="600" fill="#ededed">OpenAI</text>
+
+    
+    <text x="24" y="108" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="400" fill="#a1a1aa">GPT + Codex</text>
+
+    
+    <text x="262" y="158" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" letter-spacing="1.4" fill="#9a9aab">API</text>
+  </g>
+  <g id="provider-gemini" transform="translate(616, 72)">
+    <rect x="0" y="0" width="280" height="174" rx="8" ry="8" fill="#10101c" stroke="#2d2d44" stroke-width="1"></rect>
+    <rect x="0" y="0" width="4" height="174" rx="2" ry="2" fill="#1D9E75"></rect>
+
+    
+    <g transform="translate(24, 18)">
+      <rect x="0" y="0" width="40" height="40" rx="6" ry="6" fill="#1D9E752E"></rect>
+      <g><text x="20" y="27" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="20" font-weight="700" fill="#1D9E75">G</text></g>
+    </g>
+
+    
+    <text x="24" y="86" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="600" fill="#ededed">Google Gemini</text>
+
+    
+    <text x="24" y="108" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="400" fill="#a1a1aa">Gemini 2.x</text>
+
+    
+    <text x="262" y="158" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" letter-spacing="1.4" fill="#9a9aab">API</text>
+  </g>
+  <g id="provider-openrouter" transform="translate(24, 262)">
+    <rect x="0" y="0" width="280" height="174" rx="8" ry="8" fill="#10101c" stroke="#2d2d44" stroke-width="1"></rect>
+    <rect x="0" y="0" width="4" height="174" rx="2" ry="2" fill="#1D9E75"></rect>
+
+    
+    <g transform="translate(24, 18)">
+      <rect x="0" y="0" width="40" height="40" rx="6" ry="6" fill="#1D9E752E"></rect>
+      <g><text x="20" y="27" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="20" font-weight="700" fill="#1D9E75">R</text></g>
+    </g>
+
+    
+    <text x="24" y="86" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="600" fill="#ededed">OpenRouter</text>
+
+    
+    <text x="24" y="108" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="400" fill="#a1a1aa">200+ models via single API</text>
+
+    
+    <text x="262" y="158" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" letter-spacing="1.4" fill="#9a9aab">GATEWAY</text>
+  </g>
+  <g id="provider-local" transform="translate(320, 262)">
+    <rect x="0" y="0" width="280" height="174" rx="8" ry="8" fill="#10101c" stroke="#2d2d44" stroke-width="1"></rect>
+    <rect x="0" y="0" width="4" height="174" rx="2" ry="2" fill="#1D9E75"></rect>
+
+    
+    <g transform="translate(24, 18)">
+      <rect x="0" y="0" width="40" height="40" rx="6" ry="6" fill="#1D9E752E"></rect>
+      <g>
+      <g stroke="#1D9E75" stroke-width="1.6" fill="none" stroke-linecap="round">
+        <rect x="8" y="10" width="24" height="6" rx="1.5"></rect>
+        <rect x="8" y="19" width="24" height="6" rx="1.5"></rect>
+        <rect x="8" y="28" width="24" height="6" rx="1.5"></rect>
+      </g>
+      <circle cx="11.5" cy="13" r="1.1" fill="#1D9E75"></circle>
+      <circle cx="11.5" cy="22" r="1.1" fill="#1D9E75"></circle>
+      <circle cx="11.5" cy="31" r="1.1" fill="#1D9E75"></circle>
+    </g>
+    </g>
+
+    
+    <text x="24" y="86" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="600" fill="#ededed">Local</text>
+
+    
+    <text x="24" y="108" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="400" fill="#a1a1aa">Ollama · vLLM · LM Studio · llama.cpp</text>
+
+    
+    <text x="262" y="158" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" letter-spacing="1.4" fill="#9a9aab">SELF-HOST</text>
+  </g>
+  <g id="provider-byo" transform="translate(616, 262)">
+    <rect x="0" y="0" width="280" height="174" rx="8" ry="8" fill="#10101c" stroke="#2d2d44" stroke-width="1"></rect>
+    <rect x="0" y="0" width="4" height="174" rx="2" ry="2" fill="#1D9E75"></rect>
+
+    
+    <g transform="translate(24, 18)">
+      <rect x="0" y="0" width="40" height="40" rx="6" ry="6" fill="#1D9E752E"></rect>
+      <g>
+      <g stroke="#1D9E75" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 10 14 L 10 9 M 16 14 L 16 9"></path>
+        <rect x="6.5" y="14" width="13" height="9" rx="1.5"></rect>
+        <path d="M 13 23 L 13 27 L 21 27"></path>
+        <circle cx="27" cy="27" r="3.5"></circle>
+      </g>
+    </g>
+    </g>
+
+    
+    <text x="24" y="86" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="600" fill="#ededed">Bring your own</text>
+
+    
+    <text x="24" y="108" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="400" fill="#a1a1aa">Any OpenAI-compatible endpoint</text>
+
+    
+    <text x="262" y="158" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" letter-spacing="1.4" fill="#9a9aab">CUSTOM</text>
+  </g>
+  </g>
+</svg>

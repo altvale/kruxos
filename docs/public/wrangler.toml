@@ -1,0 +1,31 @@
+# Cloudflare Pages deployment configuration
+# Deploy: npx wrangler pages deploy site --project-name=kruxos-docs
+
+name = "kruxos-docs"
+
+# Pages configuration
+[pages]
+# mkdocs strips dot-prefixed dirs (verified empirically), so we copy
+# /.well-known/security.txt into the build output post-mkdocs. Keeps the
+# repo-root file as the canonical source-of-truth.
+# Path resolution: build runs from docs/public/, so `../../.well-known/`
+# is the repo-root .well-known/.
+build_command = "mkdocs build --strict && mkdir -p site/.well-known && cp ../../.well-known/security.txt site/.well-known/security.txt"
+build_output_dir = "site"
+
+# Custom domain
+# routes = [{ pattern = "docs.kruxos.com", custom_domain = true }]
+
+# Redirects
+# [[redirects]]
+# from = "/"
+# to = "/index.html"
+# status = 200
+
+# Headers for security
+# [[headers]]
+# for = "/*"
+# [headers.values]
+# X-Frame-Options = "DENY"
+# X-Content-Type-Options = "nosniff"
+# Referrer-Policy = "strict-origin-when-cross-origin"
