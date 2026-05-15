@@ -1,7 +1,27 @@
-# KruxOS
+<div align="center">
 
-> **The operating system for AI agents.**
-> Agents run free. You stay in control.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/kruxos-wordmark-dark.svg">
+  <img src="docs/assets/kruxos-wordmark-light.svg" alt="KruxOS" width="360">
+</picture>
+
+### The operating system for AI agents.
+Agents run free. You stay in control.
+
+[![Latest release](https://img.shields.io/github/v/release/altvale/kruxos?style=flat-square&label=release&color=1d9e75)](../../releases/latest)
+[![Docker pulls](https://img.shields.io/docker/pulls/altvale/kruxos?style=flat-square&color=1d9e75&logo=docker&logoColor=white)](https://hub.docker.com/r/altvale/kruxos)
+[![Docs](https://img.shields.io/badge/docs-kruxos.com-1d9e75?style=flat-square)](https://docs.kruxos.com)
+[![Discord](https://img.shields.io/badge/discord-join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/VXvQKNv6Jn)
+
+[**kruxos.com**](https://kruxos.com) · [**Downloads**](https://kruxos.com/downloads) · [**Docs**](https://docs.kruxos.com) · [**Pricing**](https://kruxos.com/pricing) · [**Releases**](../../releases)
+
+</div>
+
+> [!NOTE]
+> **v0.0.1 — early beta.** Single-node deployment, not for production use.
+> All features are free for everyone in v0.0.1; tier enforcement activates in v0.0.3.
+
+---
 
 KruxOS is a purpose-built operating system for AI agents — designed from the agent's perspective, not adapted from a human OS. No GUI overhead, no shell archaeology: every OS capability is exposed as a typed, documented API. Agents discover capabilities, invoke them through a structured pipeline, and see the system as a clean tool surface rather than a desktop they have to navigate.
 
