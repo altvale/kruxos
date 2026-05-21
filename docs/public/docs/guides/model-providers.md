@@ -455,7 +455,22 @@ kruxos model add openai --auth api-key --name groq \
 
 ### Via Dashboard
 
-Settings > Model Providers > Add Provider. For OpenAI-compatible providers, select "OpenAI" as the type and enter the base URL.
+Open the **Settings** page at `https://localhost:7800/settings`. The page surfaces a System Defaults card at the top (the current chat / autonomous / fallback choices) and one card per configured provider below it. Click **+ Add Provider** to register a new one.
+
+The Add Provider form supports six provider types, with auth-conditional fields per type:
+
+| Type | Auth | Notes |
+|------|------|-------|
+| **Anthropic** | API key | Base URL is built-in |
+| **OpenAI** | API key | Built-in base URL; switch to "OpenAI" + custom base URL for any OpenAI-compatible provider (DeepSeek / Grok / GLM / Mistral / Groq / your own) |
+| **OpenAI Codex** | OAuth device code | "Sign in" launches the ChatGPT subscription device-code flow — KruxOS shows a verification URL and copy-to-clipboard code, then polls until you approve in the browser |
+| **Gemini** | API key | Built-in base URL |
+| **OpenRouter** | API key | Inline info banner with a link to `openrouter.ai/keys` |
+| **Local** | None | Runtime preset dropdown (Ollama / vLLM / LM Studio / llama.cpp) auto-fills the endpoint |
+
+Each provider card on the page shows a credentials-status dot (configured vs missing), the default model selector, a Base URL field, the agent assignments referencing this provider, and three action buttons: **Test** (probes the upstream and renders the result inline), **Set Default** (for chat / autonomous / fallback), and **Remove** (confirm-modal — also wipes the vault-stored credentials).
+
+If the vault is locked when you open the page, the cards are gated behind a banner prompting you to unlock the vault first.
 
 ### Via models.yaml
 

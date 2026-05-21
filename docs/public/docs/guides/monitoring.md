@@ -65,12 +65,14 @@ System Health: HEALTHY
 
 ### Dashboard
 
-The **Health** page at `http://localhost:7800/health` shows:
+The **Health** page at `https://localhost:7800/health` auto-refreshes every 15 seconds and surfaces:
 
-- Real-time CPU, memory, and disk graphs
-- Per-service health status with history
-- Active alerts
-- Resource trend lines
+- **Status banner** at the top (Healthy / Degraded / Critical / Unknown) with the issue count, generation timestamp, and total-latency right rail.
+- **Services table** — one row per backend service (gateway / vault / proxy / audit / state) with a status dot, latency cell colour-coded by threshold, details column, and last-checked column.
+- **Resources grid** — Memory / CPU / Disk cards with progress bars that change colour at the 60 % and 80 % thresholds.
+- **Agent metrics grid** — active agents, total sessions (lifetime cumulative — see the tooltip on the Total cell), invocations per minute, and error rate.
+
+If the gateway is unreachable, the page renders an explicit error banner ("Can't reach gateway: …. Retrying …") with a **Retry now** button so a transient failure no longer presents as a silent blank page.
 
 ## Activity and audit from the dashboard
 
@@ -185,7 +187,9 @@ Proxy:      syncing (last: 2m ago)
   Buffer:   0 pending writes
 ```
 
-On the dashboard, navigate to **Service Proxy** for detailed sync status, write buffer contents, and error history.
+On the dashboard, navigate to **Service Proxy** at `/proxy` for detailed sync status, write buffer contents, and error history. The page auto-refreshes every 10 seconds and renders a five-cell overview strip at the top — **Total services**, **Synced**, **With errors**, **Buffered ops**, and **Dead letters** — so the dead-letter count is now visible at a glance instead of buried inside each per-service card.
+
+Below the overview strip, each service card shows sync status, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending writes with **Cancel** (for buffered) and **Retry** / **Discard** (for dead letters). All three actions go through a confirm modal.
 
 ## External monitoring integration
 

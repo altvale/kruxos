@@ -110,11 +110,21 @@ xterm.js terminals through the Gateway sandbox. Concurrent-session cap defaults 
 
 ### Identities
 
-User token CRUD with one-time raw-token reveal. The `krx_user_*` raw token is shown once at create time.
+A single-pane User-principal surface at `/identities` with two stacked sections:
+
+- **User tokens** — list of issued `krx_user_*` bearer tokens (name, created, last used, status). **New token** opens a modal that takes a friendly name and reveals the raw bearer **once** with a copy button. **Revoke** uses a type-the-name confirmation guard before calling `DELETE /api/user/tokens/<id>`.
+- **User policy** — a "Has policy" / "Default" chip, a trash-retention quick input (positive integer hours, blank to clear back to the 168 h default), and a read-only YAML viewer for the current `/api/user/policy`. **Edit** opens a YAML editor modal with client-side `YAML.parse` validation before save; closing with unsaved changes prompts for confirm.
+
+When the vault is locked, both sections render an inline "Vault is locked" banner with the gateway's hint message in place of their data.
 
 ### Integrations
 
-Claude Code / Codex install + regenerate seed configs (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`).
+Cards for **Claude Code** and **Codex CLI**, plus a **KruxOS Loopback** card describing the User API. Each external-CLI card shows a status badge (Loading / Installed / Not installed / Vault locked / Error), the detected version line, and action buttons:
+
+- **View config** — opens a modal with the bundled seed config (`~/.claude/settings.json` for Claude Code, `~/.codex/config.toml` for Codex), copy-to-clipboard included.
+- **Install** / **Regenerate** — atomic operation that installs the CLI via `npm i -g` (if needed) and writes the seed config in one step. Regenerate opens a confirm modal listing the destination paths before overwriting.
+
+An **External Tools** section below the cards links out to Codex Cloud and the Claude Code docs (both `target="_blank"` with `rel="noopener noreferrer"`).
 
 ### Policies
 
@@ -122,7 +132,33 @@ Visual + YAML editor. Hot-reloadable from `/data/kruxos/policies/{system,org,age
 
 ### Settings
 
-One card per model provider (Anthropic / OpenAI / Gemini / Local / OpenRouter / Codex / DeepSeek / Grok / Mistral / Groq / GLM) with connection tests.
+The page surfaces a **System defaults** summary card at the top (current chat / autonomous / fallback choices) and one **Provider card** per registered provider below. **+ Add Provider** opens a form supporting six provider types with auth-conditional fields:
+
+- **Anthropic** — API key
+- **OpenAI** — API key (also covers OpenAI-compatible upstreams via a Base URL override — DeepSeek, Grok, GLM, Mistral, Groq, custom)
+- **OpenAI Codex** — OAuth device code (Sign in opens the ChatGPT subscription flow with a verification URL + copy-to-clipboard code, then polls until you approve in the browser)
+- **Gemini** — API key
+- **OpenRouter** — API key
+- **Local** — none; runtime preset dropdown auto-fills the endpoint
+
+Each provider card shows a credentials-status dot, default-model selector, Base URL, agent assignments, and three actions — **Test** (probes the upstream and renders the result inline), **Set Default** (per role), and **Remove**. If the vault is locked, the page renders a banner gating the cards.
+
+### Health (`/health`)
+
+Operator-facing health summary that auto-refreshes every 15 seconds:
+
+- **Status banner** at the top of the page (Healthy / Degraded / Critical / Unknown) with the issue count, generation timestamp, and total-latency right rail.
+- **Services table** — one row per backend service (gateway / vault / proxy / audit / state) with a status dot, latency cell colour-coded by threshold, details column, and last-checked column. Narrow viewports collapse the trailing columns automatically.
+- **Resources grid** — Memory / CPU / Disk cards with progress bars that change colour at the 60 % and 80 % thresholds.
+- **Agent metrics grid** — active agents, total sessions (lifetime cumulative), invocations / minute, and error rate.
+
+If the gateway is unreachable, the page now renders an explicit error banner reading "Can't reach gateway: …. Retrying …" with a **Retry now** button so a transient failure no longer presents as a silent blank page.
+
+### Service Proxy (`/proxy`)
+
+Per-service sync status for the proxy backends (Gmail / Slack adapters), auto-refreshing every 10 seconds. The top of the page carries a five-cell **overview strip** — Total services, Synced, With errors, Buffered ops, **Dead letters**. The Dead-letters cell is now first-class at the top of the page rather than buried inside each per-service card.
+
+Below the overview strip, each service renders a card with the sync header, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending buffered writes (with countdown + **Cancel**) and dead-letter writes (with **Retry** / **Discard**). All three actions go through a confirm modal before posting to `/api/proxy/status`.
 
 ## Keyboard shortcuts
 

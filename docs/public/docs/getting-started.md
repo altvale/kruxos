@@ -110,10 +110,12 @@ Open <https://localhost:7800> in your browser (HTTPS-by-default with an auto-gen
 | **Audit** | Searchable hash-chained audit log with Principal-aware filtering |
 | **Chat** | Multi-model chat with persisted sessions, knowledge panel, inline approvals |
 | **Code Sessions** (`/code`) | xterm.js terminals through the sandbox — VM image only in v0.0.1 |
-| **Identities** | User token CRUD with one-time raw-token reveal |
-| **Integrations** | Claude Code / Codex install, regenerate seed configs |
+| **Identities** | User-principal surface: bearer-token CRUD with one-time raw-token reveal, plus User policy (retention quick input + YAML editor) |
+| **Integrations** | Claude Code / Codex install + regenerate seed configs (cards show install/version status + View config) |
 | **Policies** | Visual + YAML editor, per-agent overrides |
-| **Settings** | One card per model provider (Anthropic, OpenAI, Codex, OpenRouter, Gemini, Local, DeepSeek, Grok, Mistral, Groq, GLM) |
+| **Settings** | System defaults + one card per model provider — six provider types (Anthropic, OpenAI, OpenAI Codex via OAuth, Gemini, OpenRouter, Local) with Test Connection + Set Default + Remove |
+| **Health** | Auto-refreshing status / services / resources / agent-metrics summary with an explicit error banner + Retry-now button when the gateway is unreachable |
+| **Service Proxy** | Per-service sync status with a five-cell overview strip (Total / Synced / Errors / Buffered / Dead letters) and Cancel / Retry / Discard actions |
 
 ### CLI
 
