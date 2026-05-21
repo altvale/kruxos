@@ -2,6 +2,9 @@
 
 Once Claude is connected to KruxOS ([Claude Desktop](../quickstart/connect-claude.md) or [Claude Code](../quickstart/claude-code.md)), here are example prompts that exercise the key capabilities.
 
+!!! tip "Run these prompts from the dashboard, too"
+    Every prompt below also works from the dashboard's **Chat** page at `https://localhost:7800/chat`. The dashboard chat is a four-column layout (**Agents · Conversations · Messages · Knowledge**) with per-message Model + Thinking dropdowns above the composer, a collapsible Knowledge panel toggled from the Messages header, and a `⌘K` / `Ctrl+K` search overlay. See [Dashboard Chat](dashboard-chat.md) for the full tour.
+
 ## Getting oriented
 
 Start by understanding what's available:

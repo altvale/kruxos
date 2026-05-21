@@ -72,6 +72,28 @@ The **Health** page at `http://localhost:7800/health` shows:
 - Active alerts
 - Resource trend lines
 
+## Activity and audit from the dashboard
+
+Two dashboard pages share the same event-row chrome but answer different questions: **Activity** is the live feed, **Audit** is the forensic query surface. Both render each entry with a status dot · time · actor · capability · policy-tier chip · duration · expand chevron. Expanding a row shows the result summary, a key-value grid for the request, and copy-to-clipboard handles for the `entry_hash` and `log_file`.
+
+### Activity — live feed (`/activity`)
+
+A live-updating feed driven by Server-Sent Events from `/api/activity/stream`. New entries stream in at the top, capped at the 200 most recent.
+
+- **Live indicator pill** in the top-right shows the stream state — **Live**, **Paused**, or **Disconnected**. Click to pause (closes the SSE connection); click again to resume (reopens it). A warning banner appears across the top if the connection drops mid-session.
+- **Filter bar** — substring search, plus dropdowns for **Agent**, **Status**, and a dedicated **Capability** input (e.g. `shell.exec`). Filters apply to the server-side query; the substring search additionally narrows the visible 200-entry buffer.
+
+### Audit — forensic query (`/audit`)
+
+A point-in-time query against the hash-chained audit log at `/api/audit`. Default range is the last 7 days; results paginate with a configurable page size (**25 / 50 / 100 / 200**) and a "Showing N–M of T" summary at the top.
+
+- **Actor filter** is a Principal-tagged dropdown — selecting **User** filters to operator-initiated entries (`actor_type=user`); selecting an agent name filters to that agent's entries (`agent_name=<name>`).
+- **Capability** text input + **Status** dropdown + **From / To** date pickers stack alongside the actor filter.
+- **Clear filters** resets every filter at once, including the actor selection.
+- **Export JSON** downloads the current filtered result set as a JSON file (the export honours the active filters, not the page window).
+
+The Audit page's URL parameters mirror the filter state, so any view is bookmarkable and shareable.
+
 ## Metrics
 
 ### System metrics
