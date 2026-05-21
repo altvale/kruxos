@@ -10,10 +10,11 @@ stateDiagram-v2
     Registered --> Active: Agent connects
     Active --> Paused: kruxos pause <name>
     Paused --> Active: kruxos resume <name>
-    Active --> Idle: Agent disconnects
-    Idle --> Active: Agent reconnects
+    Active --> Disconnected: Agent disconnects
+    Disconnected --> Active: Agent reconnects
     Active --> Revoked: kruxos agent revoke
-    Idle --> Revoked: kruxos agent revoke
+    Disconnected --> Revoked: kruxos agent revoke
+    Revoked --> Active: kruxos agent restore
     Revoked --> [*]
 ```
 
@@ -52,12 +53,27 @@ kruxos agents
 
 ### Dashboard
 
-Navigate to **Agents** in the web dashboard at `http://localhost:7800/agents`. You'll see:
+Navigate to **Agents** in the web dashboard at `https://localhost:7800/agents`. You'll see:
 
-- Connection status (active, idle, revoked)
+- Connection status — `active` (connected), `paused` (session frozen), `revoked` (disabled), or `disconnected` (registered but not currently connected)
 - Session duration
 - Invocation count and last activity
-- Quick actions (pause, resume, kill, revoke)
+- Model-provider override (inline-editable)
+- Quick actions (pause, resume, kill, rotate key, revoke, restore)
+
+#### Agent detail page
+
+Click an agent row to open its detail page (`/agents/<name>`). The detail page renders five tabs above an action bar:
+
+| Tab | What's there |
+|-----|--------------|
+| **Overview** | Stats grid (last seen / invocations / errors), model-provider selector with default-effort + token-budget config, context-management presets, standing instructions |
+| **Identity** | `Agent.md` editor with character and token counters, draft → save flow with revert |
+| **Policy** | Summary card, trash-retention quick input, visual policy editor + YAML preview/edit toggle, delete-confirm flow |
+| **Host Access** | Per-agent mount points under `/mnt/<label>` with staged add-mount dialog |
+| **State** | Searchable key-value explorer with quota meter, expandable entries, version history, edit + delete actions |
+
+The action bar above the tabs carries **Pause / Resume / Run Now / Kill / Rotate Key / Revoke**. When an agent is `revoked`, all controls become read-only and a banner offers to restore it.
 
 ### Live activity
 
@@ -115,14 +131,23 @@ This invalidates the old key and issues a new one. The agent will need to be rec
 
 ### Revoke an agent
 
-Permanently disable an agent. Active sessions are terminated, the API key is invalidated, and the agent cannot reconnect:
+Disable an agent. Active sessions are terminated, the API key is invalidated, and the agent cannot reconnect until restored:
 
 ```bash
 kruxos agent revoke deploy-bot
 ```
 
-!!! warning
-    Revocation is permanent. The agent's state and audit logs are preserved, but the agent cannot be re-activated. Create a new agent if you need to restore access.
+The agent's state, audit logs, identity, and policy are preserved on revoke.
+
+### Restore an agent
+
+Reactivate a previously-revoked agent. State, identity, policy, and host mounts are restored alongside; a new API key is issued (the old key stays invalidated):
+
+```bash
+kruxos agent restore deploy-bot
+```
+
+You can also restore from the Agents list in the dashboard — revoked rows expose a Restore action.
 
 ## Agent state
 

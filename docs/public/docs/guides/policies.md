@@ -200,6 +200,12 @@ kruxos audit query --last 1h --outcome denied
 
 Policy changes take effect immediately — no restart required. The policy engine recompiles the evaluation tree when the file changes.
 
+## Editing policies in the dashboard
+
+Per-agent policies can also be edited from the web dashboard. Open `/agents/<name>` and switch to the **Policy** tab — you'll find a summary card, a visual rule editor, and a YAML preview/edit toggle. Saving from the dashboard writes the same YAML file (`/data/kruxos/policies/agents/<name>.yaml`) that `kruxos config` reads, so the CLI and dashboard surfaces are interchangeable.
+
+User-scoped rules ("User Rules") live on the dashboard's **Identities** page rather than per-agent.
+
 ## Next steps
 
 - [Approval Workflow](approval-workflow.md) — how approvals work in practice

@@ -24,23 +24,52 @@ docker exec kruxos kruxos verify
 
 ### First-boot Wizard
 
-On a fresh install, the dashboard opens into a wizard that walks operators through vault passphrase, AdminAgent creation, license activation, User-token issuance, and CLI install.
+On a fresh install, the dashboard opens into an eight-step wizard:
+
+1. **Welcome** — orientation card explaining the four things the wizard sets up (secrets, identity, CLIs, policy).
+2. **Vault passphrase** — initialises or unlocks the encrypted vault. A live strength meter scores the passphrase before submit.
+3. **Workspace** — picks the AdminAgent's home directory. The default `/data/kruxos/users/admin` is auto-created. A **click-through directory browser** opens a modal that lists subdirectories with writability dots and an inline "New folder" affordance (under `/data/`). A "Type path instead" fallback toggles a free-text input for clipboard pastes or pre-known paths.
+4. **AdminAgent (Identity)** — names the first agent and optionally configures its model provider inline. Five provider types are wired into the wizard — **Anthropic**, **OpenAI**, **OpenAI Codex** (OAuth device-code), **OpenRouter**, **Local** — plus a **Skip** tab that defers provider setup to Settings. Provider credentials and the agent record are persisted atomically (provider first; if provider registration fails, the agent is not created).
+5. **Licence** — paste a JWT or skip. KruxOS is free for personal use.
+6. **User token** — generates a `krx_user_*` bearer token; shown **once** for CLI installs and the loopback User API. Acknowledge-and-continue is gated on a checkbox.
+7. **Install CLI Tools** — optional. Installs Claude Code and/or Codex CLI seed configs in-process. Both can be installed later from Dashboard → Integrations.
+8. **Done** — confirmation screen with a link into the main dashboard.
+
+The progress rail at the top of the wizard supports backward navigation by clicking any completed dot.
 
 ### Home — System Overview
 
-- **System health** — overall status (healthy/degraded/unhealthy) with service-level breakdown
-- **Active agents** — count of connected agents with names and session duration
-- **Recent activity** — last 20 capability invocations across all agents
-- **Pending approvals** — count of operations waiting for human review
+The Home page renders three rows of cards:
+
+- **Row 1 — Status cards.** System health (healthy / degraded / unhealthy), Active agents (count + names + session duration), Pending approvals (count), and Service Proxy (sync state across Gmail / Slack adapters).
+- **Row 2 — Today's metrics.** Capability invocations, approvals decided, errors, and a queue depth strip.
+- **Row 3 — Recent activity.** Last 20 capability invocations across all agents, with status dots (ok / warn / error), agent name, capability, and relative timestamp.
+
+On a fresh appliance with zero agents and zero activity, the page renders an "empty" subline ("No agents connected yet · waiting for first check-in") instead of the metric rows.
 
 ### Agents
 
-Templates (Coder / Researcher / DevOps / Email / General) with per-agent model overrides, `Agent.md` identity, per-agent policy, and host mounts under `/mnt/<label>`.
+The Agents list at `/agents` renders a typed table of all agents with status badges, autonomous-pulse indicator, model-provider override (inline-editable), and quick actions. Create flow is multi-step: pick a template (Coder / Researcher / DevOps / Email / General), set name and purpose, stage host mounts under `/mnt/<label>`, then submit — `${HOME}` placeholders must be resolved before the create button enables.
 
-- **Status** — active (connected), idle (registered but not connected), revoked
-- **Session info** — current session duration, last connected time
-- **Invocation count** — total capability calls made by this agent
-- **Actions** — pause, resume, kill session, revoke credentials
+- **Status vocabulary** — `active` (connected), `paused` (session frozen), `revoked` (disabled), `disconnected` (registered but not currently connected).
+- **Create** — opens an inline form. Templates pre-populate identity, policy, and mounts; you can edit any field before submitting.
+- **Credentials modal** — after create, the new agent's API key + connection string are shown **once** in a modal with copy buttons.
+- **Revoke** — opens a confirm modal. Revoked agents move to the bottom of the list with the `revoked` badge.
+- **Restore** — revoked agents can be restored from the same row (restore preserves the agent's state and audit history).
+
+### Agent detail (`/agents/<name>`)
+
+Clicking an agent opens a five-tab detail page:
+
+| Tab | What's there |
+|-----|--------------|
+| **Overview** | Stats grid (last seen / invocations / errors), model-provider selector + default-effort + token-budget config, context-management presets, standing instructions |
+| **Identity** | `Agent.md` editor with char/token meter, draft → save (PUT) flow with revert |
+| **Policy** | Summary card, per-agent trash-retention quick input, visual policy editor + YAML preview/edit toggle, delete-confirm modal |
+| **Host Access** | Per-agent mount points under `/mnt/<label>` with staged-mode add-mount dialog |
+| **State** | Searchable key-value explorer with quota meter, expandable entries, version history, edit + delete modals |
+
+The action bar (Pause / Resume / Run Now / Kill / Rotate Key / Revoke) sits above the tabs. When the agent's status is `revoked`, all controls become read-only.
 
 ### Activity / Supervision
 

@@ -85,11 +85,11 @@ KruxOS exposes every OS operation as a **typed, documented API**:
       altvale/kruxos:latest
     ```
 
-    Open <https://localhost:7800> and complete the first-boot wizard (vault passphrase, AdminAgent, license, User token, CLI install).
+    Open <https://localhost:7800> and complete the eight-step first-boot wizard: welcome, vault passphrase, workspace (click-through directory browser), AdminAgent (inline provider config or Skip), license, User token, Install CLI Tools, done.
 
 === "VM image"
 
-    Download the `.qcow2` / `.vmdk` / Vagrant `.box` / raw `.img.gz` for x86_64 or aarch64, boot, and complete the dashboard wizard. All artefacts cosign-signed with offline-verifiable `.cosign.bundle`.
+    Download the `.qcow2` / `.vmdk` / Vagrant `.box` / raw `.img.gz` for x86_64 or aarch64, boot, and complete the same eight-step dashboard wizard (welcome → vault → workspace → AdminAgent → license → User token → Install CLI Tools → done). All artefacts cosign-signed with offline-verifiable `.cosign.bundle`.
 
     [:octicons-arrow-right-24: Full install guide](quickstart/install.md)
 
