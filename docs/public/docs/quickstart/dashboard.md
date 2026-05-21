@@ -73,16 +73,18 @@ The action bar (Pause / Resume / Run Now / Kill / Rotate Key / Revoke) sits abov
 
 ### Activity / Supervision
 
-A live-updating feed over the supervision WebSocket (TCP 7701, 30 s ping / 10 s timeout keepalive):
+A live-updating feed streamed over Server-Sent Events from `/api/activity/stream`:
 
 - Capability invocations with parameters and results
 - Policy decisions (allowed, denied, approval required)
 - Session events (connect, disconnect, reconnect)
 - Error events with structured details
 
+A **LiveIndicator** pill in the top-right shows the stream state — **Live**, **Paused**, or **Disconnected**. Click to pause (closes the SSE connection); click again to resume (reopens it). A warning banner appears across the top if the connection drops mid-session. A filter bar provides substring search plus Agent / Status / Capability filters; the feed buffers the most recent 200 entries.
+
 ### Approvals
 
-Operations gated as `approval_required` appear here with **Pending / Approved / Rejected / Timed Out** tabs. Default 24-hour hold for User MCP calls (configurable). Timed-out approvals can't be approved retroactively (HTTP 409 with a status discriminator); the audit log preserves the original `approval_required` tier through the decision chain.
+Operations gated as `approval_required` appear here with five tabs — **Pending / Approved / Rejected / Timed Out / All**. The Pending tab carries a count badge (also mirrored next to the page title). Auto-refresh polls every 5 s; when the pending count grows between polls, a toast slides in reading "N new approval request(s) pending" so operators don't need to keep the tab visually focused. Default 24-hour hold for User MCP calls (configurable). Timed-out approvals can't be approved retroactively (HTTP 409 with a status discriminator); the audit log preserves the original `approval_required` tier through the decision chain.
 
 !!! tip
     Approvals can also be managed from the CLI: `kruxos approve list` and `kruxos approve accept <id>`.
@@ -91,13 +93,16 @@ Operations gated as `approval_required` appear here with **Pending / Approved / 
 
 Search and filter the hash-chained audit log:
 
-- Principal-aware filter (`{type:"user"}` / `{type:"agent",name:...}`)
-- View full request and response details for any entry
-- Verify hash chain integrity
+- **Actor filter** — Principal-tagged dropdown; selecting **User** filters to operator-initiated entries, selecting an agent name filters to that agent's entries.
+- **Capability** text input + **Status** dropdown + **From / To** date pickers (default range: last 7 days).
+- View full request and response details for any entry; copy `entry_hash` or `log_file` from the expanded row.
+- Configurable page size (**25 / 50 / 100 / 200**) with a "Showing N–M of T" summary at the top.
+- **Export JSON** of the active filtered result set.
+- Verify hash chain integrity.
 
 ### Chat
 
-Multi-model chat with persisted sessions, knowledge panel, inline approval flow.
+Four-column desktop layout — Agents · Conversations · Messages · Knowledge — plus a `⌘K` / `Ctrl+K` Search overlay. Multi-model with per-message Model + Thinking overrides above the composer, persisted sessions, tool-call cards with policy-tier colouring, and an inline approval flow. Collapses to a 3-state mobile navigation under 768 px.
 
 ### Code Sessions (`/code`)
 

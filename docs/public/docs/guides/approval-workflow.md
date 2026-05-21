@@ -134,12 +134,44 @@ Opens a live view showing new approval requests as they arrive. Press `a` to app
 
 ## For supervisors (Dashboard)
 
-Navigate to **Approvals** at `http://localhost:7800/approvals`:
+Navigate to **Approvals** at `https://localhost:7800/approvals`.
 
-- Pending requests show agent name, capability, parameters, and time
-- Click a request to see full details
-- Approve or reject with a single click
-- Optional reason field for audit trail
+### Tab strip and pending count
+
+A five-tab strip at the top filters the queue: **Pending / Approved / Rejected / Timed out / All**. The Pending tab carries a count badge (also mirrored next to the page title) so you can see at a glance how many requests are waiting without scanning the list.
+
+### Age-coloured status dots
+
+Every row leads with a coloured status dot:
+
+- Pending — **green** under 10 minutes, **amber** 10–30 minutes, **red** over 30 minutes
+- Approved / Rejected / Timed out — status-coloured (green / red / grey)
+
+### Click-to-expand row
+
+Click a row to expand it in place. The expanded body lays out:
+
+- A key-value grid: **Capability**, **Rule reference**, **Created**, **Last updated**
+- **Agent reasoning** (free-text, may be empty)
+- **Inputs** (the parameter JSON the agent sent)
+- **Policy reason** (the rule that promoted the call to `approval_required`)
+
+The capability name, principal badge (User / agent name), and a short reasoning preview stay visible on the row itself.
+
+### Approve and reject
+
+- **Approve** is a single inline button — one click decides the request.
+- **Reject** opens a modal with an optional reason field. Press `⌘↵` (macOS) or `Ctrl+Enter` (Windows/Linux) to submit; press `Esc` or click the backdrop to cancel. If you leave the reason blank, the audit entry records the default `"Rejected by dashboard admin"`.
+
+### Auto-refresh and the new-request toast
+
+The page auto-refreshes every 5 seconds (a live dot in the header reads "Auto-refreshing every 5s"). When the pending count grows between polls, a toast slides in reading **"N new approval request(s) pending"** — you do not need to keep the tab visually focused to know that new work has arrived. The toast stack holds up to 3 notifications at once and each dismisses after 4 seconds.
+
+There is no manual "Refresh now" button — the auto-refresh dot and the new-request toast cover the use case.
+
+### Stale-recovery
+
+If an approval was already decided in another tab (or timed out) before you clicked, the server returns HTTP 409 / 404 and the page refreshes the row to its current state. Your click is not retried against the stale state.
 
 ## Approval timeout
 
