@@ -18,7 +18,7 @@ This page walks you from zero to a working KruxOS instance with a connected AI a
       altvale/kruxos:latest
     ```
 
-    Open <https://localhost:7800> and finish the first-boot wizard (vault passphrase, AdminAgent, license, User token, CLI install).
+    Open <https://localhost:7800> and finish the eight-step first-boot wizard: welcome, vault passphrase, workspace (with a click-through directory browser for the AdminAgent home directory), AdminAgent identity (with optional inline model-provider config — Anthropic / OpenAI / OpenAI Codex via OAuth / OpenRouter / Local, or Skip to defer), license, User token, Install CLI Tools, done.
 
     Verify it's running:
 

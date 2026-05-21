@@ -38,13 +38,16 @@ docker run -d --name kruxos --privileged \
 
 ### Finish setup in the browser
 
-Open <https://localhost:7800> — the first-boot wizard walks you through:
+Open <https://localhost:7800> — the first-boot wizard walks you through eight steps:
 
-1. **Vault passphrase** — same value you passed via `KRUXOS_VAULT_PASSPHRASE`. Unlocks the vault, dashboard login, and console root login.
-2. **AdminAgent** — creates the first agent with a personal-permissive policy.
-3. **License activation** — paste a JWT or skip (v0.0.1 logs a warning but keeps serving).
-4. **User token** — generates a `krx_user_*` bearer token; shown **once** for the loopback User API and CLI installs.
-5. **CLI install** — emits Claude Code / Codex seed configs via `kruxos cli-config generate`.
+1. **Welcome** — orientation card explaining what the wizard sets up.
+2. **Vault passphrase** — same value you passed via `KRUXOS_VAULT_PASSPHRASE`. Unlocks the vault, dashboard login, and console root login. A live strength meter scores the passphrase before submit.
+3. **Workspace** — picks the AdminAgent's home directory. The default `/data/kruxos/users/admin` is auto-created. A click-through **directory browser** opens a modal listing subdirectories with writability dots and an inline "New folder" affordance (under `/data/`). A "Type path instead" fallback toggles a free-text input for clipboard pastes.
+4. **AdminAgent (Identity)** — names the first agent and optionally configures its model provider inline. Five provider types are wired in — **Anthropic**, **OpenAI**, **OpenAI Codex** (OAuth device-code), **OpenRouter**, **Local** — plus a **Skip** tab that defers provider setup to Settings. Provider and agent are persisted atomically (provider first; if provider registration fails, the agent is not created).
+5. **License activation** — paste a JWT or skip (v0.0.1 logs a warning but keeps serving).
+6. **User token** — generates a `krx_user_*` bearer token; shown **once** for the loopback User API and CLI installs.
+7. **Install CLI Tools** — optional. Installs Claude Code and/or Codex CLI seed configs in-process. Both can be installed later from Dashboard → Integrations.
+8. **Done** — confirmation screen.
 
 The dashboard auto-generates a self-signed TLS cert; browsers will prompt to accept it.
 
@@ -148,7 +151,7 @@ vagrant up
 
 ### First boot
 
-The default firewall accepts TCP 22 / 7700 / 7701 / 7702 / 7800. Open `https://<vm-ip>:7800` in your browser and run through the same dashboard wizard described in Option 1 (vault passphrase, AdminAgent, license, User token, CLI install).
+The default firewall accepts TCP 22 / 7700 / 7701 / 7702 / 7800. Open `https://<vm-ip>:7800` in your browser and run through the same dashboard wizard described in Option 1 (welcome, vault passphrase, workspace, AdminAgent, license, User token, Install CLI Tools, done).
 
 Daily state backups (02:00 UTC) and audit-log rotation (03:00 UTC, 90-day retention) run on systemd timers out of the box.
 
