@@ -1,0 +1,16 @@
+name: kruxos-hashutils
+version: "1.0.0"
+description: "Stdlib hash and UUID utility capabilities for KruxOS agents"
+author: "KruxOS Examples"
+license: "MIT"
+homepage: "https://github.com/altvale/kruxos/tree/main/packs/kruxos-hashutils"
+
+capabilities:
+  - hash.sha256
+  - hash.md5
+  - hash.uuid4
+
+secrets: []
+
+dependencies: []
+kruxos_version: ">=0.0.1"

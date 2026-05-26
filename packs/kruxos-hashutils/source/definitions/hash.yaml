@@ -1,0 +1,80 @@
+- name: hash.sha256
+  version: "1.0"
+  purpose: "Compute the SHA-256 hex digest of a text input."
+  when_to_use: |
+    Use hash.sha256 to produce a stable, collision-resistant fingerprint of a
+    text string — for content addressing, deduplication keys, or integrity
+    checks. Prefer over hash.md5 for any security-sensitive use.
+  inputs:
+    - name: text
+      type: String
+      required: true
+      description: "Text to hash. Encoded as UTF-8 before hashing."
+  outputs:
+    - name: hex
+      type: String
+      description: "Lowercase SHA-256 hex digest (64 characters)."
+    - name: bytes_length
+      type: Integer
+      description: "UTF-8 byte length of the input text."
+  side_effects: []
+  common_patterns:
+    - description: "Generate a content-addressable short id"
+      steps:
+        - "hash.sha256(text=document_body)"
+        - "Use the first 12 chars of hex as a short id"
+  errors: []
+  permission_tier: autonomous
+  tags: ["hash", "crypto", "compute"]
+
+- name: hash.md5
+  version: "1.0"
+  purpose: "Compute the MD5 hex digest of a text input."
+  when_to_use: |
+    Use hash.md5 only for non-security purposes such as cache busting or
+    matching third-party systems that still emit MD5. Do not use for
+    integrity or authentication — MD5 is collision-broken. Prefer
+    hash.sha256 whenever the choice is yours.
+  inputs:
+    - name: text
+      type: String
+      required: true
+      description: "Text to hash. Encoded as UTF-8 before hashing."
+  outputs:
+    - name: hex
+      type: String
+      description: "Lowercase MD5 hex digest (32 characters)."
+    - name: bytes_length
+      type: Integer
+      description: "UTF-8 byte length of the input text."
+  side_effects: []
+  common_patterns:
+    - description: "Match a legacy MD5 fingerprint emitted by a third-party system"
+      steps:
+        - "hash.md5(text=value)"
+        - "Compare hex against the expected legacy digest"
+  errors: []
+  permission_tier: autonomous
+  tags: ["hash", "compute", "deprecated-by-md5-collisions"]
+
+- name: hash.uuid4
+  version: "1.0"
+  purpose: "Generate a random UUID v4."
+  when_to_use: |
+    Use hash.uuid4 when you need a fresh random identifier — for request ids,
+    correlation tokens, or temporary keys. Do not use when ordering or
+    determinism matters; UUID v4 carries no time information.
+  inputs: []
+  outputs:
+    - name: uuid
+      type: String
+      description: "UUID v4 in canonical 8-4-4-4-12 hyphenated hex form."
+  side_effects: []
+  common_patterns:
+    - description: "Tag a request with a correlation id"
+      steps:
+        - "hash.uuid4()"
+        - "Attach uuid to log entries for this request"
+  errors: []
+  permission_tier: autonomous
+  tags: ["uuid", "random", "compute"]

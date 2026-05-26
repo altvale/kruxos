@@ -1,0 +1,119 @@
+- name: weather.current_conditions
+  version: "1.0"
+  purpose: "Look up current weather conditions at a latitude / longitude via open-meteo.com."
+  when_to_use: |
+    Use weather.current_conditions when the agent needs a real-time
+    snapshot of weather at a point on Earth — temperature, wind,
+    cloud cover. The data source is open-meteo.com's free public
+    API (no API key required, attribution requested in
+    user-facing output).
+  inputs:
+    - name: latitude
+      type: Number
+      required: true
+      description: "Latitude in decimal degrees. Range -90 to 90."
+    - name: longitude
+      type: Number
+      required: true
+      description: "Longitude in decimal degrees. Range -180 to 180."
+    - name: temperature_unit
+      type: String
+      required: false
+      description: "'celsius' (default) or 'fahrenheit'."
+  outputs:
+    - name: temperature
+      type: Number
+      description: "Air temperature in the requested unit."
+    - name: temperature_unit
+      type: String
+      description: "Unit of the temperature value ('celsius' or 'fahrenheit')."
+    - name: wind_speed_kmh
+      type: Number
+      description: "Wind speed in km/h at 10m height."
+    - name: wind_direction_degrees
+      type: Number
+      description: "Wind direction in degrees clockwise from north."
+    - name: weather_code
+      type: Integer
+      description: "WMO weather code (0=clear, 1-3=cloudy, 45-48=fog, 51-67=rain, 71-77=snow, 80-82=showers, 95-99=thunderstorm)."
+    - name: observed_at
+      type: String
+      description: "ISO-8601 timestamp of the observation."
+    - name: attribution
+      type: String
+      description: "Data source attribution — surface this in user-visible output."
+  side_effects:
+    - "Issues one HTTPS request to api.open-meteo.com."
+  common_patterns:
+    - description: "Quick weather check for a user-supplied location"
+      steps:
+        - "weather.current_conditions(latitude=37.77, longitude=-122.42)"
+        - "Render temperature + weather_code description in a reply"
+  errors:
+    - code: "invalid_coordinates"
+      description: "Latitude or longitude outside valid range."
+    - code: "network_error"
+      description: "Could not reach open-meteo.com (DNS, TLS, timeout)."
+    - code: "upstream_error"
+      description: "open-meteo.com returned an error response."
+  permission_tier: autonomous
+  tags: ["weather", "network", "open-meteo"]
+
+- name: weather.forecast
+  version: "1.0"
+  purpose: "Look up a short-range (up to 7 days) hourly or daily weather forecast at a latitude/longitude via open-meteo.com."
+  when_to_use: |
+    Use weather.forecast when the agent needs forward-looking
+    weather data — planning an outdoor activity, deciding whether
+    to issue a weather warning, etc. Resolution is daily (defaults
+    to 7 days). Honest about uncertainty: forecasts farther out
+    have larger error bars; the data is from open-meteo.com's
+    public forecast endpoint.
+  inputs:
+    - name: latitude
+      type: Number
+      required: true
+      description: "Latitude in decimal degrees. Range -90 to 90."
+    - name: longitude
+      type: Number
+      required: true
+      description: "Longitude in decimal degrees. Range -180 to 180."
+    - name: days
+      type: Integer
+      required: false
+      description: "Number of forecast days (1-7). Defaults to 7."
+    - name: temperature_unit
+      type: String
+      required: false
+      description: "'celsius' (default) or 'fahrenheit'."
+  outputs:
+    - name: forecast_days
+      type: Array
+      description: |
+        Array of per-day forecast records, each:
+          { date, temperature_min, temperature_max, weather_code,
+            precipitation_sum_mm, sunrise, sunset }.
+    - name: temperature_unit
+      type: String
+      description: "Unit applied to temperature_min / temperature_max."
+    - name: attribution
+      type: String
+      description: "Data source attribution — surface this in user-visible output."
+  side_effects:
+    - "Issues one HTTPS request to api.open-meteo.com."
+  common_patterns:
+    - description: "Pack-the-umbrella check for the next 3 days"
+      steps:
+        - "weather.forecast(latitude=..., longitude=..., days=3)"
+        - "Sum precipitation_sum_mm across forecast_days"
+  errors:
+    - code: "invalid_coordinates"
+      description: "Latitude or longitude outside valid range."
+    - code: "invalid_days"
+      description: "days argument outside 1-7."
+    - code: "network_error"
+      description: "Could not reach open-meteo.com."
+    - code: "upstream_error"
+      description: "open-meteo.com returned an error response."
+  permission_tier: autonomous
+  tags: ["weather", "forecast", "network", "open-meteo"]
