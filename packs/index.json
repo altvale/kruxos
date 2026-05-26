@@ -1,5 +1,54 @@
 {
   "registry_version": "1",
-  "updated_at": "2026-05-26T00:00:00Z",
-  "packs": []
+  "updated_at": "2026-05-26T10:00:00Z",
+  "packs": [
+    {
+      "name": "kruxos-hashutils",
+      "version": "1.0.0",
+      "description": "Stdlib hash and UUID utility capabilities for KruxOS agents",
+      "author": "KruxOS Examples",
+      "license": "MIT",
+      "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-hashutils",
+      "tarball_url": "https://docs.kruxos.com/packs/kruxos-hashutils/1.0.0/kruxos-hashutils-1.0.0.tar.gz",
+      "checksum_sha256": "cc0116f18a303b12c8dfe23abea123e23911e1aca3c088279dfc08c24ce2ad8d",
+      "pack_type": "python",
+      "kruxos_version": ">=0.0.2",
+      "capabilities": ["hash.sha256", "hash.md5", "hash.uuid4"],
+      "tags": ["hash", "uuid", "stdlib", "compute"],
+      "security_review_required": false,
+      "published_at": "2026-05-26T10:00:00Z"
+    },
+    {
+      "name": "kruxos-urlinfo",
+      "version": "1.0.0",
+      "description": "URL introspection capabilities — host parsing, HEAD-only header fetch, robots.txt lookup",
+      "author": "KruxOS Examples",
+      "license": "MIT",
+      "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-urlinfo",
+      "tarball_url": "https://docs.kruxos.com/packs/kruxos-urlinfo/1.0.0/kruxos-urlinfo-1.0.0.tar.gz",
+      "checksum_sha256": "6d843a279bbf3479a1b190f98d9e1d0512893257e6124baf1892019e8f9f4fbf",
+      "pack_type": "python",
+      "kruxos_version": ">=0.0.2",
+      "capabilities": ["urlinfo.parse_host", "urlinfo.fetch_headers", "urlinfo.robots_txt_check"],
+      "tags": ["url", "network", "robots", "https"],
+      "security_review_required": false,
+      "published_at": "2026-05-26T10:00:00Z"
+    },
+    {
+      "name": "kruxos-weather",
+      "version": "1.0.0",
+      "description": "Weather lookup capabilities — current conditions and short-range forecast via the open-meteo.com public API (no API key)",
+      "author": "KruxOS Examples",
+      "license": "MIT",
+      "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-weather",
+      "tarball_url": "https://docs.kruxos.com/packs/kruxos-weather/1.0.0/kruxos-weather-1.0.0.tar.gz",
+      "checksum_sha256": "d17f97339cb3e2c97858a42c5288da6a68b383aa5340b6a1222a1a21a92ee131",
+      "pack_type": "python",
+      "kruxos_version": ">=0.0.2",
+      "capabilities": ["weather.current_conditions", "weather.forecast"],
+      "tags": ["weather", "network", "open-meteo", "third-party-api"],
+      "security_review_required": false,
+      "published_at": "2026-05-26T10:00:00Z"
+    }
+  ]
 }
