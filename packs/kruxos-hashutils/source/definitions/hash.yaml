@@ -23,7 +23,12 @@
       steps:
         - "hash.sha256(text=document_body)"
         - "Use the first 12 chars of hex as a short id"
-  errors: []
+  errors:
+    - type: InvalidInput
+      description: "The provided text input could not be encoded as UTF-8."
+      recovery:
+        - action: validate_input
+          description: "Confirm the input is a valid UTF-8 string before retrying."
   permission_tier: autonomous
   tags: ["hash", "crypto", "compute"]
 
@@ -53,7 +58,12 @@
       steps:
         - "hash.md5(text=value)"
         - "Compare hex against the expected legacy digest"
-  errors: []
+  errors:
+    - type: InvalidInput
+      description: "The provided text input could not be encoded as UTF-8."
+      recovery:
+        - action: validate_input
+          description: "Confirm the input is a valid UTF-8 string before retrying."
   permission_tier: autonomous
   tags: ["hash", "compute", "deprecated-by-md5-collisions"]
 
@@ -75,6 +85,11 @@
       steps:
         - "hash.uuid4()"
         - "Attach uuid to log entries for this request"
-  errors: []
+  errors:
+    - type: InternalError
+      description: "The system random source was unavailable and a UUID could not be generated."
+      recovery:
+        - action: retry
+          description: "Retry the call; transient randomness-source failures usually clear within a moment."
   permission_tier: autonomous
   tags: ["uuid", "random", "compute"]
