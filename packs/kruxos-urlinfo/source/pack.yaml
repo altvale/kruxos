@@ -1,0 +1,16 @@
+name: kruxos-urlinfo
+version: "1.0.0"
+description: "URL introspection capabilities — host parsing, HEAD-only header fetch, robots.txt lookup"
+author: "KruxOS Examples"
+license: "MIT"
+homepage: "https://github.com/altvale/kruxos/tree/main/packs/kruxos-urlinfo"
+
+capabilities:
+  - urlinfo.parse_host
+  - urlinfo.fetch_headers
+  - urlinfo.robots_txt_check
+
+secrets: []
+
+dependencies: []
+kruxos_version: ">=0.0.2"

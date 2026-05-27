@@ -1,0 +1,15 @@
+name: kruxos-weather
+version: "1.0.0"
+description: "Weather lookup capabilities — current conditions and short-range forecast via the open-meteo.com public API (no API key)"
+author: "KruxOS Examples"
+license: "MIT"
+homepage: "https://github.com/altvale/kruxos/tree/main/packs/kruxos-weather"
+
+capabilities:
+  - weather.current_conditions
+  - weather.forecast
+
+secrets: []
+
+dependencies: []
+kruxos_version: ">=0.0.2"

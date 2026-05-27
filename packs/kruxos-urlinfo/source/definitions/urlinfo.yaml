@@ -1,0 +1,127 @@
+- name: urlinfo.parse_host
+  version: "1.0"
+  purpose: "Parse a URL string into its host, port, scheme, and path components."
+  when_to_use: |
+    Use urlinfo.parse_host to extract structured pieces from a URL —
+    most often the bare hostname, for allowlist matching or
+    user-visible labelling. Pure string operation: no network call,
+    no side effects.
+  inputs:
+    - name: url
+      type: String
+      required: true
+      description: "Absolute URL (must include scheme)."
+  outputs:
+    - name: scheme
+      type: String
+      description: "URL scheme (typically 'http' or 'https')."
+    - name: host
+      type: String
+      description: "Hostname (no port). Lowercased."
+    - name: port
+      type: Integer
+      description: "Explicit port if present, otherwise the scheme's default (80 / 443)."
+    - name: path
+      type: String
+      description: "Path portion of the URL, including leading '/'. Empty if not present."
+  side_effects: []
+  common_patterns:
+    - description: "Allowlist a request by hostname"
+      steps:
+        - "urlinfo.parse_host(url=requested_url)"
+        - "Compare .host against your allowed-domains list"
+  errors:
+    - code: "invalid_url"
+      description: "Input was not a parseable URL (missing scheme, malformed authority, etc.)."
+  permission_tier: autonomous
+  tags: ["url", "parse", "compute"]
+
+- name: urlinfo.fetch_headers
+  version: "1.0"
+  purpose: "Issue an HTTPS HEAD request and return the response status + headers (no body)."
+  when_to_use: |
+    Use urlinfo.fetch_headers to probe a URL cheaply — checking
+    reachability, redirects, content-type, or content-length before
+    deciding whether to fetch the body. HTTPS only; http:// inputs
+    are rejected for the same threat-model reason `kruxos pack` is
+    HTTPS-only (no plain-text traffic in v0.0.2).
+  inputs:
+    - name: url
+      type: String
+      required: true
+      description: "Absolute https:// URL."
+    - name: timeout_seconds
+      type: Integer
+      required: false
+      description: "Request timeout in seconds. Defaults to 10."
+  outputs:
+    - name: status
+      type: Integer
+      description: "HTTP status code (e.g. 200, 301, 404, 500)."
+    - name: headers
+      type: Object
+      description: "Response headers as a name → value map (header names lowercased)."
+    - name: final_url
+      type: String
+      description: "URL after following redirects (may differ from input)."
+  side_effects:
+    - "Issues one or more network requests (with redirect follow)."
+  common_patterns:
+    - description: "Check before downloading a large file"
+      steps:
+        - "urlinfo.fetch_headers(url=download_url)"
+        - "Inspect content-length and content-type"
+        - "Decide whether to proceed with a full download"
+  errors:
+    - code: "non_https_url"
+      description: "Input URL was not https:// — refused."
+    - code: "timeout"
+      description: "Request exceeded the configured timeout."
+    - code: "network_error"
+      description: "DNS, TLS, or connection failure."
+  permission_tier: autonomous
+  tags: ["url", "network", "head"]
+
+- name: urlinfo.robots_txt_check
+  version: "1.0"
+  purpose: "Fetch and parse robots.txt for a host and report whether a given path is allowed for a given user-agent."
+  when_to_use: |
+    Use urlinfo.robots_txt_check before crawling or scraping a host
+    to respect the site's stated crawler policy. The capability
+    fetches `https://<host>/robots.txt` and applies the standard
+    longest-match rule per the Robots Exclusion Protocol.
+    Compliance is on the caller — this capability only reports the
+    site's declared policy, it does not enforce it.
+  inputs:
+    - name: url
+      type: String
+      required: true
+      description: "Absolute https:// URL whose path will be checked against the host's robots.txt."
+    - name: user_agent
+      type: String
+      required: false
+      description: "User-agent string to match against. Defaults to '*' (any-agent rules)."
+  outputs:
+    - name: allowed
+      type: Boolean
+      description: "True if the path is allowed for the given user-agent."
+    - name: matched_rule
+      type: String
+      description: "The robots.txt rule that matched (empty if no rule applied — implicitly allowed)."
+    - name: robots_status
+      type: Integer
+      description: "HTTP status of the robots.txt fetch. 200=robots.txt present; 404=absent (treated as fully-allowed); other=ambiguous."
+  side_effects:
+    - "Fetches https://<host>/robots.txt (one network request)."
+  common_patterns:
+    - description: "Gate a scrape on robots.txt"
+      steps:
+        - "urlinfo.robots_txt_check(url=target_url, user_agent='MyAgent/1.0')"
+        - "Proceed only if .allowed is true"
+  errors:
+    - code: "non_https_url"
+      description: "Input URL was not https:// — refused."
+    - code: "robots_unreachable"
+      description: "robots.txt fetch failed (network error, TLS, etc.) — caller decides whether to proceed."
+  permission_tier: autonomous
+  tags: ["url", "network", "robots", "scraping"]
