@@ -31,8 +31,11 @@
         - "urlinfo.parse_host(url=requested_url)"
         - "Compare .host against your allowed-domains list"
   errors:
-    - code: "invalid_url"
+    - type: InvalidUrl
       description: "Input was not a parseable URL (missing scheme, malformed authority, etc.)."
+      recovery:
+        - action: validate_input
+          description: "Ensure the URL is absolute and includes a scheme (e.g. 'https://example.com/path') before retrying."
   permission_tier: autonomous
   tags: ["url", "parse", "compute"]
 
@@ -65,7 +68,8 @@
       type: String
       description: "URL after following redirects (may differ from input)."
   side_effects:
-    - "Issues one or more network requests (with redirect follow)."
+    - description: "Issues one or more HTTPS HEAD requests (with redirect follow)."
+      reversible: true
   common_patterns:
     - description: "Check before downloading a large file"
       steps:
@@ -73,12 +77,31 @@
         - "Inspect content-length and content-type"
         - "Decide whether to proceed with a full download"
   errors:
-    - code: "non_https_url"
-      description: "Input URL was not https:// — refused."
-    - code: "timeout"
+    - type: InvalidUrl
+      description: "Input was not a parseable URL."
+      recovery:
+        - action: validate_input
+          description: "Ensure the URL is absolute and well-formed before retrying."
+    - type: NonHttpsUrl
+      description: "Input URL did not use the https:// scheme — plain-text traffic is refused."
+      recovery:
+        - action: use_https
+          description: "Reissue the request using an https:// URL."
+    - type: RequestTimeout
       description: "Request exceeded the configured timeout."
-    - code: "network_error"
-      description: "DNS, TLS, or connection failure."
+      recovery:
+        - action: retry_with_higher_timeout
+          description: "Retry with a larger timeout_seconds value if the host is known to be slow."
+    - type: NetworkError
+      description: "DNS, TLS, or connection failure prevented the request from completing."
+      recovery:
+        - action: retry
+          description: "Retry after a short delay; transient network errors usually clear."
+    - type: BadResponse
+      description: "Server returned an unparseable or malformed HTTP response."
+      recovery:
+        - action: inspect_target
+          description: "The remote host may be misbehaving; verify the URL is correct and try again later."
   permission_tier: autonomous
   tags: ["url", "network", "head"]
 
@@ -112,16 +135,28 @@
       type: Integer
       description: "HTTP status of the robots.txt fetch. 200=robots.txt present; 404=absent (treated as fully-allowed); other=ambiguous."
   side_effects:
-    - "Fetches https://<host>/robots.txt (one network request)."
+    - description: "Fetches https://<host>/robots.txt (one network request)."
+      reversible: true
   common_patterns:
     - description: "Gate a scrape on robots.txt"
       steps:
         - "urlinfo.robots_txt_check(url=target_url, user_agent='MyAgent/1.0')"
         - "Proceed only if .allowed is true"
   errors:
-    - code: "non_https_url"
-      description: "Input URL was not https:// — refused."
-    - code: "robots_unreachable"
-      description: "robots.txt fetch failed (network error, TLS, etc.) — caller decides whether to proceed."
+    - type: InvalidUrl
+      description: "Input was not a parseable URL."
+      recovery:
+        - action: validate_input
+          description: "Ensure the URL is absolute and well-formed before retrying."
+    - type: NetworkError
+      description: "robots.txt fetch failed (DNS, TLS, connection, or non-404 HTTP error)."
+      recovery:
+        - action: retry
+          description: "Retry after a short delay; if the host is unreachable the caller decides whether to proceed without robots.txt."
+    - type: RobotsParseError
+      description: "robots.txt was fetched but could not be parsed as a valid Robots Exclusion Protocol document."
+      recovery:
+        - action: treat_as_allowed
+          description: "Per the de-facto standard, an unparseable robots.txt is treated as no restrictions — the caller may proceed at their own discretion."
   permission_tier: autonomous
   tags: ["url", "network", "robots", "scraping"]

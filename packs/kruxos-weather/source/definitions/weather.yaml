@@ -9,11 +9,11 @@
     user-facing output).
   inputs:
     - name: latitude
-      type: Number
+      type: Float
       required: true
       description: "Latitude in decimal degrees. Range -90 to 90."
     - name: longitude
-      type: Number
+      type: Float
       required: true
       description: "Longitude in decimal degrees. Range -180 to 180."
     - name: temperature_unit
@@ -22,16 +22,16 @@
       description: "'celsius' (default) or 'fahrenheit'."
   outputs:
     - name: temperature
-      type: Number
+      type: Float
       description: "Air temperature in the requested unit."
     - name: temperature_unit
       type: String
       description: "Unit of the temperature value ('celsius' or 'fahrenheit')."
     - name: wind_speed_kmh
-      type: Number
+      type: Float
       description: "Wind speed in km/h at 10m height."
     - name: wind_direction_degrees
-      type: Number
+      type: Float
       description: "Wind direction in degrees clockwise from north."
     - name: weather_code
       type: Integer
@@ -43,19 +43,34 @@
       type: String
       description: "Data source attribution — surface this in user-visible output."
   side_effects:
-    - "Issues one HTTPS request to api.open-meteo.com."
+    - description: "Issues one HTTPS GET to api.open-meteo.com."
+      reversible: true
   common_patterns:
     - description: "Quick weather check for a user-supplied location"
       steps:
         - "weather.current_conditions(latitude=37.77, longitude=-122.42)"
         - "Render temperature + weather_code description in a reply"
   errors:
-    - code: "invalid_coordinates"
-      description: "Latitude or longitude outside valid range."
-    - code: "network_error"
-      description: "Could not reach open-meteo.com (DNS, TLS, timeout)."
-    - code: "upstream_error"
-      description: "open-meteo.com returned an error response."
+    - type: InvalidLocation
+      description: "Latitude or longitude outside valid range (-90..90 / -180..180)."
+      recovery:
+        - action: validate_input
+          description: "Clamp or reject coordinates outside the valid range before retrying."
+    - type: NetworkError
+      description: "Could not reach api.open-meteo.com (DNS, TLS, connection failure, or timeout)."
+      recovery:
+        - action: retry
+          description: "Retry after a short delay; transient network errors usually clear."
+    - type: ApiRateLimit
+      description: "open-meteo.com returned HTTP 429 — request rate exceeded."
+      recovery:
+        - action: backoff_and_retry
+          description: "Wait at least 60 seconds before retrying; consider caching results to reduce request volume."
+    - type: BadResponse
+      description: "open-meteo.com returned a non-2xx response or a body that could not be parsed."
+      recovery:
+        - action: retry_later
+          description: "Retry after a short delay; if the failure persists the upstream API may be degraded."
   permission_tier: autonomous
   tags: ["weather", "network", "open-meteo"]
 
@@ -71,11 +86,11 @@
     public forecast endpoint.
   inputs:
     - name: latitude
-      type: Number
+      type: Float
       required: true
       description: "Latitude in decimal degrees. Range -90 to 90."
     - name: longitude
-      type: Number
+      type: Float
       required: true
       description: "Longitude in decimal degrees. Range -180 to 180."
     - name: days
@@ -100,20 +115,33 @@
       type: String
       description: "Data source attribution — surface this in user-visible output."
   side_effects:
-    - "Issues one HTTPS request to api.open-meteo.com."
+    - description: "Issues one HTTPS GET to api.open-meteo.com."
+      reversible: true
   common_patterns:
     - description: "Pack-the-umbrella check for the next 3 days"
       steps:
         - "weather.forecast(latitude=..., longitude=..., days=3)"
         - "Sum precipitation_sum_mm across forecast_days"
   errors:
-    - code: "invalid_coordinates"
-      description: "Latitude or longitude outside valid range."
-    - code: "invalid_days"
-      description: "days argument outside 1-7."
-    - code: "network_error"
-      description: "Could not reach open-meteo.com."
-    - code: "upstream_error"
-      description: "open-meteo.com returned an error response."
+    - type: InvalidLocation
+      description: "Latitude or longitude outside valid range, or days argument outside 1-7."
+      recovery:
+        - action: validate_input
+          description: "Clamp or reject coordinates outside the valid range and ensure 1 <= days <= 7 before retrying."
+    - type: NetworkError
+      description: "Could not reach api.open-meteo.com (DNS, TLS, connection failure, or timeout)."
+      recovery:
+        - action: retry
+          description: "Retry after a short delay; transient network errors usually clear."
+    - type: ApiRateLimit
+      description: "open-meteo.com returned HTTP 429 — request rate exceeded."
+      recovery:
+        - action: backoff_and_retry
+          description: "Wait at least 60 seconds before retrying; consider caching results to reduce request volume."
+    - type: BadResponse
+      description: "open-meteo.com returned a non-2xx response or a body that could not be parsed."
+      recovery:
+        - action: retry_later
+          description: "Retry after a short delay; if the failure persists the upstream API may be degraded."
   permission_tier: autonomous
   tags: ["weather", "forecast", "network", "open-meteo"]
