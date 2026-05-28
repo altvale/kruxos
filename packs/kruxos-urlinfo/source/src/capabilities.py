@@ -1,17 +1,20 @@
-"""URL introspection pack implementations.
+"""kruxos-urlinfo — Capability implementations.
 
 All network-touching capabilities reject `http://` inputs — v0.0.2's
 KruxOS threat model treats plain-text traffic as out-of-scope. The
 unit tests cover the parse + robots.txt-parser branches without any
 network egress; the live HTTPS paths are exercised end-to-end by the
 appliance after installation.
+
+Function names match capability names with dots replaced by
+underscores (`urlinfo.parse_host` -> `urlinfo_parse_host`).
 """
 
+import urllib.error
 import urllib.parse
 import urllib.request
 import urllib.robotparser
-
-from kruxos.packs import capability, PackContext
+from typing import Any
 
 
 def _require_https(url: str) -> None:
@@ -19,8 +22,7 @@ def _require_https(url: str) -> None:
         raise ValueError(f"non_https_url: refusing {url!r}")
 
 
-@capability("urlinfo.parse_host")
-async def parse_host(ctx: PackContext, url: str) -> dict:
+def urlinfo_parse_host(url: str) -> dict[str, Any]:
     """Parse a URL into scheme/host/port/path."""
     try:
         parsed = urllib.parse.urlsplit(url)
@@ -37,10 +39,7 @@ async def parse_host(ctx: PackContext, url: str) -> dict:
     }
 
 
-@capability("urlinfo.fetch_headers")
-async def fetch_headers(
-    ctx: PackContext, url: str, timeout_seconds: int = 10
-) -> dict:
+def urlinfo_fetch_headers(url: str, timeout_seconds: int = 10) -> dict[str, Any]:
     """Issue an HTTPS HEAD and return status + headers."""
     _require_https(url)
     req = urllib.request.Request(url, method="HEAD")
@@ -63,10 +62,7 @@ async def fetch_headers(
         }
 
 
-@capability("urlinfo.robots_txt_check")
-async def robots_txt_check(
-    ctx: PackContext, url: str, user_agent: str = "*"
-) -> dict:
+def urlinfo_robots_txt_check(url: str, user_agent: str = "*") -> dict[str, Any]:
     """Fetch and parse robots.txt, report whether the path is allowed."""
     _require_https(url)
     parsed = urllib.parse.urlsplit(url)
