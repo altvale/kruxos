@@ -1,6 +1,6 @@
 {
   "registry_version": "1",
-  "updated_at": "2026-05-27T10:42:18Z",
+  "updated_at": "2026-05-28T13:00:42Z",
   "packs": [
     {
       "name": "kruxos-hashutils",
@@ -10,7 +10,7 @@
       "license": "MIT",
       "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-hashutils",
       "tarball_url": "kruxos-hashutils/1.0.0/kruxos-hashutils-1.0.0.tar.gz",
-      "checksum_sha256": "90dda520501bfc1a57ed965b1ab544daed843e79722c17b37fb2466d5211c104",
+      "checksum_sha256": "c2391b3ca69fd29a3a24f98d035f44664392a5f9931474ba291581c110b72dfd",
       "pack_type": "python",
       "kruxos_version": ">=0.0.2",
       "capabilities": ["hash.sha256", "hash.md5", "hash.uuid4"],
@@ -26,7 +26,7 @@
       "license": "MIT",
       "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-urlinfo",
       "tarball_url": "kruxos-urlinfo/1.0.0/kruxos-urlinfo-1.0.0.tar.gz",
-      "checksum_sha256": "a40d68b804348611077423fafe6b5559fb4d3fe8e60bf5c60cb84ed5403b96a9",
+      "checksum_sha256": "fcd713364fb546142c99f7d29b0a7e646d8a00647ded83cc5cbd3a27c55daf0c",
       "pack_type": "python",
       "kruxos_version": ">=0.0.2",
       "capabilities": ["urlinfo.parse_host", "urlinfo.fetch_headers", "urlinfo.robots_txt_check"],
@@ -42,7 +42,7 @@
       "license": "MIT",
       "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-weather",
       "tarball_url": "kruxos-weather/1.0.0/kruxos-weather-1.0.0.tar.gz",
-      "checksum_sha256": "9e9a28e4abee59334d7b78a575c172535b8b297f3b972fee2c225c8fc2e5b99f",
+      "checksum_sha256": "89446015c862eb627900cc1fc3246ec62ebf6a8fce681fca3533adb0339045c0",
       "pack_type": "python",
       "kruxos_version": ">=0.0.2",
       "capabilities": ["weather.current_conditions", "weather.forecast"],

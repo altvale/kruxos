@@ -1,16 +1,19 @@
-"""Weather pack implementations.
+"""kruxos-weather — Capability implementations.
 
 Wraps the open-meteo.com public API. No API key required; the only
 side effect is one HTTPS GET per call. The output `attribution` field
 is non-optional in the spec — pack consumers should surface it in
 user-visible output per open-meteo.com's data-licence terms.
+
+Function names match capability names with dots replaced by
+underscores (`weather.current_conditions` -> `weather_current_conditions`).
 """
 
 import json
+import urllib.error
 import urllib.parse
 import urllib.request
-
-from kruxos.packs import capability, PackContext
+from typing import Any
 
 
 _BASE_URL = "https://api.open-meteo.com/v1"
@@ -30,7 +33,7 @@ def _temp_unit(unit: str) -> str:
     return unit
 
 
-async def _get_json(url: str, timeout: int = 10) -> dict:
+def _get_json(url: str, timeout: int = 10) -> dict[str, Any]:
     try:
         with urllib.request.urlopen(url, timeout=timeout) as resp:
             if resp.status >= 400:
@@ -42,13 +45,17 @@ async def _get_json(url: str, timeout: int = 10) -> dict:
         raise RuntimeError(f"network_error: {e}") from e
 
 
-@capability("weather.current_conditions")
-async def current_conditions(
-    ctx: PackContext,
+def _idx(values, i):
+    if values is None or i >= len(values):
+        return None
+    return values[i]
+
+
+def weather_current_conditions(
     latitude: float,
     longitude: float,
     temperature_unit: str = "celsius",
-) -> dict:
+) -> dict[str, Any]:
     """Look up current weather at lat/lon via open-meteo."""
     _check_coords(latitude, longitude)
     unit = _temp_unit(temperature_unit)
@@ -63,7 +70,7 @@ async def current_conditions(
         }
     )
     url = f"{_BASE_URL}/forecast?{params}"
-    payload = await _get_json(url)
+    payload = _get_json(url)
 
     current = payload.get("current_weather") or {}
     return {
@@ -77,14 +84,12 @@ async def current_conditions(
     }
 
 
-@capability("weather.forecast")
-async def forecast(
-    ctx: PackContext,
+def weather_forecast(
     latitude: float,
     longitude: float,
     days: int = 7,
     temperature_unit: str = "celsius",
-) -> dict:
+) -> dict[str, Any]:
     """Look up a 1-7 day forecast at lat/lon via open-meteo."""
     _check_coords(latitude, longitude)
     if not 1 <= days <= 7:
@@ -110,7 +115,7 @@ async def forecast(
         }
     )
     url = f"{_BASE_URL}/forecast?{params}"
-    payload = await _get_json(url)
+    payload = _get_json(url)
 
     daily = payload.get("daily") or {}
     dates = daily.get("time") or []
@@ -132,9 +137,3 @@ async def forecast(
         "temperature_unit": unit,
         "attribution": _ATTRIBUTION,
     }
-
-
-def _idx(values, i):
-    if values is None or i >= len(values):
-        return None
-    return values[i]
