@@ -1,0 +1,154 @@
+# File Transfer
+
+How to get a file from your workstation onto a KruxOS appliance — to install a
+pack from a local tarball, drop in a custom cert / license JWT / config
+payload, or seed a state file — without leaving the dashboard.
+
+## Why this exists
+
+The KruxOS appliance ships a deliberately minimal base image: no SSH daemon,
+no hypervisor guest tools, no general-purpose shell access for agents. That's
+good for the security posture, but it means "just `scp` the file over" isn't
+available out of the box. The first-party file-transfer surface below gives
+operators a supported path that lands files in a known location with auditing
+and size limits, instead of relying on ad-hoc workarounds.
+
+## Surfaces
+
+### 1. Dashboard `/uploads` page (recommended)
+
+Open `https://<appliance>:7800/uploads`. The page gives you drag-and-drop, a
+file picker, a list of what's already there, and per-file delete. Uploaded
+files land at `/data/kruxos/uploads/<name>` and the page shows the full
+appliance path so you can copy-paste it into other tools — for example, to
+install a local pack, upload its tarball, extract it into a directory under
+`/data/kruxos/uploads/`, and point `kruxos pack install` at that directory
+(local installs take a pack *directory*, not a tarball).
+
+The page is gated by your dashboard session; the upload itself is forwarded to
+the gateway as the **User principal**, the same identity the rest of the
+loopback User API uses.
+
+### 2. User API `POST /api/user/files` (for scripts and tooling)
+
+The same backing endpoint the dashboard uses, for shell scripts and
+automation. The User API listens on the appliance loopback at `:7703`, so run
+this from the appliance itself (or through an SSH tunnel you've set up):
+
+```bash
+# $KRUXOS_USER_TOKEN is a krx_user_* bearer — create one with
+# `kruxos user-token create <label>` or copy it from the dashboard.
+curl -X POST http://127.0.0.1:7703/api/user/files \
+     -H "Authorization: Bearer $KRUXOS_USER_TOKEN" \
+     -F "file=@./my-pack.tar.gz"
+# 201 Created
+# {"name":"my-pack.tar.gz","path":"/data/kruxos/uploads/my-pack.tar.gz","size_bytes":12345}
+```
+
+Behaviour:
+
+| Aspect | Value |
+|--------|-------|
+| Backing path | `/data/kruxos/uploads/` |
+| Per-upload size cap | 100 MiB (returns `413 Payload Too Large` if exceeded) |
+| Filename rules | Path components are stripped; the basename must be ≤ 255 bytes, must not start with `.`, and may only contain `A–Z a–z 0–9 . _ - ( )` and spaces |
+| Overwrite | Re-uploading an existing name returns `409 Conflict`; pass `?overwrite=true` to replace |
+| Auth | `krx_user_*` bearer token (same as the rest of `/api/user/*`) |
+| Audit | Emits `user.file.uploaded` / `user.file.deleted` events |
+
+### 3. List and delete
+
+```bash
+# List uploads — returns [{name, size_bytes, modified}], sorted by name
+curl http://127.0.0.1:7703/api/user/files \
+     -H "Authorization: Bearer $KRUXOS_USER_TOKEN"
+
+# Delete one upload — 204 on success, 404 if it doesn't exist
+curl -X DELETE http://127.0.0.1:7703/api/user/files/my-pack.tar.gz \
+     -H "Authorization: Bearer $KRUXOS_USER_TOKEN"
+```
+
+## Other transfer mechanisms (situational)
+
+These are not first-party features and come with caveats. Use the upload
+surface above unless your situation specifically calls for one of these.
+
+### Docker bind-mount
+
+When the appliance runs under Docker Compose, the persistent named volume is
+mounted at `/data/kruxos`. You can substitute a bind-mount to expose a host
+directory:
+
+```yaml
+# Excerpt from a docker-compose override
+services:
+  kruxos:
+    volumes:
+      - ./local/uploads:/data/kruxos/uploads:rw
+```
+
+Files dropped into the host's `./local/uploads/` then appear at
+`/data/kruxos/uploads/` inside the container, where the file API sees them on
+the next list call.
+
+### VM hypervisor shared folder / USB
+
+Hypervisor-specific. The appliance doesn't ship VirtualBox / VMware / virtiofs
+guest tools (the rootfs is intentionally minimal), so shared folders only work
+at the hypervisor level — e.g. a host directory exposed as an extra block
+device that you mount manually inside the VM. USB passthrough is similar: the
+hypervisor exposes the device, you mount it under `/mnt` and copy files into
+`/data/kruxos/uploads/`.
+
+### `kruxos pack install <name>` for published packs
+
+For packs published to a registry, `kruxos pack install <name>` fetches and
+installs by name — no local file transfer needed. The upload flow is for
+unpublished or private packs (upload, extract to a directory, then
+`kruxos pack install <directory>`).
+
+### Console paste (debugging only)
+
+The VM hypervisor console supports paste, so very small files (a config
+snippet, a license JWT for offline activation) can be reconstructed with a
+heredoc:
+
+```bash
+cat > /tmp/file.txt <<'EOF'
+<pasted content>
+EOF
+```
+
+Caveats: markdown indentation can break heredoc terminators; serial-console
+flow-control drops characters on large pastes; not viable for anything over a
+few KB.
+
+### SSH (operator-supplied)
+
+`sshd` is not bundled in the base appliance. A determined operator can rebuild
+the image with `openssh` / `dropbear` added and an `sshd` service unit, but
+that's outside the supported path and not documented further here.
+
+## Security model
+
+- The upload directory is **User-scoped**, not per-agent-scoped. Files land in
+  a directory readable by any process running as the User principal (the
+  gateway itself, `kruxos pack install`, and so on).
+- Sandboxed agents and MCP clients do **not** get access to
+  `/data/kruxos/uploads/` unless you explicitly mount it into the agent's
+  sandbox — same governance as any other host directory.
+- The audit events (`user.file.uploaded` / `user.file.deleted`) record
+  filename and size, not contents. Watch the audit feed to catch surprise
+  uploads.
+- Filename sanitisation rejects path components, dotfiles, and characters that
+  shells / HTTP / path resolvers interpret specially. A symlink swapped into
+  the uploads directory is caught by canonicalising the parent before the file
+  is opened.
+
+## Next steps
+
+- [Getting Started](../getting-started.md) — stand up the appliance and the
+  dashboard first
+- [Managing Agents](managing-agents.md) — control which agents can reach
+  host paths
+- [Monitoring](monitoring.md) — watch the audit feed for upload/delete events
