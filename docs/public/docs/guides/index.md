@@ -12,7 +12,9 @@ Day-to-day operations for running KruxOS.
 | [Backup & Restore](backup-restore.md) | Protect and recover your data |
 | [Updating KruxOS](updating.md) | Apply updates with automatic rollback |
 | [Migration from OpenClaw](migration-from-openclaw.md) | Step-by-step guide for OpenClaw users |
+| [Connecting Services](connecting-services.md) | Connect Gmail & Slack to the Service Proxy (dashboard or CLI) |
 | [Slack Integration](slack-integration.md) | Connect Slack for agent messaging and search |
+| [File Transfer](file-transfer.md) | Get files onto the appliance for local pack installs, certs, and config |
 | [Docker Agent Isolation](docker-isolation.md) | Single-container vs multi-container deployment patterns |
 | [Autonomous Agents](autonomous-agents.md) | Create, configure, and manage server-side autonomous agents |
 | [First Conversation](first-conversation.md) | Example prompts that work well with Claude + KruxOS |

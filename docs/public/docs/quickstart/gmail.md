@@ -105,6 +105,7 @@ The release-notes file `docs/release-notes/v0.0.1.md` records this as a known li
 
 ## Next steps
 
+- [Connecting Services](../guides/connecting-services.md) — the operator-facing flow to connect a Gmail account (dashboard or `kruxos connect gmail`)
 - [Managing Agents](../guides/managing-agents.md) — control which agents can access email
 - [Policies](../guides/policies.md) — restrict email capabilities per agent
 - [Monitoring](../guides/monitoring.md) — monitor sync health and write buffers

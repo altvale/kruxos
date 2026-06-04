@@ -147,6 +147,8 @@ Once connected, try these in a conversation:
 - **[Approval Workflow](guides/approval-workflow.md)** — how gated calls flow through the queue
 - **[Managing Agents](guides/managing-agents.md)** — create agents with different permission tiers
 - **[Model Providers](guides/model-providers.md)** — add OpenAI / Codex / Gemini / local providers
+- **[Connect Gmail & Slack](guides/connecting-services.md)** — wire external services into the Service Proxy from the dashboard or CLI
+- **[File Transfer](guides/file-transfer.md)** — get files onto the appliance for local pack installs, certs, and config
 - **[Email capabilities](quickstart/gmail.md)** — adapters ship today; operator-facing OAuth lands v0.0.2
 - **[Autonomous Agents](guides/autonomous-agents.md)** — five-field cron schedules, one-shot delays, manual trigger
 - **[Dashboard Chat](guides/dashboard-chat.md)** — chat with your agent from the web UI

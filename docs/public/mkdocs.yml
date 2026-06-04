@@ -105,7 +105,9 @@ nav:
     - Migration from OpenClaw: guides/migration-from-openclaw.md
     - Autonomous Agents: guides/autonomous-agents.md
     - Docker Agent Isolation: guides/docker-isolation.md
+    - Connecting Services: guides/connecting-services.md
     - Slack Integration: guides/slack-integration.md
+    - File Transfer: guides/file-transfer.md
     - First Conversation: guides/first-conversation.md
     - Dashboard Chat: guides/dashboard-chat.md
     - Troubleshooting: guides/troubleshooting.md

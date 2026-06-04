@@ -35,7 +35,7 @@ Architecture:
 Codex CLI  (Rust binary)
   │  stdio (newline-delimited JSON-RPC, MCP 2024-11-05)
   ▼
-kruxos.connectors.claude_bridge  (launched by Codex as a subprocess)
+mcp-bridge  (/opt/kruxos/bin/mcp-bridge, launched by Codex as a subprocess)
   │  WebSocket
   ▼
 KruxOS Gateway  ──►  Policy Engine  ──►  Sandbox  ──►  Capabilities
@@ -44,17 +44,22 @@ KruxOS Gateway  ──►  Policy Engine  ──►  Sandbox  ──►  Capabil
 ```
 
 Same bridge as Claude Desktop, Claude Code, and Hermes — MCP stdio is a
-standard transport, so KruxOS ships a single `kruxos.connectors.claude_bridge`
-Python module and every MCP-capable client launches it the same way.
+standard transport, so KruxOS ships a single bundled `mcp-bridge` and every
+MCP-capable client launches it the same way.
 
 ## Prerequisites
 
 - **KruxOS** running and reachable at `ws://HOST:7700`.
-- **A KruxOS agent token**:
+- **A KruxOS User token.** Codex CLI runs in the *User context* — the
+  operator *is* the user, not a sandboxed agent — so the bridge authenticates
+  with the shared User token, not a per-agent token. The first-boot wizard
+  seeds one; you can create another any time:
   ```bash
-  kruxos agent create --name codex
+  kruxos user-token create primary
   ```
-  Save the 64-char hex token.
+  The token is stored in the vault under the label you pass (`primary` here)
+  and is printed exactly once. In practice you rarely paste it: the bridge
+  reads it from the vault by label, so it never lands on argv.
 - **The bundled `mcp-bridge`** at `/opt/kruxos/bin/mcp-bridge` — ships on the
   appliance (VM or Docker image).
 - **Codex CLI installed** (`npm install -g @openai/codex`, or whichever
@@ -79,34 +84,69 @@ Python module and every MCP-capable client launches it the same way.
 
 ## Step 1 — Add KruxOS as an MCP server in Codex
 
-The hand-edit alternative (when `kruxos cli-config generate` isn't an option):
+The MCP server entry alone is one `codex mcp add` away:
 
 ```bash
-codex mcp add kruxos -- /opt/kruxos/bin/mcp-bridge
+codex mcp add kruxos-gateway -- \
+  /opt/kruxos/bin/mcp-bridge --label primary --gateway ws://127.0.0.1:7700/
 ```
 
-This writes a `[mcp_servers.kruxos]` entry into `~/.codex/config.toml`.
-You'll need to add the environment variables by hand. Open
-`~/.codex/config.toml` and make the entry look like this:
+That writes a `[mcp_servers.kruxos-gateway]` entry into
+`~/.codex/config.toml`. But the shipping config also sets a few top-level
+keys that `codex mcp add` won't touch, so the hand-edit below is the
+complete picture. Open `~/.codex/config.toml` and make it look like this —
+this is exactly what `kruxos cli-config generate --codex` emits:
 
 ```toml
-[mcp_servers.kruxos]
-command = "/opt/kruxos/bin/mcp-bridge"
-args = []
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
 
-[mcp_servers.kruxos.env]
-KRUXOS_ENDPOINT = "wss://localhost:7700"
-KRUXOS_AGENT_NAME = "codex"
-KRUXOS_AGENT_TOKEN = "7f3a8c1d2e9b5a4f8e6c1d3b7a9f2e5c8d1b4a7f3c9e6d8b1a4c7f2e5d9b8a3c"
+[shell_environment_policy]
+inherit = "core"
+exclude = ["*KEY", "*SECRET", "*TOKEN", "ANTHROPIC_*", "OPENAI_API_KEY"]
+
+[features]
+hooks = true
+shell_tool = false
+unified_exec = false
+
+[mcp_servers.kruxos-gateway]
+command = "/opt/kruxos/bin/mcp-bridge"
+args = ["--label", "primary", "--gateway", "ws://127.0.0.1:7700/"]
+tool_timeout_sec = 86400
+startup_timeout_sec = 30
+required = true
+
+[mcp_servers.kruxos-gateway.env]
+KRUXOS_USER_TOKEN = "krx_user_…"
 ```
 
-These are the three env vars the bridge reads:
+What each piece does:
 
-| Var                  | Purpose                                  | Default                  |
-|----------------------|------------------------------------------|--------------------------|
-| `KRUXOS_ENDPOINT`    | Gateway WebSocket URL                    | `wss://localhost:7700`   |
-| `KRUXOS_AGENT_NAME`  | Agent name (from `kruxos agent create`)  | *(required)*             |
-| `KRUXOS_AGENT_TOKEN` | Agent token (64-char hex)                | *(required)*             |
+| Key | Purpose |
+|-----|---------|
+| `approval_policy = "never"` | Suppresses Codex's own per-tool "Always Allow" prompts. Approval still happens — in the KruxOS dashboard queue, which is the single approval surface. |
+| `sandbox_mode = "danger-full-access"` | Codex runs in the User context (the operator *is* the user), so it gets full local access. Per-call gating happens at the gateway, not in Codex's own sandbox. |
+| `shell_environment_policy.exclude` | Scrubs secrets/keys/tokens out of the environment the bridge subprocess inherits. |
+| `features.hooks = true` | Keeps the KruxOS CLI-hook PreToolUse integration active. |
+| `features.shell_tool = false` / `unified_exec = false` | Disables Codex's native shell + exec tools so **every** tool call routes through the `kruxos-gateway` MCP server rather than Codex's built-in shell path. |
+| `mcp_servers.kruxos-gateway.env.KRUXOS_USER_TOKEN` | The User bearer the bridge presents to the gateway. |
+
+The bridge reads exactly two things from its launch flags — `--label`
+(which vault entry to read the User token from, default `primary`) and
+`--gateway` (the gateway MCP WebSocket URL, default `ws://127.0.0.1:7700/`) —
+plus one environment variable:
+
+| Var                 | Purpose                                            | Default                   |
+|---------------------|----------------------------------------------------|---------------------------|
+| `KRUXOS_USER_TOKEN` | User bearer token (`krx_user_…`). If unset, the bridge reads it from the vault at `user/token/<label>`. | *(falls back to vault)* |
+
+`kruxos cli-config generate --codex --write` seeds `KRUXOS_USER_TOKEN` from
+the vault into the `env` block for you, so the generated file works
+out of the box. If you'd rather not have the token in the file at all, drop
+the `KRUXOS_USER_TOKEN` line: with the env var unset the bridge resolves the
+token from the vault at `user/token/primary` (the `--label` value) on each
+launch.
 
 Codex launches the bridge as a child process on startup, pipes MCP messages
 over its stdin/stdout, and the bridge proxies everything to the gateway.
@@ -138,8 +178,9 @@ gateway, so the audit log records `filesystem.read`, not the mangled form.
 
 You should see the call in:
 
-- **KruxOS audit log**: `kruxos audit tail --agent codex`
-- **Dashboard** (`http://localhost:7800`): a new session for agent `codex`
+- **KruxOS audit log**: `kruxos audit query --capability filesystem.read`
+- **Dashboard** (`http://localhost:7800`): the Codex tool call in the
+  session view
 - **Approval queue** (if policy is `require_approval`): a pending request
 
 ## Sandbox layering: Codex Landlock + KruxOS sandbox
@@ -216,26 +257,31 @@ services:
       codex-net:
     volumes:
       - codex-workspace:/workspace
+      # Mount the bundled bridge binary from the appliance host (read-only).
+      - /opt/kruxos/bin/mcp-bridge:/opt/kruxos/bin/mcp-bridge:ro
     environment:
-      KRUXOS_ENDPOINT: "ws://gateway:7700"
-      KRUXOS_AGENT_NAME: "codex"
-      KRUXOS_API_KEY: "${CODEX_API_KEY}"
+      KRUXOS_USER_TOKEN: "${KRUXOS_USER_TOKEN}"
       OPENAI_API_KEY: "${OPENAI_API_KEY}"
     command: >
       bash -c "
-        apt-get update && apt-get install -y python3 python3-pip &&
-        pip install --break-system-packages kruxos &&
         npm install -g @openai/codex &&
         mkdir -p /root/.codex &&
         cat > /root/.codex/config.toml <<'TOML'
-[mcp_servers.kruxos]
-command = \"python3\"
-args = [\"-m\", \"kruxos.connectors.claude_bridge\"]
+approval_policy = \"never\"
+sandbox_mode = \"danger-full-access\"
 
-[mcp_servers.kruxos.env]
-KRUXOS_ENDPOINT = \"ws://gateway:7700\"
-KRUXOS_AGENT_NAME = \"codex\"
-KRUXOS_API_KEY = \"${KRUXOS_API_KEY}\"
+[features]
+hooks = true
+shell_tool = false
+unified_exec = false
+
+[mcp_servers.kruxos-gateway]
+command = \"/opt/kruxos/bin/mcp-bridge\"
+args = [\"--label\", \"primary\", \"--gateway\", \"ws://gateway:7700/\"]
+required = true
+
+[mcp_servers.kruxos-gateway.env]
+KRUXOS_USER_TOKEN = \"${KRUXOS_USER_TOKEN}\"
 TOML
         tail -f /dev/null
       "
@@ -271,8 +317,8 @@ Codex supports `.codex/config.toml` inside a project directory, and it
 takes precedence over `~/.codex/config.toml` when Codex is launched from
 that directory. This is the most underrated Codex feature for team setups:
 
-1. One engineer sets up KruxOS and the agent API key.
-2. They commit `.codex/config.toml` to the project repo (with the API key
+1. One engineer sets up KruxOS and the User token.
+2. They commit `.codex/config.toml` to the project repo (with the token
    read from an env var, not hardcoded — see below).
 3. Everyone who clones the repo gets KruxOS governance automatically the
    first time they run `codex` in that directory.
@@ -280,26 +326,34 @@ that directory. This is the most underrated Codex feature for team setups:
 Example `.codex/config.toml` for a repo:
 
 ```toml
-[mcp_servers.kruxos]
-command = "/opt/kruxos/bin/mcp-bridge"
-args = []
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
 
-[mcp_servers.kruxos.env]
-KRUXOS_ENDPOINT = "wss://localhost:7700"
-KRUXOS_AGENT_NAME = "codex-team"
+[features]
+hooks = true
+shell_tool = false
+unified_exec = false
+
+[mcp_servers.kruxos-gateway]
+command = "/opt/kruxos/bin/mcp-bridge"
+args = ["--label", "primary", "--gateway", "ws://127.0.0.1:7700/"]
+required = true
+
+[mcp_servers.kruxos-gateway.env]
 # Token resolved from the shell environment at Codex launch time
-KRUXOS_AGENT_TOKEN = "${CODEX_KRUXOS_TOKEN}"
+KRUXOS_USER_TOKEN = "${KRUXOS_USER_TOKEN}"
 ```
 
-Add `CODEX_KRUXOS_TOKEN` to `.envrc` / `direnv` / your shell profile, and
+Add `KRUXOS_USER_TOKEN` to `.envrc` / `direnv` / your shell profile, and
 *do not* commit the actual token. This pattern gives you centralised
 governance for a whole team with one commit.
 
 !!! warning "Don't commit tokens"
     `~/.codex/config.toml` is fine for personal use, but a project-scoped
     `.codex/config.toml` lives in the repo. Use environment-variable
-    interpolation (`${VAR}`) for `KRUXOS_AGENT_TOKEN`, never a literal
-    64-char hex token.
+    interpolation (`${VAR}`) for `KRUXOS_USER_TOKEN`, never a literal
+    token. Better still, drop the `KRUXOS_USER_TOKEN` line entirely and let
+    the bridge resolve the token from the vault by `--label`.
 
 ## Codex as an MCP server (not covered here)
 
@@ -311,27 +365,30 @@ to KruxOS). It is out of scope for the v0.0.x line.
 
 ## Troubleshooting
 
-### `codex mcp list` shows `kruxos` as failed
+### `codex mcp list` shows `kruxos-gateway` as failed
 
-Run the bridge by hand with the same env vars to see the error:
+Run the bridge by hand with the same flags to see the error:
 
 ```bash
-KRUXOS_ENDPOINT=wss://localhost:7700 \
-KRUXOS_AGENT_NAME=codex \
-KRUXOS_AGENT_TOKEN=7f3a8c1d2e9b5a4f8e6c1d3b7a9f2e5c8d1b4a7f3c9e6d8b1a4c7f2e5d9b8a3c \
-/opt/kruxos/bin/mcp-bridge
+KRUXOS_USER_TOKEN=krx_user_… \
+/opt/kruxos/bin/mcp-bridge --label primary --gateway ws://127.0.0.1:7700/
 ```
 
-Structured exit codes (10 = auth, 11 = network) point at the cause.
+(Omit `KRUXOS_USER_TOKEN` to exercise the vault path — the bridge then reads
+`user/token/primary` and the vault must be unlocked.) Structured exit codes
+point at the cause: `3` vault locked, `4` no token at that label, `5` vault
+unavailable, `6` gateway unreachable, `7` token rejected.
 
 Most common causes:
 
 - **`mcp-bridge` binary not on the path Codex sees.** Codex launches the
   command verbatim; verify `/opt/kruxos/bin/mcp-bridge` is executable and
   reachable from the Codex working directory.
-- **Env vars missing.** `~/.codex/config.toml` has to have the
-  `[mcp_servers.kruxos.env]` subsection — `codex mcp add` does not create
-  it for you. Edit the file and add the env vars manually.
+- **Wrong server entry.** `~/.codex/config.toml` must carry a
+  `[mcp_servers.kruxos-gateway]` entry with the `--label` / `--gateway`
+  args — `codex mcp add` writes the entry but not the surrounding
+  `approval_policy` / `sandbox_mode` / `[features]` keys, so finish the
+  hand-edit from [Step 1](#step-1-add-kruxos-as-an-mcp-server-in-codex).
 - **Gateway unreachable.** `curl -sk -o /dev/null -w '%{http_code}\n'
   https://localhost:7800` — if the dashboard isn't responding the gateway
   is down.
@@ -344,36 +401,33 @@ a very old Codex build — upgrade (`npm install -g @openai/codex`) and try
 again. The bridge faithfully forwards whatever the client sends and the
 gateway rejects out-of-order traffic per the MCP spec.
 
-### "Authentication failed" in the bridge logs
+### "Authentication failed" in the bridge logs (exit code 7)
 
-The `KRUXOS_AGENT_TOKEN` value does not match a registered agent. Re-check
-the token you saved from `kruxos agent create --name codex`. Agent tokens
-are 64-char hex strings in v0.0.1. Set `KRUXOS_BRIDGE_LOG_LEVEL=DEBUG` in the env
-section to see more.
+The User token the bridge presented does not match a live token (revoked, or
+the wrong value). Re-check the token under label `primary`, or mint a fresh
+one with `kruxos user-token create primary` and re-seed the config. Set
+`KRUXOS_LOG=debug` in the `env` section to see more.
 
 ### Tools return "blocked by policy" immediately
 
-This is not a bug — KruxOS is doing its job. Inspect the policy:
+This is not a bug — KruxOS is doing its job. Inspect the blocked call:
 
 ```bash
-kruxos audit tail --agent codex
+kruxos audit query --capability filesystem.read
 ```
 
-You will see the blocked call with the matching policy rule. Edit the
-policy file in `policies/` or assign the `codex` agent to a different
-policy group:
-
-```bash
-kruxos agent set-policy codex --group permissive
-```
+You will see the blocked call with the matching policy rule. Adjust the
+policy that governs the User principal to allow it — see
+[Policies](policies.md) for how rules are written and applied.
 
 ### Approval requests appear in the dashboard but Codex times out
 
-The bridge waits up to 5 minutes (`_APPROVAL_TIMEOUT_SECS`) for an approval
-decision, and 2 minutes (`_EXECUTION_TIMEOUT_SECS`) for execution after
-approval is granted. If your reviewers are slower than that, increase both
-constants in `claude_bridge.py` or approve faster. A timed-out approval
-returns a STOP error to Codex — the call is not silently dropped.
+A tool call that needs approval is held at the gateway until a reviewer acts.
+The Codex side waits up to `tool_timeout_sec` (the shipping config sets this
+to 86400 — 24 hours — so human-in-the-loop approvals don't time out the call
+under normal use). A timed-out approval returns a STOP error to Codex — the
+call is not silently dropped. If you want a shorter leash, lower
+`tool_timeout_sec` in the `[mcp_servers.kruxos-gateway]` entry.
 
 ### Codex's own sandbox blocks a legitimate tool call
 
