@@ -2,44 +2,27 @@
 
 Connect your KruxOS instance to Slack so agents can search messages, post to channels, and react to messages — all through the Service Proxy's safety layer.
 
-!!! warning "Operator-facing connection flow ships in v0.0.2"
-    The Slack adapter (search, read, channels, send, reply, react, remove_react) is **wired end-to-end in v0.0.1** — the read-replica sync, write buffer, batch protection, and vault-backed token storage with auto-refresh all work. What v0.0.1 does **not** yet ship is the operator-facing OAuth connection UX — the `kruxos connect slack` CLI subcommand and the dashboard Slack-OAuth flow both land in **v0.0.2**. This page describes the runtime behaviour that's in place today; the wiring described under "Connecting Slack" is the v0.0.2 surface.
+This page covers **what agents can do with Slack once it's connected**. For the
+one-time connect step — creating the Slack app and pasting its token — see
+**[Connecting Services](connecting-services.md)**.
 
-## Prerequisites
+## Connecting Slack
 
-- A running KruxOS instance (Docker via `altvale/kruxos`, or the VM image)
-- A Slack workspace where you have permission to install apps
-- A Slack App with a Bot Token (see [Creating a Slack App](#creating-a-slack-app))
-
-## Creating a Slack App
-
-1. Go to [api.slack.com/apps](https://api.slack.com/apps) and click **Create New App**
-2. Choose **From scratch**, give it a name (e.g. "KruxOS"), and select your workspace
-3. Under **OAuth & Permissions**, add these **Bot Token Scopes**:
-   - `channels:read` — list channels and metadata
-   - `channels:history` — read message history
-   - `chat:write` — post messages and replies
-   - `reactions:write` — add and remove reactions
-   - `users:read` — resolve user names
-4. Under **OAuth & Permissions**, set the **Redirect URL** to `http://127.0.0.1:8081`
-5. Note your **Client ID** from the **Basic Information** page
-
-## Connecting Slack (v0.0.2)
-
-Run the connect command:
+Slack connects by pasting a **Bot User OAuth Token** (`xoxb-…`) — there's no
+browser OAuth dance, because the bot token *is* the bearer the Service Proxy
+uses. You create a Slack app from the provided manifest, install it to your
+workspace, and hand KruxOS the token, either from the dashboard **Service
+Proxy** page (`/proxy`) Connect tile or with:
 
 ```bash
-kruxos connect slack --client-id <YOUR_CLIENT_ID>
+kruxos connect slack
 ```
 
-In v0.0.2 this will:
-
-1. Open a browser window for Slack OAuth authorization
-2. Start a local callback server on port 8081
-3. Exchange the authorization code for access tokens (PKCE flow)
-4. Store the encrypted tokens in the KruxOS vault
-5. Initialize the local read-replica database
-6. Start background sync (every 60 seconds by default)
+The full walkthrough — the app manifest (which requests exactly the scopes the
+proxy needs), the install steps, and where to find the `xoxb-` token — lives in
+[Connecting Services → Slack](connecting-services.md#slack). Run
+`kruxos connect status` to confirm the connection. Once connected, the
+capabilities below become available to agents.
 
 ## What Agents Can Do
 
@@ -104,13 +87,21 @@ async with KruxOS.connect() as agent:
     })
 ```
 
-## Rollback
+## Cancelling and approving writes
 
-Sent messages and replies can be rolled back (deleted) for up to **24 hours** after sending. Reactions can also be rolled back (removed). Use the rollback system through the Service Proxy dashboard or CLI:
+`slack.send` and `slack.reply` are held in the write buffer for 30 seconds
+before they execute. During that window you can act on them from the dashboard
+**Service Proxy** page (`/proxy`), which lists buffered writes by `write_id`
+and offers **cancel**, **retry**, and **discard** actions. Reactions execute
+immediately and aren't buffered.
+
+When batch protection escalates an operation to `approval_required`, it lands
+in the approval queue:
 
 ```bash
-kruxos approve list --service slack    # view recent writes
-kruxos approve rollback <write_id>     # undo a write
+kruxos approve list            # pending approval requests
+kruxos approve accept <id>     # let it through
+kruxos approve reject <id> --reason "…"
 ```
 
 ## Sync Configuration
@@ -125,23 +116,19 @@ The Slack read-replica syncs automatically:
 
 Messages in the local replica are typically less than 60 seconds behind live Slack.
 
-## Disconnecting (v0.0.2)
+## Disconnecting
 
-```bash
-kruxos disconnect slack
-```
-
-In v0.0.2 this will:
-
-1. Revoke the OAuth tokens
-2. Stop background sync
-3. Cancel any buffered (unsent) writes
-4. Delete the local read-replica database
-5. Remove tokens from the vault
+To revoke access, **uninstall the app from your Slack workspace** (Slack app
+settings → *Install App* → *Revoke*). That invalidates the `xoxb-` bot token,
+so the Service Proxy can no longer reach Slack. To swap in a different token,
+use the **Reconnect** action on the dashboard Service Proxy tile (or re-run
+`kruxos connect slack`), which replaces the stored token.
 
 ## Troubleshooting
 
-**"Slack service is not connected"**: The operator-facing `kruxos connect slack` subcommand and the dashboard Slack-OAuth flow ship in v0.0.2. Until then, seed the vault entry manually — see [Service Proxy Adapters](../developers/services.md) for the layout. Read operations require the sync to be active.
+**"Slack service is not connected"**: No Slack token is stored yet. Connect the
+service first — see [Connecting Services → Slack](connecting-services.md#slack).
+Read operations also require the sync to have run at least once.
 
 **"Slack write operation failed"**: Check that the bot has been invited to the target channel. Slack bots can only post to channels they've been added to.
 
