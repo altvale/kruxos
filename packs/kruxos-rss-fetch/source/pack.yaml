@@ -1,0 +1,14 @@
+name: kruxos-rss-fetch
+version: "1.0.0"
+description: "Fetch RSS and Atom feeds and return their entries as ready-to-use structured fields for AI agents"
+author: "KruxOS Examples"
+license: "MIT"
+homepage: "https://github.com/altvale/kruxos/tree/main/packs/kruxos-rss-fetch"
+
+capabilities:
+  - rss.fetch
+
+secrets: []
+
+dependencies: []
+kruxos_version: ">=0.0.2"

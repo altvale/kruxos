@@ -1,6 +1,6 @@
 {
   "registry_version": "1",
-  "updated_at": "2026-05-28T13:00:42Z",
+  "updated_at": "2026-06-04T08:00:00Z",
   "packs": [
     {
       "name": "kruxos-hashutils",
@@ -49,6 +49,22 @@
       "tags": ["weather", "network", "open-meteo", "third-party-api"],
       "security_review_required": false,
       "published_at": "2026-05-26T10:00:00Z"
+    },
+    {
+      "name": "kruxos-rss-fetch",
+      "version": "1.0.0",
+      "description": "Fetch RSS and Atom feeds and return their entries as ready-to-use structured fields for AI agents",
+      "author": "KruxOS Examples",
+      "license": "MIT",
+      "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-rss-fetch",
+      "tarball_url": "kruxos-rss-fetch/1.0.0/kruxos-rss-fetch-1.0.0.tar.gz",
+      "checksum_sha256": "ef11ee350a69e4cd5fd0c74e50b7ac66fd25332c13824df34935fc584dd0b90f",
+      "pack_type": "python",
+      "kruxos_version": ">=0.0.2",
+      "capabilities": ["rss.fetch"],
+      "tags": ["rss", "atom", "feed", "network"],
+      "security_review_required": false,
+      "published_at": "2026-06-04T08:00:00Z"
     }
   ]
 }
