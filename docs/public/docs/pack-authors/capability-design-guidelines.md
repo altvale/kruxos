@@ -8,7 +8,7 @@ A KruxOS capability is a typed tool an AI agent calls during task execution. The
 
 Every token spent on a capability's metadata is a token spent in the agent's context window. Every parse step the agent does on your output is a step that could fail. The goal of these guidelines is to make capabilities **maximally efficient for AI agents to use correctly on the first try**.
 
-The canonical reference is the **rss.fetch** worked example — shipped both as a template in the [Pack SDK](https://github.com/altvale/kruxos-pack-sdk) and as a community pack in the [pack registry](https://github.com/altvale/kruxos/tree/main/packs). Read its `definitions/rss.fetch.yaml` alongside this document — every rule below is exercised there.
+The canonical reference is the **rss.fetch** worked example — shipped both as a template in the [Pack SDK](https://github.com/altvale/kruxos-pack-sdk) (under `examples/rss-fetch/`) and as a community pack in the [pack registry](https://github.com/altvale/kruxos/tree/main/packs) (under `packs/kruxos-rss-fetch/`). Read its `definitions/rss.fetch.yaml` alongside this document — every rule below is exercised there.
 
 ---
 
