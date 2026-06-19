@@ -100,6 +100,7 @@ nav:
     - Approval Workflow: guides/approval-workflow.md
     - Policies: guides/policies.md
     - Monitoring: guides/monitoring.md
+    - Remote Access: guides/remote-access.md
     - Backup & Restore: guides/backup-restore.md
     - Updating KruxOS: guides/updating.md
     - Migration from OpenClaw: guides/migration-from-openclaw.md

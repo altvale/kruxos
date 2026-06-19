@@ -9,6 +9,7 @@ Day-to-day operations for running KruxOS.
 | [Approval Workflow](approval-workflow.md) | How operations that need human review work |
 | [Policies](policies.md) | Write and manage YAML policy rules |
 | [Monitoring](monitoring.md) | Health checks, metrics, and alerts |
+| [Remote Access](remote-access.md) | Reach the dashboard from outside the LAN with Tailscale, Cloudflare Tunnel, or Ngrok |
 | [Backup & Restore](backup-restore.md) | Protect and recover your data |
 | [Updating KruxOS](updating.md) | Apply updates with automatic rollback |
 | [Migration from OpenClaw](migration-from-openclaw.md) | Step-by-step guide for OpenClaw users |
