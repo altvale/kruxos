@@ -70,6 +70,21 @@ Agents:     2 registered, 1 active
 Uptime:     3h 42m
 ```
 
+## Alerts
+
+```bash
+kruxos alerts
+```
+
+Lists active alerts — those an agent raises with `alerts.send` and those the system's automatic monitors raise (high CPU / memory, disk pressure, audit-write failures, a service going down). Narrow the list by recency or severity:
+
+```bash
+kruxos alerts --last 24h           # alerts from the last 24 hours
+kruxos alerts --severity critical  # critical alerts only
+```
+
+The same alerts surface on the dashboard **Alerts** page (`/alerts`), where you can acknowledge them.
+
 ## Agent management
 
 ### Create an agent
