@@ -111,6 +111,7 @@ Proxy:      error (Gmail: sync failed 5m ago)
 
 **Solutions:**
 
+- **See the exact error:** the dashboard **Service Proxy** page (`/proxy`) shows each service's consecutive-failure count and last sync error, which usually names the cause (auth, quota, or network) instead of leaving the service on "Never / Unknown".
 - **OAuth token expired:** v0.0.1 stores Gmail OAuth tokens with auto-refresh in the vault; if a manual reconnect is needed, the operator-facing dashboard Gmail-OAuth flow / `kruxos connect gmail` CLI subcommand ships in **v0.0.2**. Until then, re-seed the vault entry manually (see [Service Proxy Adapters](../developers/services.md)).
 - **Google API quota:** Gmail API has rate limits. Wait and retry.
 - **Network issue:** Check internet connectivity from the KruxOS host.

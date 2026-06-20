@@ -154,11 +154,15 @@ Operator-facing health summary that auto-refreshes every 15 seconds:
 
 If the gateway is unreachable, the page now renders an explicit error banner reading "Can't reach gateway: …. Retrying …" with a **Retry now** button so a transient failure no longer presents as a silent blank page.
 
+### Alerts (`/alerts`)
+
+The operator's surface for alerts — both those an agent raises with `alerts.send` and those the system's automatic monitors raise (high CPU / memory, disk pressure, audit-write failures, a service going down). Each row shows the severity (info / warning / critical), the source agent or monitor, the message, the timestamp, and whether it has been acknowledged; **Acknowledge** marks an alert as handled. The sidebar **Alerts** entry carries a badge showing the number of pending (unacknowledged) alerts, and critical alerts also raise a banner across the top of every page — so an alert an agent sends now reaches the operator wherever they are in the dashboard rather than going unnoticed.
+
 ### Service Proxy (`/proxy`)
 
 Per-service sync status for the proxy backends (Gmail / Slack adapters), auto-refreshing every 10 seconds. The top of the page carries a five-cell **overview strip** — Total services, Synced, With errors, Buffered ops, **Dead letters**. The Dead-letters cell is now first-class at the top of the page rather than buried inside each per-service card.
 
-Below the overview strip, each service renders a card with the sync header, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending buffered writes (with countdown + **Cancel**) and dead-letter writes (with **Retry** / **Discard**). All three actions go through a confirm modal before posting to `/api/proxy/status`.
+Below the overview strip, each service renders a card with the sync header, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending buffered writes (with countdown + **Cancel**) and dead-letter writes (with **Retry** / **Discard**). When a service's sync is failing, the card surfaces how many consecutive failures it has seen and the last sync error (for example, a Slack `missing_scope`), so a misconfigured connection is diagnosable from the tile instead of showing a bare "Never / Unknown" with no explanation. All three write actions go through a confirm modal before posting to `/api/proxy/status`.
 
 ## Keyboard shortcuts
 
