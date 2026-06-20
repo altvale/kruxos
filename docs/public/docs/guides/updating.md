@@ -150,7 +150,7 @@ docker run -d --name kruxos --privileged \
 
 ## Update signing
 
-All updates are signed with Ed25519. The public key is embedded in the OS image. The update mechanism verifies the signature before writing to disk — unsigned or tampered updates are rejected.
+All updates are signed with Ed25519. The public key is embedded in the OS image. The update mechanism verifies the signature before writing to disk — unsigned or tampered updates are rejected. The signing key can be rotated transparently when needed: a new public key travels inside an update signed by the current key, so the appliance learns to trust it automatically and operators don't need to do anything.
 
 ## Next steps
 
