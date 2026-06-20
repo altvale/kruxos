@@ -156,7 +156,7 @@ If the gateway is unreachable, the page now renders an explicit error banner rea
 
 ### Alerts (`/alerts`)
 
-The operator's surface for alerts — both those an agent raises with `alerts.send` and those the system's automatic monitors raise (high CPU / memory, disk pressure, audit-write failures, a service going down). Each row shows the severity (info / warning / critical), the source agent or monitor, the message, the timestamp, and whether it has been acknowledged; **Acknowledge** marks an alert as handled. The sidebar **Alerts** entry carries a count badge, and critical alerts also raise a banner across the top of every page — so an alert an agent sends now reaches the operator wherever they are in the dashboard rather than going unnoticed.
+The operator's surface for alerts — both those an agent raises with `alerts.send` and those the system's automatic monitors raise (high CPU / memory, disk pressure, audit-write failures, a service going down). Each row shows the severity (info / warning / critical), the source agent or monitor, the message, the timestamp, and whether it has been acknowledged; **Acknowledge** marks an alert as handled. The sidebar **Alerts** entry carries a badge showing the number of pending (unacknowledged) alerts, and critical alerts also raise a banner across the top of every page — so an alert an agent sends now reaches the operator wherever they are in the dashboard rather than going unnoticed.
 
 ### Service Proxy (`/proxy`)
 
