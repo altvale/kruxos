@@ -8,19 +8,20 @@ Read, write, search, copy, move, delete, watch, and restore files and directorie
 |------------|:----------:|---------|
 | [`filesystem.read`](#filesystemread) | 🟢 Autonomous | Reads the contents of a file at the specified path and returns the content with metadata. |
 | [`filesystem.write`](#filesystemwrite) | 🔵 Notify | Writes content to a file at the specified path. |
+| [`filesystem.edit`](#filesystemedit) | 🔵 Notify | Find-and-replace in existing files (literal or regex) with an expected-match-count guard; one file or many (glob); returns per-file counts + a unified diff. |
 | [`filesystem.list`](#filesystemlist) | 🟢 Autonomous | Lists the contents of a directory, returning file and subdirectory entries with metadata. |
 | [`filesystem.delete`](#filesystemdelete) | 🟡 Approval Required | Soft-deletes a file or directory into per-principal trash (168 h User / 24 h Agent retention). |
 | [`filesystem.restore`](#filesystemrestore) | 🔵 Notify | Restores a soft-deleted file from trash back to its original path using sidecar metadata. |
 | [`filesystem.stat`](#filesystemstat) | 🟢 Autonomous | Returns metadata about a file or directory without reading its contents. |
-| [`filesystem.search`](#filesystemsearch) | 🟢 Autonomous | Recursively searches for files matching a glob pattern within a directory tree. |
-| [`filesystem.search_content`](#filesystemsearch_content) | 🟢 Autonomous | Searches file *contents* for a pattern (ranked, deduplicated, with context) — designed to answer "where is X?" in one call. |
+| [`filesystem.search`](#filesystemsearch) | 🟢 Autonomous | Recursively searches for files by glob/mtime/size — or, with `aggregate`, rolls up an inventory (count/size by extension, dir, or mtime day) and finds duplicate files (`include_hash` + `dedupe`) in one call. |
+| [`filesystem.search_content`](#filesystemsearch_content) | 🔵 Notify | Searches file *contents* for a pattern (ranked, with context) — or counts them: `total_only` (just the total) and `count_by` (a histogram by a regex capture group). |
 | [`filesystem.copy`](#filesystemcopy) | 🔵 Notify | Copies a file from one path to another. |
 | [`filesystem.move`](#filesystemmove) | 🔵 Notify | Moves (renames) a file from one path to another. |
 | [`filesystem.watch`](#filesystemwatch) | 🟢 Autonomous | Subscribes to filesystem change events in a directory. |
 | [`filesystem.append`](#filesystemappend) | 🔵 Notify | Appends content to the end of an existing file. |
 
 !!! info "Detailed schemas"
-    Per-capability input/output schemas for `filesystem.restore` and `filesystem.search_content` are emitted via MCP `tools/list` / JSON-RPC `capabilities.list`; the YAML source of truth lives at [`definitions/filesystem.yaml`](https://github.com/altvale/kruxos/blob/main/definitions/filesystem.yaml). Detailed per-capability sections below cover the capabilities present in v0.0.0 and earlier-drafted reference docs; the two newer entries are documented inline in the YAML.
+    Every capability's full input/output schema is emitted via MCP `tools/list` / JSON-RPC `capabilities.list`; the YAML source of truth lives at [`definitions/filesystem.yaml`](https://github.com/altvale/kruxos/blob/main/definitions/filesystem.yaml). The per-capability sections below cover the common surfaces; the newer aggregation modes (`filesystem.edit`, `search_content`'s `count_by`/`total_only`, and `search`'s `aggregate`/`include_hash`) are summarised here with the complete field lists in the YAML.
 
 ## `filesystem.read`
 
@@ -146,6 +147,74 @@ Use filesystem.copy to duplicate an existing file.
 - **check_quota**: Use system.disk_usage to check available space.
 
 **Tags:** `filesystem` `write` `modifying`
+
+---
+
+## `filesystem.edit`
+
+**Permission:** 🔵 Notify · **Version:** 1.0
+
+> Find-and-replace inside existing files — literal or regex — with a server-side expected-match-count guard, returning per-file counts plus a unified diff of only the changed hunks.
+
+Replaces the read-whole-file → reproduce-it-in-context → write-it-back loop (which sends the file through the context window twice) with a single call that carries only the find/replace strings up and only the changed hunks down.
+
+### When to use
+
+- Modify text that **already exists** — rename a symbol, bump a version, fix a config value, swap an import.
+- You provide what to match (`pattern`), what to replace it with (`replace`), and how many matches you **expect** (`expected_replacements`); KruxOS verifies the count and **fails closed — nothing is written — if reality disagrees**, so a too-broad pattern can't silently corrupt the file.
+- Use `filesystem.write` instead to create a file or replace its entire contents; `filesystem.append` to add to the end.
+
+### Key inputs
+
+| Input | Notes |
+|-------|-------|
+| `path` | The single file to edit, or — with `include_glob` — the directory root to edit across. |
+| `include_glob` | Edit many files: a glob under `path` (e.g. `**/*.toml`). Default exclusions + `.gitignore` are honoured unless `include_all=true`. |
+| `pattern` / `replace` | Literal by default; a regex with `${1}` backreferences when `regex=true`. |
+| `expected_replacements` **xor** `replace_all` | Set exactly one. The count guard fails closed on mismatch; `replace_all` skips it. |
+| `dry_run` | Preview the diff + per-file counts without writing. |
+
+### Outputs
+
+`applied` (`full`/`preview`/`partial`), `total_replacements`, `files_changed`, `per_file[]` (changed files only), `skipped[]` (binary/too-large), and `diff` — a unified diff that **is** the change record (no follow-up read needed to confirm). Full schema in the YAML.
+
+### Example
+
+```text
+# preview a version bump across a tree, then commit
+filesystem.edit(path='.', include_glob='**/*.toml', pattern='0.0.2', replace='0.0.3', dry_run=true)
+filesystem.edit(path='.', include_glob='**/*.toml', pattern='0.0.2', replace='0.0.3', replace_all=true)
+```
+
+**Tags:** `filesystem` `edit` `write` `modifying`
+
+---
+
+## `filesystem.search_content`
+
+**Permission:** 🔵 Notify · **Version:** 1.1
+
+> Search file *contents* for a pattern in one call: ranked, deduplicated matches with smart context — **or** an aggregate that returns the count instead of streaming the matches back.
+
+Pick the cheapest mode for your question (precedence: `total_only` > `count_by` > `files_only` > default):
+
+| Mode | Returns |
+|------|---------|
+| `total_only=true` | Just the integer match total — "are there any? how many?" |
+| `count_by='<group>'` | A histogram bucketed by a regex capture group (name, or 1-based index; **requires `regex=true`**). Log triage: `pattern='\b(ERROR\|WARN\|INFO)\b', regex=true, count_by='1'` → `{"ERROR":12,"INFO":900,"WARN":40}`. |
+| `files_only=true` | One `{path, match_count}` row per matching file. |
+| (default) | Ranked results with an `enclosing_snippet` so you usually need no follow-up read. |
+
+Aggregate modes short-circuit the ranking/snippet work, so they are strictly cheaper than paging the default results and tallying by hand. `count_by`/`total_only` count occurrences; the default/`files_only` mode counts matching lines. Full schema in the YAML.
+
+### Example
+
+```text
+# how many ERROR vs WARN vs INFO across the logs, in one call
+filesystem.search_content(path='logs/', pattern='(ERROR|WARN|INFO)', regex=true, count_by='1')
+```
+
+**Tags:** `filesystem` `search` `read` `code` `aggregate`
 
 ---
 
@@ -367,7 +436,26 @@ Use filesystem.read to get the content of a file once you find it.
 
 - **simplify**: Use a simpler pattern. Supported syntax: * (any), ** (recursive), ? (single char), [abc] (character class).
 
-**Tags:** `filesystem` `read` `safe` `search`
+### Inventory & dedupe (v1.2)
+
+Pass `aggregate` to roll the matched files up server-side instead of paging the per-file list and summing yourself — the per-file `matches` array is omitted and a compact table is returned:
+
+- `aggregate.group_by` — `extension` (lowercased; no-extension/dotfile → `<none>`), `dir` (top-level subdirectory under `path`; a file directly under it → `.`), `mtime-bucket` (calendar day, UTC), or `none` (a grand total).
+- `aggregate.metrics` — any of `count`, `total_size` (raw bytes). `sort_by` / `max_groups` order and bound the rows; an overflowing tail folds into an `<other>` row (`groups_truncated`).
+
+```text
+# total size by extension under /data, in one call
+filesystem.search(path='/data', pattern='**/*', aggregate={group_by:'extension'})
+```
+
+Pass `include_hash=true` with `aggregate.dedupe=true` to get **duplicate-file groups** directly — files sharing an identical SHA-256, sorted biggest-reclaim-first — so you never compare hashes by hand. Hashing reads file bodies, so secret/policy-protected files are counted in the size totals but **never hashed**; files over `max_hash_bytes` (10 MiB default, 256 MiB max) are flagged in `large_files_skipped` rather than silently missed.
+
+```text
+# find duplicate photos to reclaim space
+filesystem.search(path='/photos', pattern='**/*.jpg', include_hash=true, aggregate={dedupe:true})
+```
+
+**Tags:** `filesystem` `read` `safe` `search` `aggregate` `inventory` `dedupe`
 
 ---
 
