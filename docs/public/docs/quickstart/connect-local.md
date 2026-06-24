@@ -1,8 +1,24 @@
 # Connect Local Models
 
-By the end of this page, a locally-running model (via Ollama, vLLM, LM Studio, or llama.cpp) will be connected to KruxOS.
+By the end of this page, a locally-running model (via Ollama, vLLM, LM Studio, or llama.cpp) will drive KruxOS tools.
 
-KruxOS v0.0.1 ships local-provider support via the same OpenAI-compatible function-calling adapter — point any server that speaks that format at the appliance.
+This page covers the **SDK connector** direction: *your* code runs the model loop
+(here, calling Ollama directly) and connects to KruxOS to fetch and execute tools.
+KruxOS is the tool server; your script is the agent. The connector turns KruxOS
+capabilities into OpenAI-format function-calling tool definitions that any
+OpenAI-tool-calling-compatible client — including Ollama's — accepts.
+
+!!! note "Connector vs. model provider — two different things"
+    There are **two** ways to use a local model with KruxOS:
+
+    - **This page (SDK connector):** your script runs the model and calls KruxOS for
+      tools. Use the `kruxos` Python SDK's `LocalAdapter`.
+    - **Model provider:** KruxOS runs the agent itself and calls your local model as
+      its backend. For that, register an `ollama` provider — see
+      [Model Providers → Ollama](../guides/model-providers.md#ollama-local). Note the
+      provider talks to Ollama's **native** API (`http://host:11434`, no `/v1`);
+      OpenAI-compatible servers (vLLM, LM Studio, llama.cpp) register as an `openai`
+      provider with a `/v1` base URL.
 
 ## Prerequisites
 
@@ -44,8 +60,8 @@ async def main():
     )
 
     try:
-        # Create adapter — uses OpenAI-compatible format
-        adapter = OllamaAdapter(os)
+        # Create adapter — emits OpenAI-format tool definitions
+        adapter = LocalAdapter(os)
         tools = adapter.as_tools()
         print(f"Registered {len(tools)} tools")
 
@@ -80,11 +96,11 @@ Result: {"entries": [{"name": "hello.txt", "type": "file", "size": 21}]}
 
 ## Other OpenAI-compatible servers
 
-The Ollama adapter works with any server that speaks the OpenAI tool-calling format:
+`LocalAdapter` works with any server that speaks the OpenAI tool-calling format:
 
 - **vLLM**: `pip install vllm` and point to its endpoint
 - **llama.cpp server**: use `--api-like-oai` flag
-- **LM Studio**: enable the server and use the Ollama adapter
+- **LM Studio**: enable the server and use `LocalAdapter`
 
 The adapter produces standard OpenAI function-calling tool definitions, compatible with any server that accepts that format.
 
