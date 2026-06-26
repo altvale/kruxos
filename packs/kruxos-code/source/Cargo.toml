@@ -2,9 +2,12 @@
 # and is NOT part of any parent workspace. It depends on the pure applier in
 # ./applier (its own workspace root) as an ordinary path dependency.
 #
-# Build the shipped module:
-#   cargo build --release --target wasm32-wasip2
+# Build the shipped module (the RUSTFLAGS remap strips the build host's path out
+# of the artifact — env-derived so no literal /home path is ever committed):
+#   RUSTFLAGS="--remap-path-prefix=$HOME=/build" \
+#     cargo build --release --target wasm32-wasip2
 #   cp target/wasm32-wasip2/release/code.wasm ./code.wasm
+#   strings code.wasm | grep -c "$(printf %s "$HOME")"   # expect 0
 [workspace]
 # ./applier is its own workspace root (so it stays decoupled and testable
 # standalone, and links cleanly into the off-box native eval); exclude it here.
@@ -30,3 +33,11 @@ kruxos-code-applier = { path = "applier" }
 opt-level = "s"
 strip = true
 lto = true
+# Build-path hygiene for this PUBLISHED, open-source artifact: `strip = true`
+# removes symbols but NOT the rustc panic-location `&'static str` data literals
+# from third-party crates (serde_json, itoa), which would otherwise embed the
+# build host's cargo-registry path into code.wasm. The build command therefore
+# passes `--remap-path-prefix` via RUSTFLAGS (env-derived, so no literal host
+# path is committed) — see the rebuild command in this file's header. Once the
+# pinned toolchain's Cargo stabilizes the `trim-paths` profile option (it is
+# gated in cargo 1.94.0 here), prefer `trim-paths = "all"` over the RUSTFLAGS.

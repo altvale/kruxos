@@ -74,7 +74,7 @@
       "license": "Apache-2.0",
       "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-code",
       "tarball_url": "kruxos-code/1.0.0/kruxos-code-1.0.0.tar.gz",
-      "checksum_sha256": "e853806ee07de1db9d68411e90792736456d11d36cfa3fb2061b53ec231154ff",
+      "checksum_sha256": "d4351e4e2a4e381e23776dc8ba80869728bae4acda01841cb4960b5f21e1673d",
       "pack_type": "wasm",
       "kruxos_version": ">=0.0.3",
       "capabilities": ["code.edit", "code.multi_edit"],
