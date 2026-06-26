@@ -247,6 +247,44 @@ fn tier2_ambiguous_via_normalization() {
     assert!(nb.is_none());
 }
 
+#[test]
+fn tier2_overlapping_windows_are_ambiguous_not_silent_apply() {
+    // M1 regression: 3 consecutive identical-after-trim lines + a 2-line
+    // old_string produce OVERLAPPING Tier-2 windows (lines 0-1 and 1-2). The
+    // greedy de-overlap must NOT collapse them into a single silent apply — that
+    // is a wrong-occurrence edit. Without the fix this returns `applied`
+    // (match_tier=whitespace, replacements=1) editing only the first window.
+    let buf = "    log\n        log\n    log\n";
+    let old = "\tlog\n\tlog"; // tab-indented; Tier-1 misses on tab-vs-space.
+    let (nb, out) = apply(buf, &single(old, "X\nY"), &opts_single());
+    assert_eq!(outcome(&out), "ambiguous_match");
+    assert!(nb.is_none(), "ambiguous match must write nothing");
+    assert_eq!(out["match_count"], 2);
+    // The buffer is byte-identical — no silent first-window edit leaked through.
+}
+
+#[test]
+fn tier2_blank_old_does_not_match_phantom_trailing_segment() {
+    // M2 regression: a whitespace-only old line must NOT match the synthetic
+    // empty segment after a file's final newline when the file has no real blank
+    // line. Without the fix this returns `applied` (phantom EOF insert).
+    let buf = "abc\n";
+    let (nb, out) = apply(buf, &single("   \n", "X\n"), &opts_single());
+    assert_eq!(outcome(&out), "no_match");
+    assert!(nb.is_none());
+}
+
+#[test]
+fn tier2_blank_old_matches_only_the_real_blank_line() {
+    // M2 regression: a blank old line against a file ending in a newline matches
+    // ONLY the real interior blank line, not the phantom trailing segment.
+    // Without the fix the phantom inflates this to ambiguous_match (count 2).
+    let buf = "a\n\nb\n";
+    let (nb, out) = apply(buf, &single("   \n", "MID\n"), &opts_single());
+    assert_eq!(outcome(&out), "applied");
+    assert_eq!(nb.unwrap(), "a\nMID\nb\n");
+}
+
 // ------------------------------- EOL -------------------------------------
 
 #[test]

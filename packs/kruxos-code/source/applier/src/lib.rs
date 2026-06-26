@@ -446,8 +446,24 @@ fn resolve_matches(
     candidates: Vec<(usize, usize)>,
     tier: &'static str,
 ) -> EditStep {
-    // De-overlap candidates greedily (only relevant for replace_all over
-    // periodic patterns); preserves ascending order.
+    // Uniqueness for a non-replace_all edit is judged on the RAW candidate count.
+    // Tier-2 over a periodic pattern can yield OVERLAPPING windows (e.g. lines
+    // 0-1 and 1-2 of three identical-after-trim lines); de-overlapping them first
+    // would silently collapse genuine ambiguity into a single wrong-occurrence
+    // apply — exactly the corruption mode the matcher exists to refuse. So if more
+    // than one site matched and replace_all is not set, that is ambiguous_match
+    // (using the raw candidate starts for the line numbers).
+    if !replace_all && candidates.len() > 1 {
+        let count = candidates.len();
+        let mut lines: Vec<usize> = candidates.iter().map(|&(s, _)| line_of(cur, s)).collect();
+        let truncated = lines.len() > MATCH_LINES_CAP;
+        lines.truncate(MATCH_LINES_CAP);
+        return EditStep::Ambiguous { count, lines, truncated };
+    }
+
+    // De-overlap candidates greedily (only relevant for replace_all over periodic
+    // patterns, where overlapping windows must not be double-written); preserves
+    // ascending order. A single non-replace_all candidate passes through unchanged.
     let mut spans: Vec<(usize, usize)> = Vec::new();
     for (s, e) in candidates {
         if spans.last().map(|&(_, pe)| s >= pe).unwrap_or(true) {
@@ -455,13 +471,6 @@ fn resolve_matches(
         }
     }
     let count = spans.len();
-
-    if count > 1 && !replace_all {
-        let mut lines: Vec<usize> = spans.iter().map(|&(s, _)| line_of(cur, s)).collect();
-        let truncated = lines.len() > MATCH_LINES_CAP;
-        lines.truncate(MATCH_LINES_CAP);
-        return EditStep::Ambiguous { count, lines, truncated };
-    }
 
     if replace_all && count > MAX_REPLACEMENTS {
         return EditStep::ParseErr {
@@ -569,7 +578,19 @@ fn tier2_candidates(
         return None;
     }
     let buf_segs = split_segments(cur, eol);
-    if w > buf_segs.len() {
+    // split_segments emits a SYNTHETIC trailing empty segment after a file's
+    // final EOL ("a\n" -> ["a", ""]). That phantom maps to NO real line, so it is
+    // not an eligible match target: a whitespace-only / blank old line must never
+    // match the void after the last newline. Exclude it from the scannable window
+    // positions (n_real), while still using the real final EOL via last_buf_idx
+    // for trailing-line consumption.
+    let buf_ends_with_eol = cur.ends_with(eol);
+    let n_real = if buf_ends_with_eol {
+        buf_segs.len().saturating_sub(1)
+    } else {
+        buf_segs.len()
+    };
+    if w > n_real {
         return Some(Vec::new());
     }
     // If trimming old_t to whitespace-only-equal would match the raw bytes
@@ -577,7 +598,7 @@ fn tier2_candidates(
     // found zero, so we proceed.
     let mut spans = Vec::new();
     let last_buf_idx = buf_segs.len() - 1;
-    for j in 0..=(buf_segs.len() - w) {
+    for j in 0..=(n_real - w) {
         let all_match = (0..w).all(|k| buf_segs[j + k].content.trim() == old_segs[k].content.trim());
         if !all_match {
             continue;
