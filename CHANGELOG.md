@@ -8,6 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Per-release notes with more narrative detail live under
 [`docs/release-notes/`](docs/release-notes/).
 
+## [Unreleased]
+
+### Added
+
+**The `kruxos-code` pack — surgical code editing for agents**
+
+- New first-party, open-source capability pack `kruxos-code` (`packs/kruxos-code/`,
+  Apache-2.0) providing two code-editing capabilities for AI agents:
+  - **`code.edit`** — make a single literal-string edit to an existing text file:
+    find an exact `old_string` and replace it with `new_string`. The token cost is
+    proportional to the change, not the file size, and the agent physically cannot
+    drop the lines it did not touch. The match must be unique (or `replace_all` is
+    set), so an edit that would match more than one place — or none — returns a
+    structured `ambiguous_match` / `no_match` outcome with a concrete recovery hint
+    instead of silently making the wrong edit. Whitespace-only and line-ending
+    (LF/CRLF) differences are tolerated without collapsing meaningful blank lines.
+  - **`code.multi_edit`** — apply several `code.edit`-style edits to ONE file
+    atomically (all-or-nothing): either every edit applies and the file is written
+    once, or nothing changes.
+- `kruxos-code` is the first pack to run on the in-process WASM capability runtime,
+  so it executes at built-in speed inside the same per-agent sandbox as first-party
+  capabilities. Its file access is confined to the agent's mounted workspace and is
+  subject to the same secrets/write-protect rules as every other capability.
+- For safety the platform requires an agent to have read a file (fully, this
+  session) before editing it, and refuses an edit if the file changed since it was
+  read — so an edit can never be applied to stale content.
+
 ## [0.0.2] - 2026-06-08
 
 Second release. Still early beta — not for production use. The largest
