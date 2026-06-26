@@ -58,10 +58,10 @@
       description: "Present on every non-applied outcome. On a batch rejection it names the failing edit index and states that zero edits were applied — fix that edit and resubmit the COMPLETE edits[] array."
     - name: failed_edit_index
       type: Integer
-      description: "non-applied (batch reject) only: the 0-based index of the edit that caused the rejection."
+      description: "Present on a PER-EDIT batch rejection (one specific edit failed to apply: ambiguous_match / no_match / overlap parse_error). ABSENT on a batch-LEVEL parse_error (empty/oversized/non-array edits[]) and on stale_file — there is no single failing edit there, so branch on `outcome` and read the top-level `recovery` for those."
     - name: failed_edit
       type: Object
-      description: "non-applied (batch reject) only: detail for the failing edit — its index, outcome, recovery, and (for an ambiguous failure) match_count / match_lines / truncated. Line numbers only; never file content."
+      description: "Present on a PER-EDIT batch rejection only: detail for the failing edit — its index, outcome, recovery, and (for an ambiguous failure) match_count / match_lines / truncated. Line numbers only; never file content. ABSENT on a batch-level parse_error and on stale_file."
     - name: edits_applied
       type: Integer
       description: "applied only: number of edits that were applied (== edits_total on success)."
@@ -103,8 +103,8 @@
         - "Check outcome=='applied' and edits_applied==2; confirm via checksum."
     - description: "Recover from a rejected batch"
       steps:
-        - "code.multi_edit(...) returns outcome!='applied' with failed_edit_index and a recovery naming that index"
-        - "Inspect failed_edit, fix that one edit (e.g. add unique context for an ambiguous_match), then resubmit the COMPLETE edits[] array — do NOT drop the edits that would have matched."
+        - "code.multi_edit(...) returns a non-applied outcome. On a per-edit failure it carries failed_edit_index and a recovery naming that index; on a batch-level parse_error or stale_file there is no index — the top-level recovery alone applies."
+        - "Inspect failed_edit when present, fix that one edit (e.g. add unique context for an ambiguous_match), then resubmit the COMPLETE edits[] array — do NOT drop the edits that would have matched."
   errors:
     - type: PathOutOfScope
       description: "path resolves outside the agent's mounted workspace. Raised host-side before any read or write."

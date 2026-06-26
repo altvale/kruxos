@@ -83,6 +83,11 @@ resubmit the complete array.
 
 ## Install
 
+On a KruxOS appliance, `kruxos-code` ships **bundled** — it is seeded into the
+pack registry on first boot, so no install step is needed there. The command
+below is for boxes where it is not bundled (a dev checkout or a non-appliance
+run); on an appliance where it is already present it is an idempotent no-op.
+
 ```bash
 kruxos pack install kruxos-code
 ```
