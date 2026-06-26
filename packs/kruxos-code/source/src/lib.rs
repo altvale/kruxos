@@ -88,9 +88,28 @@ fn too_large_error() -> CapError {
     )
 }
 
-/// Defensive guard for structurally-impossible input (the registry validates
-/// required inputs before the guest is reached, so this is a belt-and-suspenders
-/// net, not part of the normal contract).
+/// Empty / blank `path` — the registry normally rejects a blank required string
+/// before the guest is reached, so this is a belt-and-suspenders net. It
+/// synthesizes a DECLARED `FileNotFound` error_type (enumerated in both
+/// definitions' `errors[]`, so its static recovery line renders to the model)
+/// rather than an undeclared `InvalidInput` that would arrive with no recovery.
+fn empty_path_error() -> CapError {
+    cap_error(
+        "FileNotFound",
+        "No file exists at the given path (path was empty or missing)",
+        "The 'path' argument was empty or missing. Supply a non-empty workspace path to an existing UTF-8 text file.",
+        vec![RecoveryAction {
+            action: "abort".to_string(),
+            description: "Supply a non-empty path to an existing file; create it with filesystem.write if it does not exist.".to_string(),
+            capability: Some("filesystem.write".to_string()),
+            inputs_json: None,
+        }],
+    )
+}
+
+/// Defensive guard for a structurally-impossible capability name (the op is
+/// always registry-routed to "code.edit"/"code.multi_edit", so this branch is
+/// unreachable — a belt-and-suspenders net, not part of the normal contract).
 fn invalid_input(msg: &str) -> CapError {
     cap_error("InvalidInput", msg, msg, vec![])
 }
@@ -104,7 +123,7 @@ impl Capabilities for Pack {
 
         let path = match str_field(&v, "path") {
             Some(p) if !p.is_empty() => p,
-            _ => return Err(invalid_input("missing or empty 'path'")),
+            _ => return Err(empty_path_error()),
         };
 
         // Normalize the request into the applier's (edits-array, multi) shape.
