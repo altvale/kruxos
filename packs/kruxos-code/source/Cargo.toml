@@ -1,0 +1,32 @@
+# Standalone workspace — the kruxos-code WASM pack guest. Targets wasm32-wasip2
+# and is NOT part of any parent workspace. It depends on the pure applier in
+# ./applier (its own workspace root) as an ordinary path dependency.
+#
+# Build the shipped module:
+#   cargo build --release --target wasm32-wasip2
+#   cp target/wasm32-wasip2/release/code.wasm ./code.wasm
+[workspace]
+# ./applier is its own workspace root (so it stays decoupled and testable
+# standalone, and links cleanly into the off-box native eval); exclude it here.
+exclude = ["applier"]
+
+[package]
+name = "kruxos-code-guest"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[lib]
+name = "code"
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = "0.58"
+serde_json = "1"
+kruxos-code-applier = { path = "applier" }
+
+[profile.release]
+opt-level = "s"
+strip = true
+lto = true

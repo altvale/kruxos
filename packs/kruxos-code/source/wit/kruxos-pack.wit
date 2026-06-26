@@ -1,0 +1,110 @@
+// KruxOS in-process WASM pack ABI (Component Model + WIT). The `pack` world a
+// Rust/any-lang pack compiles to (wasm32-wasip2). Capability payloads stay JSON
+// so the registry's value contract is preserved verbatim; at the registry layer
+// a WASM pack is indistinguishable from a built-in capability handler.
+//
+// This is a comment-sanitized copy of the host's frozen ABI, vendored into the
+// pack source so the guest's `generate!` path is repo-relative. The type and
+// function signatures below are byte-identical to the host's frozen world.
+
+package kruxos:pack@0.1.0;
+
+/// Shared types. `cap-error` maps 1:1 onto the registry error type — every
+/// field round-trips losslessly. Arbitrary-JSON fields (context, recovery
+/// inputs) are carried as JSON strings since WIT has no `any` type; the host
+/// parses them back to a JSON value.
+interface types {
+    /// A single suggested recovery step the agent can take.
+    record recovery-action {
+        action: string,                       // machine-readable action name
+        description: string,                  // what this recovery step does
+        capability: option<string>,           // capability to call for recovery
+        inputs-json: option<string>,          // suggested inputs (JSON-encoded value)
+    }
+
+    /// The structured error a capability can return. The host's error kinds all
+    /// flatten into this via `error-type` (PascalCase code, e.g. "PathOutOfScope")
+    /// + `context-json`, so a pack can represent any of them.
+    record cap-error {
+        error-type: string,                   // machine-readable code
+        description: string,                  // human-readable
+        agent-description: string,            // agent-tailored, concrete/literal
+        recovery-actions: list<recovery-action>,
+        retryable: bool,
+        retry-after-secs: option<u64>,        // retry-after as whole seconds
+        context-json: option<string>,         // additional structured context (JSON-encoded)
+    }
+
+    /// Result of `host-fs.stat`.
+    record file-stat {
+        is-dir: bool,
+        size: u64,
+        modified-secs: u64,                   // unix mtime seconds
+    }
+
+    enum log-level { trace, debug, info, warn, error }
+}
+
+/// Capability-gated filesystem I/O. The guest has NO WASI preopens and NO `fd_*`
+/// filesystem — these host functions are the ONLY way to touch the disk, and EVERY
+/// one re-enters the host's scope/secrets validation under the live agent's
+/// principal + mount targets. So a pack call is confined to the active Agent's
+/// mounts with no pack-code change; the vault session path is structurally
+/// outside every allowed root.
+interface host-fs {
+    use types.{cap-error, file-stat};
+    read-file: func(path: string) -> result<list<u8>, cap-error>;
+    write-file: func(path: string, data: list<u8>) -> result<_, cap-error>;     // atomic temp+rename, host-side
+    list-dir: func(path: string) -> result<list<string>, cap-error>;
+    stat: func(path: string) -> result<file-stat, cap-error>;
+    exists: func(path: string) -> result<bool, cap-error>;
+    create-dir: func(path: string) -> result<_, cap-error>;                      // mkdir -p, scope-checked
+    remove: func(path: string) -> result<_, cap-error>;                          // HARD scope-checked unlink (NOT trash; recoverable deletes use the reused filesystem.delete capability)
+}
+
+/// Capability-gated network egress. Re-enters the same egress DOMAIN allowlist the
+/// built-in `network.http_request` uses — exfil to a non-allowlisted domain is
+/// refused host-side before DNS. No raw sockets are exposed.
+/// NOTE: this gives the domain allowlist ONLY — NOT the per-method policy tier
+/// (the GET=autonomous/non-GET=notify split) which the policy evaluator applies at
+/// the top-level invoke() boundary, not to a pack's inner host-net call. A pack
+/// needing method-tiered egress uses the reused `network.http_request` capability
+/// instead of host-net.
+interface host-net {
+    use types.{cap-error};
+    record http-header { name: string, value: string }
+    record http-response { status: u16, headers: list<http-header>, body: list<u8> }
+    http-request: func(
+        method: string,                       // GET/POST/... — egress-allowlist-gated only
+        url: string,
+        headers: list<http-header>,
+        body: option<list<u8>>,
+    ) -> result<http-response, cap-error>;
+}
+
+/// Structured logging back to the host tracing subscriber (never stdout/stderr —
+/// the guest has no stdio). INFALLIBLE by design (void return, the only host
+/// import that is not result<_,cap-error>): a denied/dropped log must never fail
+/// the capability. Do not "fix" it into a result — that is an ABI change.
+interface host-log {
+    use types.{log-level};
+    log: func(level: log-level, message: string);
+}
+
+/// The capability entry point the pack exports. `inputs-json` is the registry-coerced,
+/// schema-validated input (a JSON value, serialized); the Ok string is the
+/// capability result (a JSON-encoded value); the Err is a `cap-error`.
+/// Input validation + the RPC timeout already ran before this is called —
+/// inherited for free, exactly like a subprocess pack.
+interface capabilities {
+    use types.{cap-error};
+    invoke: func(capability: string, inputs-json: string) -> result<string, cap-error>;
+}
+
+/// The world a KruxOS WASM pack compiles to.
+world pack {
+    import host-fs;
+    import host-net;
+    import host-log;
+    export capabilities;
+}
