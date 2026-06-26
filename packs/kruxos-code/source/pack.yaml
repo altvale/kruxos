@@ -1,0 +1,28 @@
+name: kruxos-code
+version: "1.0.0"
+description: "Surgical literal-string code editing for AI agents — apply minimal old_string->new_string changes with a structured ambiguity/no-match signal, instead of rewriting whole files or shelling out to sed."
+author: "KruxOS"
+license: "Apache-2.0"
+homepage: "https://github.com/altvale/kruxos/tree/main/packs/kruxos-code"
+
+capabilities:
+  - code.edit
+  - code.multi_edit
+
+secrets: []
+
+dependencies: []
+kruxos_version: ">=0.0.3"
+
+# In-process WASM runtime (Component Model). The authoritative loader switch is
+# this runtime.kind; the registry index's pack_type is display/audit metadata.
+runtime:
+  kind: wasm
+  module: code.wasm
+  abi: "kruxos:pack@0.1.0"
+  # Audited against the compiled module (wasm-tools component wit): the guest
+  # imports only kruxos:pack/host-fs (host-net + host-log are eliminated as
+  # unused). A module importing an interface absent from this list is rejected
+  # at load.
+  host_imports:
+    - host-fs
