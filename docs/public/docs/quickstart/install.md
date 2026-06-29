@@ -7,7 +7,7 @@ KruxOS v0.0.1 ships as a self-hosted appliance with two distribution paths:
 - **Docker image** on Docker Hub (`altvale/kruxos`) — fastest to try out
 - **VM image** as `.img.gz` / `.qcow2` / `.vmdk` / Vagrant `.box` for x86_64 and aarch64 — full sandbox + Code Sessions
 
-Either path drops you into the same first-boot dashboard wizard at `http://<host>:7800`.
+Either path drops you into the same first-boot dashboard wizard at `https://<host>:7800`. The dashboard serves HTTPS by default; a plain `http://<host>:7800` request is permanently redirected (`308`) to the HTTPS URL on the same port, so accept the self-signed certificate on first visit.
 
 ## Option 1: Docker (recommended for trying out)
 
@@ -140,6 +140,25 @@ qemu-system-x86_64 \
 3. Attach the `.vmdk` as the boot disk
 4. Forward ports 7700, 7701, 7800
 5. Start the VM
+
+!!! tip "Faster local inference in VirtualBox (AVX2)"
+    KruxOS also ships a `kruxos-x86_64.ova` for VirtualBox's **File → Import
+    Appliance** one-click path. The OVA opts the guest into the host CPU's real
+    vector features (AVX2 and the AVX/FMA features it builds on), which lets the
+    appliance's built-in local inference engine pick its fastest CPU code path
+    instead of falling back to the slow baseline. Features are only ever exposed
+    when the host CPU actually has them, so the import is safe on older hardware.
+    Two host requirements for AVX2 to reach the guest:
+
+    - **VirtualBox 7.1.4 or newer** — earlier releases can't pass AVX2 through to
+      the guest at all.
+    - **On Windows with Hyper-V enabled** (this includes any machine running
+      WSL2), VirtualBox masks the host's CPU features unless you're on
+      **VirtualBox 7.1.12 or newer**. On such a host, either disable Hyper-V or
+      use VirtualBox 7.1.12+.
+
+    After booting, confirm the feature reached the guest with
+    `grep avx2 /proc/cpuinfo` inside the appliance.
 
 ### Boot via Vagrant (x86_64)
 

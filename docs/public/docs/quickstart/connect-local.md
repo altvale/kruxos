@@ -104,6 +104,38 @@ Result: {"entries": [{"name": "hello.txt", "type": "file", "size": 21}]}
 
 The adapter produces standard OpenAI function-calling tool definitions, compatible with any server that accepts that format.
 
+## Tuning the on-appliance inference engine
+
+Separately from the connector and provider paths above, a KruxOS appliance can run
+its **own** built-in inference engine — a bundled `llama.cpp` server — so dashboard
+Chat and other features work with no external model service. When an operator has
+enabled the engine, its runtime behaviour is tunable through an optional environment
+file at `/data/kruxos/inference.env`.
+
+A documented template ships read-only at `/opt/kruxos/inference/inference.env.example`.
+Copy it, set the keys you want, then restart the engine:
+
+```bash
+cp /opt/kruxos/inference/inference.env.example /data/kruxos/inference.env
+vi /data/kruxos/inference.env
+systemctl restart kruxos-inference
+```
+
+Every key is optional — an unset or empty key falls back to the baked default shown
+in brackets:
+
+| Key | Default | Effect |
+|-----|---------|--------|
+| `KRUXOS_INFERENCE_PARALLEL` | `1` | Concurrent inference slots. The single-slot default avoids a multi-vCPU interrupt storm on small VMs; raise it only if you genuinely serve concurrent requests. |
+| `KRUXOS_INFERENCE_THREADS` | auto | Worker threads. Unset auto-detects the host's physical cores (hyperthread siblings excluded); set a number (e.g. `2`) to be a quieter neighbour on a shared VM. Fewer threads is slower, not faster. |
+| `KRUXOS_INFERENCE_POLL` | `50` | Threadpool busy-poll level, 0–100. `0` sleeps at the work barrier (lowest idle CPU); `100` spins a whole core. |
+| `KRUXOS_INFERENCE_EXTRA_ARGS` | _(none)_ | Extra raw `llama-server` flags, appended verbatim and split on spaces — e.g. `--ctx-size 8192 --no-warmup`. A bad flag stops the engine from starting. |
+
+!!! tip "If a chat turn hangs or the appliance gets laggy"
+    Apply the levers in order, restarting after each: first set
+    `KRUXOS_INFERENCE_THREADS=2`, then (if it still struggles) `KRUXOS_INFERENCE_POLL=100`.
+    Re-test a chat turn and watch the softirq (`%si`) row in `top`.
+
 ## Next steps
 
 - [Web Dashboard](dashboard.md) — monitor agent activity
