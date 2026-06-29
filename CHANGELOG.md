@@ -17,6 +17,13 @@ Per-release notes with more narrative detail live under
   security trade-offs (expose only the dashboard port; keep the loopback
   User API private; add a tunnel-level identity gate), cost, and
   troubleshooting.
+- Local inference & VirtualBox AVX2 docs — how to tune the appliance's
+  built-in `llama.cpp` engine via `/data/kruxos/inference.env` (parallel
+  slots, threads, poll, extra args), and how to import the
+  `kruxos-x86_64.ova` so VirtualBox passes host AVX2 through to the guest
+  (needs VirtualBox 7.1.4+; 7.1.12+ on Windows hosts with Hyper-V/WSL2).
+  Also clarified that a plain `http://` request to the dashboard port is
+  permanently redirected (`308`) to `https://`.
 
 ### Fixed
 
