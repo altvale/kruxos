@@ -6,12 +6,13 @@ payload, or seed a state file — without leaving the dashboard.
 
 ## Why this exists
 
-The KruxOS appliance ships a deliberately minimal base image: no SSH daemon,
-no hypervisor guest tools, no general-purpose shell access for agents. That's
-good for the security posture, but it means "just `scp` the file over" isn't
-available out of the box. The first-party file-transfer surface below gives
-operators a supported path that lands files in a known location with auditing
-and size limits, instead of relying on ad-hoc workarounds.
+The KruxOS appliance ships a deliberately minimal base image: no hypervisor
+guest tools and no general-purpose shell access for agents, with the SSH server
+**disabled by default**. That's good for the security posture, but it means
+"just `scp` the file over" isn't available until you opt in. The first-party
+file-transfer surfaces below give operators a supported path that lands files in
+a known location with auditing and size limits — and once SSH is enabled,
+`scp` / SFTP becomes a first-party path too (see the SSH section below).
 
 ## Surfaces
 
@@ -123,11 +124,28 @@ Caveats: markdown indentation can break heredoc terminators; serial-console
 flow-control drops characters on large pastes; not viable for anything over a
 few KB.
 
-### SSH (operator-supplied)
+### SSH (opt-in)
 
-`sshd` is not bundled in the base appliance. A determined operator can rebuild
-the image with `openssh` / `dropbear` added and an `sshd` service unit, but
-that's outside the supported path and not documented further here.
+As of v0.0.3 the appliance bundles an OpenSSH server, but it is **opt-in and
+disabled by default** — nothing listens and `tcp/22` stays firewalled until you
+enable it from **Settings › System › SSH access**. Enabling requires at least
+one authorized public key; KruxOS then starts the SSH service and opens the
+firewall rule, and removes that rule again when you disable it.
+
+The posture is locked down: **root login, public-key only — password
+authentication is never enabled**, so the appliance passphrase is never exposed
+over the network. Host keys and your `authorized_keys` live on the data
+partition and survive A/B updates. SFTP and `scp` run over the same connection,
+so once SSH is on it is also a first-party file-transfer path:
+
+```bash
+# copy a local pack tarball onto the appliance over SSH
+scp ./my-pack.tar.gz root@<appliance>:/data/kruxos/uploads/
+```
+
+Keep SSH on the LAN or behind a VPN — the management plane is not meant for the
+public internet. Removing your last authorized key automatically disables the
+service and closes `tcp/22` again.
 
 ## Security model
 
