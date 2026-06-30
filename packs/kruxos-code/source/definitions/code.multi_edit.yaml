@@ -22,8 +22,13 @@
   when_not_to_use: |
     Do NOT use code.multi_edit for a single edit — use code.edit instead.
 
-    Do NOT use it across MULTIPLE files — it is single-file. Call it once per
-    file (each call is independently atomic).
+    Do NOT use it across MULTIPLE files — it is single-file, and a cross-file
+    refactor is sequential-with-rollback, NOT atomic. To rename across a codebase:
+    rename the file with filesystem.move, locate the call sites with code.symbols
+    or filesystem.search_content, then call code.multi_edit ONCE PER FILE (each
+    call is independently atomic) — never a blind cross-file replace. If a later
+    file fails partway, stop and have the operator /rewind to the EARLIEST
+    checkpoint of the changed set rather than leaving a half-renamed tree.
 
     Do NOT use it to CREATE or whole-file-rewrite a file, or on a binary / >16 MiB
     file — use filesystem.write instead.
