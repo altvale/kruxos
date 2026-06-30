@@ -22,8 +22,10 @@ Per-release notes with more narrative detail live under
   by default and enabled from **Settings › System › SSH access**. Root,
   public-key only (password authentication is never enabled); `tcp/22` stays
   firewalled until you add an authorized key, and closes again when the last
-  key is removed. SFTP and `scp` ride the same channel as a first-party
-  file-transfer path. Documented in the File Transfer guide and the security
+  key is removed. Once enabled, SSH stays on across reboot until you disable
+  it. SFTP and `scp` ride the same channel as a first-party file-transfer
+  path. The File Transfer guide now walks through generating, pasting, and
+  fingerprint-verifying an SSH key; documented there and in the security
   whitepaper.
 
 ### Fixed
