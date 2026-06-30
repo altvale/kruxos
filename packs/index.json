@@ -1,6 +1,6 @@
 {
   "registry_version": "1",
-  "updated_at": "2026-06-04T08:00:00Z",
+  "updated_at": "2026-06-26T00:00:00Z",
   "packs": [
     {
       "name": "kruxos-hashutils",
@@ -65,6 +65,22 @@
       "tags": ["rss", "atom", "feed", "network"],
       "security_review_required": false,
       "published_at": "2026-06-04T08:00:00Z"
+    },
+    {
+      "name": "kruxos-code",
+      "version": "1.0.0",
+      "description": "Surgical literal-string code editing for AI agents — apply minimal old_string->new_string changes with a structured ambiguity/no-match signal, instead of rewriting whole files or shelling out to sed",
+      "author": "KruxOS",
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/altvale/kruxos/tree/main/packs/kruxos-code",
+      "tarball_url": "kruxos-code/1.0.0/kruxos-code-1.0.0.tar.gz",
+      "checksum_sha256": "d4351e4e2a4e381e23776dc8ba80869728bae4acda01841cb4960b5f21e1673d",
+      "pack_type": "wasm",
+      "kruxos_version": ">=0.0.3",
+      "capabilities": ["code.edit", "code.multi_edit"],
+      "tags": ["code", "edit", "file", "refactor"],
+      "security_review_required": false,
+      "published_at": "2026-06-26T00:00:00Z"
     }
   ]
 }

@@ -1,0 +1,4 @@
+# Build artifacts — never committed. The prebuilt code.wasm under source/ IS
+# committed (it is the shipped pack module); everything else under target/ is not.
+target/
+**/Cargo.lock

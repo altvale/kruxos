@@ -1,0 +1,145 @@
+- name: code.multi_edit
+  version: "1.0"
+  purpose: "Apply several surgical literal-string edits to ONE existing text file in a single atomic, all-or-nothing operation. Each edit is an exact old_string->new_string replacement; the edits are applied sequentially over one evolving buffer and committed once."
+  when_to_use: |
+    Use code.multi_edit when you need to make TWO OR MORE edits to the SAME file
+    in one step. The edits are applied sequentially over one evolving buffer (a
+    later edit sees the text earlier edits produced) and committed with a single
+    atomic write. It is all-or-nothing: if ANY edit fails to apply cleanly
+    (ambiguous, no-match, malformed, or overlapping an earlier edit's output),
+    the WHOLE batch is rejected and ZERO bytes are written — you never get a
+    half-applied file.
+
+    Each edit object is { old_string, new_string, replace_all? } with the SAME
+    literal-string, uniqueness-checked semantics as code.edit: no regex, no
+    escaping, structured ambiguity/no-match signals.
+
+    Prefer code.multi_edit over repeated code.edit calls for multi-edit changes
+    to one file: it is atomic (no half-applied state) and reads/writes the file
+    once. Prefer it over rewriting the file with filesystem.write: it costs
+    tokens proportional to the changes, not the whole file, and cannot drop
+    untouched lines.
+  when_not_to_use: |
+    Do NOT use code.multi_edit for a single edit — use code.edit instead.
+
+    Do NOT use it across MULTIPLE files — it is single-file, and a cross-file
+    refactor is sequential-with-rollback, NOT atomic. To rename across a codebase:
+    rename the file with filesystem.move, locate the call sites with code.symbols
+    or filesystem.search_content, then call code.multi_edit ONCE PER FILE (each
+    call is independently atomic) — never a blind cross-file replace. If a later
+    file fails partway, stop and have the operator /rewind to the EARLIEST
+    checkpoint of the changed set rather than leaving a half-renamed tree.
+
+    Do NOT use it to CREATE or whole-file-rewrite a file, or on a binary / >16 MiB
+    file — use filesystem.write instead.
+
+    Do NOT guess old_string values. If unsure, call filesystem.read first and
+    copy each old_string verbatim.
+
+    NEVER batch edits by shelling out to sed/awk/perl -i (Linux/macOS) or
+    PowerShell (Get-Content)-replace (Windows) via process.run — those are not
+    atomic, mangle metacharacters and quoting, differ per OS, and give no
+    ambiguity signal. code.multi_edit is literal-string, atomic, and identical on
+    every OS.
+  inputs:
+    - name: path
+      type: String
+      required: true
+      description: "Absolute or workspace-relative path to the single UTF-8 text file to edit. Must resolve inside the agent's mounted workspace and already exist."
+    - name: edits
+      type: Array
+      required: true
+      description: "Ordered list of edit objects, each { old_string: String (required), new_string: String (required, \"\" is a valid DELETE), replace_all: Boolean (optional, default false) }. Applied sequentially over one evolving buffer; at most 50 edits per batch; each old_string/new_string is max 1 MiB. A later edit that matches inside the bytes an earlier edit wrote is rejected (reorder or add context)."
+    - name: expected_sha
+      type: String
+      required: false
+      description: "Optional whole-file SHA-256 (lowercase hex) the file must currently hash to. If it differs, the batch is refused with outcome=stale_file and nothing is written. Usually supplied automatically by the harness."
+  outputs:
+    - name: outcome
+      type: String
+      description: "Discriminator — one of: applied | ambiguous_match | no_match | parse_error | stale_file. Only `applied` changed the file; on any non-applied outcome the WHOLE batch was rejected and ZERO bytes were written."
+    - name: recovery
+      type: String
+      description: "Present on every non-applied outcome. On a batch rejection it names the failing edit index and states that zero edits were applied — fix that edit and resubmit the COMPLETE edits[] array."
+    - name: failed_edit_index
+      type: Integer
+      description: "Present on a PER-EDIT batch rejection (one specific edit failed to apply: ambiguous_match / no_match / overlap parse_error). ABSENT on a batch-LEVEL parse_error (empty/oversized/non-array edits[]) and on stale_file — there is no single failing edit there, so branch on `outcome` and read the top-level `recovery` for those."
+    - name: failed_edit
+      type: Object
+      description: "Present on a PER-EDIT batch rejection only: detail for the failing edit — its index, outcome, recovery, and (for an ambiguous failure) match_count / match_lines / truncated. Line numbers only; never file content. ABSENT on a batch-level parse_error and on stale_file."
+    - name: edits_applied
+      type: Integer
+      description: "applied only: number of edits that were applied (== edits_total on success)."
+    - name: edits_total
+      type: Integer
+      description: "applied only: number of edits in the batch."
+    - name: replacements
+      type: Integer
+      description: "applied only: total occurrences replaced across all edits."
+    - name: per_edit
+      type: Array
+      description: "applied only: one entry per edit — { index, outcome:'applied', replacements, match_tier } — so you can confirm each edit landed without re-reading the file."
+    - name: bytes_before
+      type: Integer
+      description: "applied only: file size in bytes before the batch."
+    - name: bytes_after
+      type: Integer
+      description: "applied only: file size in bytes after the batch."
+    - name: lines_added
+      type: Integer
+      description: "applied only: total newline count inserted across all edits."
+    - name: lines_removed
+      type: Integer
+      description: "applied only: total newline count removed across all edits."
+    - name: checksum
+      type: String
+      description: "applied only: SHA-256 (lowercase hex) of the file AFTER the batch — confirm the write without re-reading."
+    - name: path
+      type: String
+      description: "applied only: the resolved path that was written. ABSENT on every non-applied outcome, so a rejected batch records no phantom file change."
+  side_effects:
+    - description: "Modifies the file at path in place exactly once (single atomic temp+rename) if and only if every edit applied. The prior content is snapshotted by the harness before the write."
+      reversible: true
+  common_patterns:
+    - description: "Rename a symbol at two known sites in one file"
+      steps:
+        - "filesystem.read(path='src/lib.rs')"
+        - "code.multi_edit(path='src/lib.rs', edits=[{old_string:'fn old_name(', new_string:'fn new_name('}, {old_string:'old_name()', new_string:'new_name()'}])"
+        - "Check outcome=='applied' and edits_applied==2; confirm via checksum."
+    - description: "Recover from a rejected batch"
+      steps:
+        - "code.multi_edit(...) returns a non-applied outcome. On a per-edit failure it carries failed_edit_index and a recovery naming that index; on a batch-level parse_error or stale_file there is no index — the top-level recovery alone applies."
+        - "Inspect failed_edit when present, fix that one edit (e.g. add unique context for an ambiguous_match), then resubmit the COMPLETE edits[] array — do NOT drop the edits that would have matched."
+  errors:
+    - type: PathOutOfScope
+      description: "path resolves outside the agent's mounted workspace. Raised host-side before any read or write."
+      recovery:
+        - action: abort
+          description: "Correct the path to one inside a mounted directory; do not retry the same path."
+    - type: PathDenied
+      description: "path is denied by the secrets denylist (e.g. a vault or credentials path). The file is never read or written."
+      recovery:
+        - action: abort
+          description: "This path is protected (secrets/vault). Do not retry — choose a different file."
+    - type: PathWriteProtected
+      description: "path is write-protected (e.g. a policy or system-config file)."
+      recovery:
+        - action: abort
+          description: "This file is write-protected and cannot be edited. Do not retry the write."
+    - type: FileNotFound
+      description: "No file exists at path."
+      recovery:
+        - action: abort
+          description: "Create the file with filesystem.write, or correct the path. code.multi_edit only edits existing files."
+    - type: ResourceExhausted
+      description: "The file exceeds the 16 MiB edit ceiling and cannot be loaded for editing."
+      recovery:
+        - action: abort
+          description: "Use filesystem.write for files above 16 MiB; code.multi_edit cannot load them."
+    - type: EncodingError
+      description: "The target is binary or not valid UTF-8 text. code.multi_edit operates on UTF-8 text only."
+      recovery:
+        - action: abort
+          description: "Use filesystem.write to replace a binary/non-text file wholesale; do not retry with code.multi_edit."
+  permission_tier: autonomous
+  tags: ["code", "edit", "file", "refactor", "atomic"]

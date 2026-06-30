@@ -1,0 +1,154 @@
+- name: code.edit
+  version: "1.0"
+  purpose: "Make a single surgical edit to one existing text file: find an exact literal old_string and replace it with new_string. Token cost is proportional to the change, not the file."
+  when_to_use: |
+    Use code.edit to change a small, known region of an EXISTING text file you
+    have already read with filesystem.read. You emit only old_string (the exact
+    text to replace) and new_string (the replacement), so it costs tokens
+    proportional to the CHANGE — not the whole file — and it physically cannot
+    drop or alter the lines you did not touch.
+
+    old_string is a LITERAL string: every character (including whitespace and
+    newlines) is matched verbatim, with NO regex and NO escaping. It must match
+    exactly one place in the file, so you get a structured ambiguous_match /
+    no_match outcome instead of a silent wrong edit. Copy old_string verbatim
+    from a prior filesystem.read.
+
+    Prefer code.edit over filesystem.write for in-place changes: filesystem.write
+    re-emits the entire file (O(file) tokens) and risks silently dropping
+    untouched lines. Prefer code.edit over running sed/awk/perl/PowerShell via
+    process.run: it is literal-string (no escaping), identical on every OS, and
+    returns a real ambiguity signal those tools never give.
+  when_not_to_use: |
+    Do NOT use code.edit to CREATE a new file or rewrite a whole file — use
+    filesystem.write instead.
+
+    Do NOT use code.edit on a binary or non-UTF-8 file, or a file larger than
+    16 MiB — use filesystem.write instead.
+
+    Do NOT make two or more edits to the SAME file with repeated code.edit calls
+    — use code.multi_edit instead, which applies them atomically (all-or-nothing).
+
+    Do NOT guess old_string. If you are unsure of the exact text, call
+    filesystem.read first and copy it verbatim.
+
+    NEVER edit code by shelling out to sed, awk, perl -i, ed, or patch (Linux/
+    macOS), or PowerShell Set-Content / (Get-Content)-replace / Out-File
+    (Windows), via process.run. Those silently make zero or every-line
+    substitutions, mangle regex metacharacters and quoting, behave differently
+    per OS, and give no ambiguity signal. code.edit is literal-string, identical
+    on every OS, and refuses an ambiguous edit.
+  inputs:
+    - name: path
+      type: String
+      required: true
+      description: "Absolute or workspace-relative path to the UTF-8 text file to edit. Must resolve inside the agent's mounted workspace. The file must already exist (use filesystem.write to create one)."
+    - name: old_string
+      type: String
+      required: true
+      description: "The exact literal text to find — NOT a regex; every character, including whitespace and newlines, is matched verbatim. Must match exactly one site unless replace_all is true. Copy it verbatim from a filesystem.read. Max 1 MiB."
+    - name: new_string
+      type: String
+      required: true
+      description: "The literal replacement text. An empty string (\"\") is a valid DELETE and is preserved as such. Must differ from old_string. Max 1 MiB."
+    - name: replace_all
+      type: Boolean
+      required: false
+      description: "Replace every occurrence instead of requiring a unique match. Default false (expect-unique → multiple matches return ambiguous_match). When true, old_string must be at least 3 characters and match at most 1000 sites, else parse_error."
+    - name: expected_sha
+      type: String
+      required: false
+      description: "Optional whole-file SHA-256 (lowercase hex) the file must currently hash to. If it differs, the edit is refused with outcome=stale_file and nothing is written — an optimistic-concurrency guard against editing a file that changed since you read it. Usually supplied automatically by the harness."
+  outputs:
+    - name: outcome
+      type: String
+      description: "Discriminator — one of: applied | ambiguous_match | no_match | parse_error | stale_file. Branch on this. Only `applied` changed the file; every other outcome wrote ZERO bytes."
+    - name: recovery
+      type: String
+      description: "Present on every non-applied outcome: a concrete, content-free instruction for fixing the edit and retrying (never echoes file content)."
+    - name: replacements
+      type: Integer
+      description: "applied only: number of occurrences replaced (1 unless replace_all)."
+    - name: match_tier
+      type: String
+      description: "applied only: how old_string matched — `exact` (byte-for-byte) or `whitespace` (matched after per-line leading/trailing whitespace was normalized; internal whitespace and blank lines are never collapsed)."
+    - name: bytes_before
+      type: Integer
+      description: "applied only: file size in bytes before the edit."
+    - name: bytes_after
+      type: Integer
+      description: "applied only: file size in bytes after the edit — no re-read needed to know the new size."
+    - name: lines_added
+      type: Integer
+      description: "applied only: newline count inserted by the edited region."
+    - name: lines_removed
+      type: Integer
+      description: "applied only: newline count removed by the edited region."
+    - name: checksum
+      type: String
+      description: "applied only: SHA-256 (lowercase hex) of the file AFTER the edit — confirm the write without re-reading the file."
+    - name: path
+      type: String
+      description: "applied only: the resolved path that was written. ABSENT on every non-applied outcome, so a refused edit records no phantom file change."
+    - name: match_count
+      type: Integer
+      description: "ambiguous_match only: how many sites old_string matched."
+    - name: match_lines
+      type: Array
+      description: "ambiguous_match only: 1-based line NUMBERS of the matches (capped at 20 — see truncated). Line numbers only; never file content."
+    - name: truncated
+      type: Boolean
+      description: "ambiguous_match only: true if more than 20 sites matched and match_lines was capped."
+  side_effects:
+    - description: "Modifies the file at path in place (atomic temp+rename, host-side). The prior content is snapshotted by the harness before the write."
+      reversible: true
+  common_patterns:
+    - description: "Change one known line after reading the file"
+      steps:
+        - "filesystem.read(path='src/main.rs')"
+        - "code.edit(path='src/main.rs', old_string='let x = 1;', new_string='let x = 2;')"
+        - "Check outcome=='applied'; confirm via the returned checksum (no re-read)."
+    - description: "Recover from an ambiguous match"
+      steps:
+        - "code.edit(...) returns outcome=='ambiguous_match', match_count==3, match_lines=[10,42,88]"
+        - "Either add unique surrounding context to old_string, OR pass replace_all=true to change all 3."
+    - description: "Recover from a no-match"
+      steps:
+        - "code.edit(...) returns outcome=='no_match'"
+        - "filesystem.read(path) again, copy old_string verbatim (whitespace/line-endings may differ, or the file changed), then retry."
+    - description: "Delete a block"
+      steps:
+        - "code.edit(path, old_string='// dead code\\nfn unused() {}\\n', new_string='')"
+  errors:
+    - type: PathOutOfScope
+      description: "path resolves outside the agent's mounted workspace. Raised host-side before any read or write."
+      recovery:
+        - action: abort
+          description: "The path is outside your workspace. Correct the path to one inside a mounted directory; do not retry the same path."
+    - type: PathDenied
+      description: "path is denied by the secrets denylist (e.g. a vault or credentials path). Raised host-side; the file is never read or written."
+      recovery:
+        - action: abort
+          description: "This path is protected (secrets/vault). Do not retry — choose a different file."
+    - type: PathWriteProtected
+      description: "path is write-protected (e.g. a policy or system-config file). The file may be readable but cannot be edited."
+      recovery:
+        - action: abort
+          description: "This file is write-protected and cannot be edited. Do not retry the write."
+    - type: FileNotFound
+      description: "No file exists at path."
+      recovery:
+        - action: abort
+          description: "Create the file with filesystem.write, or correct the path. code.edit only edits existing files."
+    - type: ResourceExhausted
+      description: "The file exceeds the 16 MiB edit ceiling and cannot be loaded for editing."
+      recovery:
+        - action: abort
+          description: "Use filesystem.write for files above 16 MiB; code.edit cannot load them."
+    - type: EncodingError
+      description: "The target is binary or not valid UTF-8 text. code.edit operates on UTF-8 text only."
+      recovery:
+        - action: abort
+          description: "Use filesystem.write to replace a binary/non-text file wholesale; do not retry with code.edit."
+  permission_tier: autonomous
+  tags: ["code", "edit", "file", "refactor"]

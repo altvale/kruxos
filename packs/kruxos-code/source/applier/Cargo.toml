@@ -1,0 +1,22 @@
+# Standalone workspace — the pure code-edit applier. Compiles to BOTH the
+# native host (linked into the off-box eval) AND wasm32-wasip2 (compiled into
+# the kruxos-code pack guest). It is its own `[workspace]` root so it is fully
+# decoupled from the guest workspace one directory up: the guest depends on it
+# as an ordinary path dependency, and `cargo test` here never drags the
+# wasm-only guest crate into a native build.
+[workspace]
+
+[package]
+name = "kruxos-code-applier"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Pure literal-string code-edit applier (layered exact/whitespace matcher, deterministic EOL translation, multi-edit sequencing, the 4-way outcome taxonomy + checksum). Zero fs/scope/openssl; builds native and wasm32-wasip2."
+publish = false
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+serde_json = "1"
+sha2 = "0.10"

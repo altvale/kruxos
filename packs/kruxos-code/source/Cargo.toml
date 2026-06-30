@@ -1,0 +1,43 @@
+# Standalone workspace — the kruxos-code WASM pack guest. Targets wasm32-wasip2
+# and is NOT part of any parent workspace. It depends on the pure applier in
+# ./applier (its own workspace root) as an ordinary path dependency.
+#
+# Build the shipped module (the RUSTFLAGS remap strips the build host's path out
+# of the artifact — env-derived so no literal /home path is ever committed):
+#   RUSTFLAGS="--remap-path-prefix=$HOME=/build" \
+#     cargo build --release --target wasm32-wasip2
+#   cp target/wasm32-wasip2/release/code.wasm ./code.wasm
+#   strings code.wasm | grep -c "$(printf %s "$HOME")"   # expect 0
+[workspace]
+# ./applier is its own workspace root (so it stays decoupled and testable
+# standalone, and links cleanly into the off-box native eval); exclude it here.
+exclude = ["applier"]
+
+[package]
+name = "kruxos-code-guest"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[lib]
+name = "code"
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = "0.58"
+serde_json = "1"
+kruxos-code-applier = { path = "applier" }
+
+[profile.release]
+opt-level = "s"
+strip = true
+lto = true
+# Build-path hygiene for this PUBLISHED, open-source artifact: `strip = true`
+# removes symbols but NOT the rustc panic-location `&'static str` data literals
+# from third-party crates (serde_json, itoa), which would otherwise embed the
+# build host's cargo-registry path into code.wasm. The build command therefore
+# passes `--remap-path-prefix` via RUSTFLAGS (env-derived, so no literal host
+# path is committed) — see the rebuild command in this file's header. Once the
+# pinned toolchain's Cargo stabilizes the `trim-paths` profile option (it is
+# gated in cargo 1.94.0 here), prefer `trim-paths = "all"` over the RUSTFLAGS.
