@@ -816,7 +816,7 @@ This appendix maps KruxOS security controls to common compliance frameworks. **T
 | **4.1** Logging and auditing | Hash-chained CBOR audit log; SQLite index; 90-day retention | **Addressed** |
 | **4.2** Log integrity | SHA-256 hash chain with tamper detection; agents cannot access audit directory | **Addressed** |
 | **5.1** Access control | API key authentication; policy-based authorization; 4-tier model | **Addressed** |
-| **5.2** SSH configuration | SSH not installed on the OS image by default | **Addressed** (by omission) |
+| **5.2** SSH configuration | Opt-in OpenSSH, disabled by default; when enabled: root key-only, password authentication disabled, `tcp/22` firewalled until enabled | **Addressed** (hardened when enabled) |
 | **5.3** Privilege escalation | seccomp blocks privilege-related syscalls; user namespace maps to unprivileged | **Addressed** |
 | **6.1** System file integrity | Immutable root filesystem (ext4 mounted read-only) | **Addressed** |
 
