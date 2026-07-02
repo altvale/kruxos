@@ -77,6 +77,40 @@ Pack the doc with the decision the agent has to make. If the answer is in the do
 
 The pack-sdk lint requires `when_to_use` to mention `instead` or `not` — enforcing this rule.
 
+#### The dedicated `when_not_to_use` field (v0.0.4)
+
+As of v0.0.4 the anti-mis-selection half of this rule has its own first-class
+field: `when_not_to_use`, sitting beside `when_to_use` in the definition. On a
+loaded tool it renders as its own `When NOT to use: …` line; when the field is
+absent the line is simply omitted (no placeholder). This is the single
+highest-leverage lever against tool mis-selection between overlapping tools.
+
+```yaml
+when_to_use: |
+  Use rss.fetch when the agent needs structured data from a feed URL.
+  Typical missions: "summarise the last 5 entries from <feed>".
+when_not_to_use: |
+  Don't use rss.fetch for arbitrary HTML scraping — use http.fetch and parse
+  downstream. Don't use it on auth-required feeds — http.fetch with headers.
+```
+
+Conventions that make it work:
+
+- **Keep it to ≤ ~3 lines.** The rendered per-tool description is
+  token-budgeted — name the sibling tool to prefer; don't enumerate every
+  alternative.
+- **Cross-references must be real.** Any sibling tool named in
+  `when_to_use` / `when_not_to_use` must exist in the loaded definition set —
+  the registry validates this referential integrity at load, so a tool rename
+  can't silently rot the guidance.
+- **Include it.** Built-in KruxOS capabilities are required to carry a real
+  `when_not_to_use`. A pack that omits it still loads and renders without the
+  line (backward-compatible), but omitting it weakens the anti-mis-selection
+  signal — treat it as effectively required for any pack with sibling tools.
+- Prose `Do NOT` pairs inside `when_to_use` (the pre-v0.0.4 pattern above)
+  still work, but new packs should put the negative guidance in
+  `when_not_to_use` and keep `when_to_use` purely affirmative.
+
 ### 5. Typed errors with concrete recovery actions
 
 **GOOD:**
@@ -176,7 +210,7 @@ If the agent would derive a value from your output, return it yourself. You know
 | 1. Domain-specific | `name`, `purpose`, `tags` |
 | 2. Validate at boundary | `inputs[].required`, `errors[]` (typed and synchronous) |
 | 3. Pre-parse output | `outputs[]` with concrete types, not stringified blobs |
-| 4. When to use + NOT use | `when_to_use` |
+| 4. When to use + NOT use | `when_to_use`, `when_not_to_use` (v0.0.4) |
 | 5. Typed errors + recovery | `errors[].type`, `errors[].recovery[]` |
 | 6. Defaults + ceilings | `inputs[].description` (state default + max), function-side clamping |
 | 7. Convenience aggregates | `outputs[]` includes derived/computed fields |
@@ -191,7 +225,8 @@ These conventions aren't yet enforceable by the SDK but will be:
 - **Expected-latency declaration** (`p50_latency_ms`, `p99_latency_ms`) — agent decides whether to parallelize
 - **Nested output type schemas** (`Array<FeedEntry>` with `FeedEntry` as a named struct) — sub-type rigour
 - **Token-cost estimation** (`estimated_input_tokens`, `estimated_output_tokens`) — budget-aware agents
-- **Explicit anti-pattern field** (`not_for: [...]`) — moves out of the `when_to_use` prose
+- ~~**Explicit anti-pattern field** (`not_for: [...]`) — moves out of the `when_to_use` prose~~
+  **Shipped in v0.0.4** as `when_not_to_use` — see Rule 4.
 
 When you encounter these gaps:
 - Document inline in `purpose` or `when_to_use` (until the field exists)
