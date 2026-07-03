@@ -65,7 +65,7 @@ KruxOS Verify
   [PASS] Supervision WebSocket       listening on 0.0.0.0:7701
   [PASS] Dashboard (HTTPS)           listening on 0.0.0.0:7800
   [PASS] Vault                       unlocked
-  [PASS] Capability definitions      89 capabilities across 13 categories
+  [PASS] Capability definitions      91 capabilities across 13 categories
 ```
 
 !!! tip "CLI commands inside Docker"
@@ -77,7 +77,7 @@ KruxOS Verify
     ```
 
 !!! warning "Code Sessions are not supported in the Docker image (v0.0.1)"
-    The dashboard `/code` page (xterm.js terminals through the sandbox) needs cgroup v2 delegation that isn't reliable through Docker even with `--privileged`. All other features — gateway, dashboard, agents, capabilities, vault, audit, comms — work normally. Use the VM image for code-session workloads. Docker-side fix ships in **v0.0.2**.
+    The dashboard `/code` page (xterm.js terminals through the sandbox) needs cgroup v2 delegation that isn't reliable through Docker even with `--privileged`. All other features — gateway, dashboard, agents, capabilities, vault, audit, comms — work normally. Use the VM image for code-session workloads.
 
 Your KruxOS instance is ready. Continue to connect your AI model or CLI:
 
