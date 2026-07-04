@@ -6,7 +6,7 @@
       "type": "skill-md",
       "description": "Navigate docs.kruxos.com — install, MCP, capabilities, CLI, policy, and API reference.",
       "url": "https://docs.kruxos.com/.well-known/agent-skills/docs-map/SKILL.md",
-      "digest": "sha256:fb6ebe8eeac40310cd0af9ce0a63de940e9aff622c22e700f3a8a589252bd027"
+      "digest": "sha256:d600ef0a4db8d981575d2d804e3b6ff6097fee9d7933fc8d259666b081b37b92"
     },
     {
       "name": "kruxos-setup",

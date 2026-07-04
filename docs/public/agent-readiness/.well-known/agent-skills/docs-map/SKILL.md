@@ -11,7 +11,7 @@ Navigate docs.kruxos.com for install, API, and capability reference.
 
 | Task | URL |
 |------|-----|
-| Install | https://docs.kruxos.com/quickstart/install/ |
+| Install (overview) | https://docs.kruxos.com/quickstart/install/ |
 | First-boot wizard | https://docs.kruxos.com/quickstart/dashboard/ |
 | MCP connection | https://docs.kruxos.com/developers/api/gateway-mcp/ |
 | Capabilities (89) | https://docs.kruxos.com/developers/capabilities/ |
@@ -20,6 +20,16 @@ Navigate docs.kruxos.com for install, API, and capability reference.
 | Managing agents | https://docs.kruxos.com/guides/managing-agents/ |
 | REST API | https://docs.kruxos.com/developers/api/rest-api/ |
 | Security | https://docs.kruxos.com/security/whitepaper/ |
+
+## Install paths
+
+| Path | Guide anchor |
+|------|--------------|
+| Docker | https://docs.kruxos.com/quickstart/install/#option-1-docker-recommended-for-trying-out |
+| VM image | https://docs.kruxos.com/quickstart/install/#option-2-vm-image-full-appliance--code-sessions--sandbox |
+| Bare metal | https://docs.kruxos.com/quickstart/install/#option-3-bare-metal |
+
+Agent-oriented install summary: https://kruxos.com/agents/setup/
 
 ## Markdown negotiation
 
