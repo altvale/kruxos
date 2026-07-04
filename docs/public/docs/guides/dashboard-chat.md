@@ -12,7 +12,7 @@ The chat interface is organized into four columns plus a search overlay:
 - **Knowledge (right, collapsible)** — Toggle via the bookmark button in the Messages header. Inline add · edit · delete for the selected agent's persistent state entries.
 - **Search (overlay, `⌘K` / `Ctrl+K`)** — Substring filter on conversation title and preview. Press Enter to jump to the first match.
 
-On screens narrower than 768 px the panels collapse to a 3-state mobile navigation (**agents → conversations → messages**) with back buttons to return up the hierarchy.
+On screens 820 px and narrower the panels collapse to a 3-state mobile navigation (**agents → conversations → messages**) with back buttons to return up the hierarchy; the sidebar auto-collapses to its icon rail at the same breakpoint.
 
 ## Creating and Managing Conversations
 
