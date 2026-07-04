@@ -272,7 +272,7 @@ The generator never puts raw tokens on argv — it stores them in the vault and 
 ```bash
 kruxos code list                   # active + parked sessions
 kruxos code kill <uuid>            # terminate
-kruxos code attach <uuid>          # attach stdio (scaffolded in Gate C; full attach lands in v0.0.2)
+kruxos code attach <uuid>          # attach stdio (scaffolded in Gate C; full attach pending)
 ```
 
 !!! warning "Code Sessions need the VM image"

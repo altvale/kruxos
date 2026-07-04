@@ -1,0 +1,26 @@
+{
+  "serverInfo": {
+    "name": "KruxOS Agent Gateway",
+    "version": "0.0.2",
+    "description": "MCP-native gateway exposing 89 typed KruxOS capabilities across 13 categories."
+  },
+  "transport": {
+    "type": "websocket",
+    "endpoint": "ws://localhost:7700/mcp"
+  },
+  "authentication": {
+    "type": "bearer",
+    "description": "64-char hex agent API key from kruxos agent create or AdminAgent wizard step"
+  },
+  "capabilities": {
+    "tools": { "listChanged": true },
+    "resources": { "subscribe": false, "listChanged": false },
+    "prompts": { "listChanged": false }
+  },
+  "documentation": "https://docs.kruxos.com/developers/api/gateway-mcp/",
+  "relatedEndpoints": {
+    "dashboard": "https://localhost:7800",
+    "supervisionWebSocket": "ws://localhost:7701/events",
+    "userApi": "http://127.0.0.1:7703"
+  }
+}
