@@ -8,32 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Per-release notes with more narrative detail live under
 [`docs/release-notes/`](docs/release-notes/).
 
-## [Unreleased]
-
-### Added
-
-- Remote Access guide — recipes for reaching the dashboard from outside
-  the LAN with Tailscale, Cloudflare Tunnel, or Ngrok. Covers the
-  security trade-offs (expose only the dashboard port; keep the loopback
-  User API private; add a tunnel-level identity gate), cost, and
-  troubleshooting.
-
-- SSH access — the appliance now bundles an opt-in OpenSSH server, disabled
-  by default and enabled from **Settings › System › SSH access**. Root,
-  public-key only (password authentication is never enabled); `tcp/22` stays
-  firewalled until you add an authorized key, and closes again when the last
-  key is removed. Once enabled, SSH stays on across reboot until you disable
-  it. SFTP and `scp` ride the same channel as a first-party file-transfer
-  path. The File Transfer guide now walks through generating, pasting, and
-  fingerprint-verifying an SSH key; documented there and in the security
-  whitepaper.
-
-### Fixed
-
-- Documentation site dark mode: restored the code-block padding that was
-  missing in the dark (slate) theme, so code samples no longer sit flush
-  against their border. Light mode was unaffected.
-
 ## [0.0.2] - 2026-06-08
 
 Second release. Still early beta — not for production use. The largest

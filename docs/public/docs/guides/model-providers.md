@@ -365,8 +365,7 @@ providers:
 
 | | |
 |---|---|
-| **Type** | `ollama` |
-| **Endpoint** | `http://localhost:11434` (configurable) — the bare server root, **no `/v1`** |
+| **Endpoint** | `http://localhost:11434` (configurable) |
 | **Auth** | None — runs locally |
 | **Thinking** | No reasoning control |
 | **Prompt Caching** | Not applicable |
@@ -375,37 +374,17 @@ providers:
 
 Free, private, no data leaves your machine. Requires [Ollama](https://ollama.com) installed locally.
 
-KruxOS talks to Ollama on its **native API** (`/api/chat`, `/api/tags`), so the
-endpoint is just the server root — do **not** add a `/v1` path. (Servers that
-speak the OpenAI format instead — vLLM, LM Studio, llama.cpp — are configured as
-an [OpenAI-compatible provider](#openai-compatible-providers-base_url) with a
-`base_url` ending in `/v1`, not as `ollama`.)
-
 **Available Models:** Any model you pull with `ollama pull`. Enter the model name as free text (e.g., `llama3.3:8b`, `mistral:latest`, `codellama:34b`).
 
 ```yaml
 providers:
   local-default:
-    type: ollama          # `local` is still accepted (it maps to `ollama`)
+    type: local
     auth: none
     endpoint: http://localhost:11434
     model: llama3.3:8b
     label: Local Llama
 ```
-
-From the CLI:
-
-```bash
-kruxos model add ollama --name local-default \
-  --endpoint http://localhost:11434 --model llama3.3:8b
-# (`--auth none` is the default for ollama)
-```
-
-!!! note "Running Ollama on another machine"
-    From a KruxOS appliance, `localhost` is the **appliance**, not your laptop or
-    server. To reach an Ollama box on your LAN, use that machine's LAN IP and make
-    sure Ollama listens on it — e.g. start Ollama with `OLLAMA_HOST=0.0.0.0` and set
-    the endpoint to `http://192.168.1.50:11434`.
 
 ---
 
@@ -464,7 +443,7 @@ This works with any provider that accepts the OpenAI request/response format: To
 kruxos model add anthropic --auth api-key
 kruxos model add openai --auth api-key
 kruxos model add gemini --auth api-key
-kruxos model add ollama --endpoint http://localhost:11434   # local model; --auth none is the default
+kruxos model add local --endpoint http://localhost:11434
 kruxos model add openrouter --auth api-key
 
 # OpenAI-compatible providers (endpoint with /v1 auto-detected as base_url)

@@ -62,7 +62,7 @@ graph LR
 | **Permission tiers** | Each capability has a tier: autonomous, notify, approval_required, or blocked |
 | **Structured errors** | Every error includes a type, message, and recovery suggestions |
 | **Packs** | Installable bundles of capability definitions + implementations |
-| **Service Proxy** | Safe external service access (Gmail + Slack adapters) with read-replica, write buffer, batch protection |
+| **Service Proxy** | Safe external service access (Gmail + Slack adapters in v0.0.1) with read-replica, write buffer, batch protection |
 | **MCP** | Model Context Protocol — the Gateway's native surface; JSON-RPC is the documented fallback |
 
 ## Model connectors

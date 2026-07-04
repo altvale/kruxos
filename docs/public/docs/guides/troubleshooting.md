@@ -41,7 +41,7 @@ kruxos agent show my-agent
 
 **Solutions:**
 
-- **Wrong token:** Agent tokens are 64-character hex strings; User tokens start with `krx_user_`. Check for copy-paste errors (trailing whitespace, truncation). Agent connections use the bare-hex token via the MCP handshake on port 7700; the loopback User API and dashboard use `krx_user_*`.
+- **Wrong token:** Agent tokens are 64-character hex strings in v0.0.1; User tokens start with `krx_user_`. Check for copy-paste errors (trailing whitespace, truncation). Agent connections use the bare-hex token via the MCP handshake on port 7700; the loopback User API and dashboard use `krx_user_*`.
 - **Agent revoked:** Create a new agent with `kruxos agent create`
 - **Key rotated:** If you rotated the key, update your agent configuration with the new key
 
@@ -111,8 +111,7 @@ Proxy:      error (Gmail: sync failed 5m ago)
 
 **Solutions:**
 
-- **See the exact error:** the dashboard **Service Proxy** page (`/proxy`) shows each service's consecutive-failure count and last sync error, which usually names the cause (auth, quota, or network) instead of leaving the service on "Never / Unknown".
-- **OAuth token expired:** Gmail OAuth tokens are stored with auto-refresh in the vault. Reconnect via the dashboard **Service Proxy** page or `kruxos connect gmail`. For automation, you can also re-seed the vault entry manually (see [Service Proxy Adapters](../developers/services.md)).
+- **OAuth token expired:** v0.0.1 stores Gmail OAuth tokens with auto-refresh in the vault; if a manual reconnect is needed, the operator-facing dashboard Gmail-OAuth flow / `kruxos connect gmail` CLI subcommand ships in **v0.0.2**. Until then, re-seed the vault entry manually (see [Service Proxy Adapters](../developers/services.md)).
 - **Google API quota:** Gmail API has rate limits. Wait and retry.
 - **Network issue:** Check internet connectivity from the KruxOS host.
 

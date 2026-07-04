@@ -91,6 +91,9 @@ pub trait RollbackCapable: Send + Sync {
 
 **OAuth callback port**: 8080
 
+!!! info "Operator-facing connection flow ships in v0.0.2"
+    The Gmail adapter is wired end-to-end in v0.0.1 — read-replica, write buffer, batch protection, and vault-backed token storage with auto-refresh all work. What v0.0.1 doesn't ship is the dashboard Gmail-OAuth flow / `kruxos connect gmail` CLI subcommand; that operator UX lands in v0.0.2.
+
 ### Slack (`crates/proxy/src/adapters/slack.rs`)
 
 | Capability | Type | Buffer Delay | Rollback |
@@ -105,6 +108,9 @@ pub trait RollbackCapable: Send + Sync {
 
 **OAuth callback port**: 8081
 **Batch protection**: 10 messages/hour per channel
+
+!!! info "Slack operator UX lands in v0.0.2"
+    Same status as Gmail: the Slack adapter is fully wired in v0.0.1, but the operator-facing connection flow (dashboard or CLI) ships in v0.0.2.
 
 ## Key Concepts
 

@@ -31,8 +31,7 @@ Commands:
   resume        Resume a paused agent's session
   state         Explore and manage agent state, plus backup/restore/backups
   model         Manage model providers (Claude, OpenAI, Gemini, Local)
-  pack          Manage capability packs (search, install, update, remove)
-  inference     On-appliance model catalog, status, pull
+  pack          Manage capability packs (install <local-path> only in v0.0.1)
   vault         Manage the secrets vault
   audit         Query audit logs
   user-token    Manage User bearer tokens (krx_user_*)
@@ -59,32 +58,17 @@ kruxos status
 Expected output:
 
 ```
-KruxOS v0.0.2
+KruxOS v0.0.1
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Gateway:    running (port 7700, MCP-native)
+Supervision: running (port 7701, 30s ping / 10s timeout keepalive)
 Dashboard:  running (port 7800, HTTPS)
-Health:     running (port 7704)
 Vault:      unlocked
 Policy:     personal-permissive (AdminAgent)
 
 Agents:     2 registered, 1 active
 Uptime:     3h 42m
 ```
-
-## Alerts
-
-```bash
-kruxos alerts
-```
-
-Lists active alerts — those an agent raises with `alerts.send` and those the system's automatic monitors raise (high CPU / memory, disk pressure, audit-write failures, a service going down). Narrow the list by recency or severity:
-
-```bash
-kruxos alerts --last 24h           # alerts from the last 24 hours
-kruxos alerts --severity critical  # critical alerts only
-```
-
-The same alerts surface on the dashboard **Alerts** page (`/alerts`), where you can acknowledge them.
 
 ## Agent management
 
@@ -217,25 +201,12 @@ kruxos vault revoke <key>
 ## Capability packs
 
 ```bash
-kruxos pack search weather          # search the community registry
-kruxos pack install kruxos-rss-fetch  # install from registry
-kruxos pack install ./my-pack       # install from local path or tarball
 kruxos pack list
-kruxos pack update <name>           # upgrade to latest registry version
-kruxos pack remove <name>
+kruxos pack install ./my-pack       # local-path install only in v0.0.1
 ```
 
-See [Managing Packs](../guides/managing-packs.md) for the dashboard equivalent.
-
-## On-appliance inference
-
-```bash
-kruxos inference catalog            # browse available GGUF models
-kruxos inference pull phi-3-mini    # download and stage a model
-kruxos inference status             # engine health and loaded models
-```
-
-See [On-Appliance Inference](../guides/on-appliance-inference.md).
+!!! info "Pack registry ships in v0.0.2"
+    `kruxos pack search` / `kruxos pack install <name-from-registry>` and the GitHub-based publishing flow land in **v0.0.2** alongside the seed packs and the standalone `pack-sdk` CLI.
 
 ## Mounts
 
@@ -272,11 +243,11 @@ The generator never puts raw tokens on argv — it stores them in the vault and 
 ```bash
 kruxos code list                   # active + parked sessions
 kruxos code kill <uuid>            # terminate
-kruxos code attach <uuid>          # attach stdio (scaffolded in Gate C; full attach pending)
+kruxos code attach <uuid>          # attach stdio (scaffolded in Gate C; full attach lands in v0.0.2)
 ```
 
-!!! warning "Code Sessions need the VM image"
-    Code Sessions (`/code` dashboard page + the `kruxos code` subcommands) require the VM image. Docker deployments may not support them reliably. See [Code Sessions](../guides/code-sessions.md).
+!!! warning "Code Sessions need the VM image in v0.0.1"
+    Code Sessions (`/code` dashboard page + the `kruxos code` subcommands) are not supported on the Docker image in v0.0.1; the Docker-side cgroup v2 delegation fix ships in v0.0.2.
 
 ## Trash
 

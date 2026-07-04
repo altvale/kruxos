@@ -2,17 +2,18 @@
 
 Create a capability pack in 10 minutes. Packs bundle capability definitions and implementations into installable packages for the KruxOS community.
 
-## Prerequisites
+!!! warning "v0.0.1 supports local-path installs only"
+    `kruxos pack install <local-path>` works on the v0.0.1 appliance. The community registry, `pack-sdk` standalone CLI, GitHub-based publishing flow, and seed packs **all ship in v0.0.2**. Scaffolding helpers (`kruxos pack init`) and the test harness shown below describe the v0.0.2 surface — see the [pack-sdk repo](https://github.com/altvale/kruxos) for the current state.
 
-Install the Pack SDK:
+## Prerequisites (v0.0.2 workflow)
+
+The standalone `@kruxos/pack-cli` distribution and the pip-installable `kruxos` SDK both ship in **v0.0.2 / v0.0.3** respectively. Until then, build packs against the in-appliance Python SDK at `/opt/kruxos/sdk/python/` (auto-importable on the appliance) and install via:
 
 ```bash
-npm install -g @kruxos/pack-sdk
+kruxos pack install ./path/to/my-pack
 ```
 
-You can also build packs against the in-appliance Python SDK at `/opt/kruxos/sdk/python/` and install via `kruxos pack install ./path/to/my-pack`.
-
-## Scaffold a pack
+## Scaffold a pack (v0.0.2 workflow)
 
 ```bash
 kruxos pack init my-weather-pack
@@ -192,13 +193,13 @@ dependencies: []
 kruxos_version: ">=0.0.1"
 ```
 
-## Install locally
+## Install locally (v0.0.1)
 
 ```bash
 kruxos pack install ./my-weather-pack
 ```
 
-The capabilities are now available to all agents and appear in MCP `tools/list` / JSON-RPC `capabilities.list` for any agent whose policy admits them. (There is no `kruxos cap`/`kruxos capabilities list` CLI subcommand — discovery happens via the Gateway protocol surfaces.)
+The capabilities are now available to all agents and appear in MCP `tools/list` / JSON-RPC `capabilities.list` for any agent whose policy admits them. (There is no `kruxos cap`/`kruxos capabilities list` CLI subcommand in v0.0.1 — discovery happens via the Gateway protocol surfaces.)
 
 ## Next steps
 

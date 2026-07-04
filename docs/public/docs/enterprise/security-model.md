@@ -37,7 +37,7 @@ graph TB
 
 ## Agent sandboxing
 
-Every agent runs inside a sandbox constructed from Linux kernel security mechanisms. **Namespaces, cgroup v2, seccomp-bpf, and nftables are active today.** Landlock filesystem confinement, gateway/code-session privilege separation, and per-agent seccomp / resource policy YAML are part of the **v0.0.3 security architecture rework**.
+Every agent runs inside a sandbox constructed from Linux kernel security mechanisms. **v0.0.1 activates namespaces, cgroup v2, seccomp-bpf, and nftables.** Landlock filesystem confinement, gateway/code-session privilege separation, and per-agent seccomp / resource policy YAML are part of the **v0.0.3 security architecture rework**.
 
 Per-call fork model: capability handlers run in a forked child with the full sandbox applied; stateless capabilities (`system.time`, `system.info`, `system.health`, `agent.whoami`) execute in-process for low latency.
 
@@ -86,7 +86,7 @@ A **strict profile** additionally blocks `execve`, `execveat`, `fork`, and `vfor
 ### Landlock mandatory access control (v0.0.3)
 
 !!! info "Landlock lands in v0.0.3"
-    Landlock filesystem confinement is part of the **v0.0.3 security architecture rework**, which also includes gateway/code-session privilege separation and per-agent seccomp / resource policy YAML. Today, filesystem boundaries are enforced through mount namespaces + per-agent host mounts under `/mnt/<label>` with path-escape detection in the gateway, plus seccomp blocking of the filesystem-escape syscalls (`mount`, `pivot_root`, `unshare`). The Landlock layer adds kernel-enforced MAC on top.
+    Landlock filesystem confinement is part of the **v0.0.3 security architecture rework**, which also includes gateway/code-session privilege separation and per-agent seccomp / resource policy YAML. v0.0.1 enforces filesystem boundaries through mount namespaces + per-agent host mounts under `/mnt/<label>` with path-escape detection in the gateway, plus seccomp blocking of the filesystem-escape syscalls (`mount`, `pivot_root`, `unshare`). The Landlock layer adds kernel-enforced MAC on top.
 
 When v0.0.3 ships, Landlock will enforce these paths at the kernel level, irreversibly:
 

@@ -1,6 +1,6 @@
 # Capability Reference
 
-Auto-generated from `definitions/*.yaml`. **91 typed capabilities across 13 categories** in the current release. Every built-in capability available to agents through the KruxOS Gateway is listed here. Pack-installed capabilities are documented in each pack's README.
+Auto-generated from `definitions/*.yaml`. **89 typed capabilities across 13 categories** in v0.0.1. Every capability available to agents through the KruxOS Gateway is listed here.
 
 Capabilities are surfaced over MCP (`tools/list`) and JSON-RPC (`capabilities.list`). Each entry is annotated with its policy tier; capabilities at the `blocked` tier are omitted from listing entirely.
 
@@ -13,7 +13,7 @@ Capabilities are surfaced over MCP (`tools/list`) and JSON-RPC (`capabilities.li
 | 🟡 `approval_required` | Agent must wait for supervisor approval before execution (default 24-hour hold for User MCP calls) |
 | 🔴 `blocked` | Blocked unconditionally — requires explicit policy override to surface |
 
-## Categories (91 capabilities)
+## Categories (89 capabilities)
 
 | Category | Capabilities | Description |
 |----------|:------------:|-------------|
@@ -46,4 +46,4 @@ From the JSON-RPC fallback path:
 { "jsonrpc": "2.0", "id": 1, "method": "capabilities.list" }
 ```
 
-Each returned capability includes its `policy_tier` annotation. The CLI does not ship a dedicated `kruxos cap` subcommand for listing — use `tools/list` / `capabilities.list` over the Gateway, or inspect the live registry from the dashboard `/agents` page where each agent's effective surface is rendered with its tier badges.
+Each returned capability includes its `policy_tier` annotation. The v0.0.1 CLI does not ship a dedicated `kruxos cap` subcommand for listing — use `tools/list` / `capabilities.list` over the Gateway, or inspect the live registry from the dashboard `/agents` page where each agent's effective surface is rendered with its tier badges.

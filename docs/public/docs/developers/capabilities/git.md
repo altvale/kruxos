@@ -1,6 +1,6 @@
 # Git Capabilities
 
-Clone, pull, push, commit, diff, log, branch, and working-tree state. **8 built-in capabilities.**
+Clone, pull, push, commit, diff, log, branch, and working-tree state. **8 capabilities in v0.0.1.**
 
 ## Overview
 
