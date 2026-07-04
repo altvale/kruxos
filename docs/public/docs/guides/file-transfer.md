@@ -6,12 +6,13 @@ payload, or seed a state file — without leaving the dashboard.
 
 ## Why this exists
 
-The KruxOS appliance ships a deliberately minimal base image: no SSH daemon,
-no hypervisor guest tools, no general-purpose shell access for agents. That's
-good for the security posture, but it means "just `scp` the file over" isn't
-available out of the box. The first-party file-transfer surface below gives
-operators a supported path that lands files in a known location with auditing
-and size limits, instead of relying on ad-hoc workarounds.
+The KruxOS appliance ships a deliberately minimal base image: no hypervisor
+guest tools and no general-purpose shell access for agents, with the SSH server
+**disabled by default**. That's good for the security posture, but it means
+"just `scp` the file over" isn't available until you opt in. The first-party
+file-transfer surfaces below give operators a supported path that lands files in
+a known location with auditing and size limits — and once SSH is enabled,
+`scp` / SFTP becomes a first-party path too (see the SSH section below).
 
 ## Surfaces
 
@@ -123,11 +124,75 @@ Caveats: markdown indentation can break heredoc terminators; serial-console
 flow-control drops characters on large pastes; not viable for anything over a
 few KB.
 
-### SSH (operator-supplied)
+### SSH (opt-in)
 
-`sshd` is not bundled in the base appliance. A determined operator can rebuild
-the image with `openssh` / `dropbear` added and an `sshd` service unit, but
-that's outside the supported path and not documented further here.
+As of v0.0.3 the appliance bundles an OpenSSH server, but it is **opt-in and
+disabled by default** — nothing listens and `tcp/22` stays firewalled until you
+enable it from **Settings › System › SSH access**. Enabling requires at least
+one authorized public key; KruxOS then starts the SSH service and opens the
+firewall rule, and removes that rule again when you disable it.
+
+#### Set up an SSH key
+
+Because SSH is public-key only, you add a key before the service will start. If
+you don't already have one, generate a key pair on your workstation:
+
+```bash
+ssh-keygen -t ed25519
+```
+
+Press Enter to accept the default path (`~/.ssh/id_ed25519`); the optional
+passphrase it offers encrypts the private key at rest. This writes two files —
+the private key `id_ed25519` (keep it secret) and the public key
+`id_ed25519.pub` (the one you share).
+
+Print the **public** key so you can copy it:
+
+=== "macOS / Linux"
+
+    ```bash
+    cat ~/.ssh/id_ed25519.pub
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    type $env:USERPROFILE\.ssh\id_ed25519.pub
+    ```
+
+It is a single line beginning with `ssh-ed25519 AAAA…`. Copy that whole line,
+open **Settings › System › SSH access** in the dashboard, paste it into the SSH
+card, and save. The card shows the key's `SHA256:…` fingerprint — confirm it
+matches the fingerprint `ssh-keygen` printed when you created the key (or
+re-derive it with `ssh-keygen -lf ~/.ssh/id_ed25519.pub`) so you know the right
+key was pasted intact. Once the first key is saved, KruxOS starts the SSH
+service and opens `tcp/22`.
+
+!!! warning "Paste the public key, never the private one"
+    Only the `.pub` file ever leaves your workstation. The private key (the
+    `id_ed25519` file with no extension, and anything containing
+    `BEGIN … PRIVATE KEY`) must never be pasted anywhere. Each authorized key
+    is a **root credential in its own right**, independent of the vault
+    passphrase: changing the appliance passphrase does **not** revoke keys, and
+    removing a key does **not** change the passphrase. Add only keys you
+    control, and remove a key as soon as the workstation holding it is
+    decommissioned.
+
+The posture is locked down: **root login, public-key only — password
+authentication is never enabled**, so the appliance passphrase is never exposed
+over the network. Host keys and your `authorized_keys` live on the data
+partition and survive A/B updates. SFTP and `scp` run over the same connection,
+so once SSH is on it is also a first-party file-transfer path:
+
+```bash
+# copy a local pack tarball onto the appliance over SSH
+scp ./my-pack.tar.gz root@<appliance>:/data/kruxos/uploads/
+```
+
+Keep SSH on the LAN or behind a VPN — the management plane is not meant for the
+public internet. **SSH stays on across reboot until you disable it**, so turn it
+off from the same SSH card when you don't need it. Removing your last authorized
+key automatically disables the service and closes `tcp/22` again.
 
 ## Security model
 

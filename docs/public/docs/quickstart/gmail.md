@@ -2,8 +2,8 @@
 
 By the end of this page, your agents will be able to search, read, and send emails through the Service Proxy safety chain.
 
-!!! warning "Operator-facing connection flow ships in v0.0.2"
-    The v0.0.1 appliance bundles the Gmail / Slack OAuth **adapters** — the read-replica sync, write buffer, and batch-protection chain all work, and the vault stores OAuth tokens with auto-refresh. What v0.0.1 does **not** yet ship is the operator-facing connection UX (`kruxos connect gmail` CLI subcommand, dashboard Gmail-OAuth flow). This page describes the runtime behaviour that's in place today; the wiring will arrive in **v0.0.2**.
+!!! tip "Full setup walkthrough"
+    For the complete OAuth setup (Google Cloud console, redirect URIs, dashboard and CLI connect flows), see **[Connecting Services](../guides/connecting-services.md)**. This page explains how email capabilities work once connected.
 
 ## How the Service Proxy works
 
@@ -13,9 +13,17 @@ KruxOS never gives agents direct access to Gmail. Instead, the Service Proxy pro
 2. **Write buffer** — sends, deletes, and label changes are buffered for a configurable delay (default: 30 seconds). During this window, writes can be cancelled.
 3. **Batch protection** — if an agent tries to send more than 5 emails in a short window, the operation escalates to the KruxOS approval queue.
 
-## Email capabilities in v0.0.1
+```mermaid
+flowchart LR
+    AGT[Agent] -->|email.send| BUF[Write buffer<br/>30s delay]
+    AGT -->|email.search| REP[Local replica]
+    BUF -->|after delay| GMAIL[Gmail API]
+    REP -->|background sync| GMAIL
+```
 
-Once the OAuth handshake is in place (manual today, dashboard-driven in v0.0.2), seven typed `email.*` capabilities are exposed to agents:
+## Email capabilities
+
+Seven typed `email.*` capabilities are exposed to agents once Gmail is connected:
 
 | Capability | Description | Safety |
 |-----------|-------------|--------|
@@ -27,11 +35,24 @@ Once the OAuth handshake is in place (manual today, dashboard-driven in v0.0.2),
 | `email.delete` | Delete a message | Soft-delete, 24 h recovery via the trash subsystem |
 | `email.label` | Add/remove labels | Buffered with delay |
 
-These show up under `tools/list` annotated with their policy tier; agents see them once the OAuth handshake has stored a refreshable token in the vault.
+These show up under `tools/list` annotated with their policy tier.
 
-## Verify email capabilities from the SDK
+## Quick connect
 
-Once a Gmail account is connected (today: by an operator wiring OAuth tokens into the vault manually; v0.0.2: via the dashboard), agents call email capabilities like any other typed capability:
+=== "Dashboard"
+
+    1. Open **Service Proxy** (`/proxy`) or use the connect flow in **Connecting Services**.
+    2. Click **Connect Gmail** and follow the OAuth prompts.
+
+=== "CLI"
+
+    ```bash
+    kruxos connect gmail
+    ```
+
+See [Connecting Services](../guides/connecting-services.md) for prerequisites and the Google OAuth client setup.
+
+## Verify from the SDK
 
 ```python
 import asyncio
@@ -46,66 +67,20 @@ async def main():
     )
 
     try:
-        # Search emails (hits local replica — zero Gmail API calls)
         result = await os.call_async(
             "email.search",
-            query="is:unread",
+            query="from:boss subject:urgent",
             max_results=5,
         )
-        print(f"Found {len(result.data['messages'])} unread messages")
-
-        # Read a specific email
-        if result.data["messages"]:
-            msg_id = result.data["messages"][0]["id"]
-            email = await os.call_async("email.read", message_id=msg_id)
-            print(f"Subject: {email.data['subject']}")
-            print(f"From: {email.data['sender']}")
+        print(result)
     finally:
         await os.close_async()
 
 asyncio.run(main())
 ```
 
-Expected output:
-
-```
-Found 3 unread messages
-Subject: Weekly status update
-From: team@example.com
-```
-
-## Sending email (with the write buffer)
-
-```python
-result = await os.call_async(
-    "email.send",
-    to="colleague@example.com",
-    subject="Report ready",
-    body="The daily report has been generated and is attached.",
-)
-
-print(f"Status: {result.data['status']}")
-print(f"Buffer ID: {result.data['buffer_id']}")
-print(f"Send at: {result.data['scheduled_send']}")
-print(f"Cancel before: {result.data['cancel_deadline']}")
-```
-
-The email is held in the write buffer for 30 seconds. During this window:
-
-- The agent can cancel with `email.cancel(buffer_id="buf_abc123")`
-- A human can cancel via the dashboard or CLI
-- After the deadline, the email is sent to Gmail
-
-## What lands in v0.0.2
-
-- **Operator-facing connection path** — dashboard Gmail-OAuth flow + a CLI subcommand so operators can bind a Google account to the appliance without hand-editing the vault.
-- **Slack adapter parity** — Slack uses the same Service Proxy primitives; the operator UX lands at the same time.
-
-The release-notes file `docs/release-notes/v0.0.1.md` records this as a known limitation under "Known limitations → Health-driven A/B rollback automation … and the operator-facing Gmail/Slack OAuth flow ship in v0.0.2."
-
 ## Next steps
 
-- [Connecting Services](../guides/connecting-services.md) — the operator-facing flow to connect a Gmail account (dashboard or `kruxos connect gmail`)
-- [Managing Agents](../guides/managing-agents.md) — control which agents can access email
-- [Policies](../guides/policies.md) — restrict email capabilities per agent
-- [Monitoring](../guides/monitoring.md) — monitor sync health and write buffers
+- [Connecting Services](../guides/connecting-services.md) — full Gmail & Slack setup
+- [Service Proxy](../enterprise/service-proxy.md) — architecture deep dive
+- [Approval Workflow](../guides/approval-workflow.md) — how buffered writes escalate

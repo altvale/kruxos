@@ -106,7 +106,7 @@ Four-column desktop layout — Agents · Conversations · Messages · Knowledge 
 
 ### Code Sessions (`/code`)
 
-xterm.js terminals through the Gateway sandbox. Concurrent-session cap defaults to 4; per-session memory cap 2 GiB; 4-hour idle timeout. **Not supported on the Docker image in v0.0.1** — use the VM image.
+xterm.js terminals through the Gateway sandbox. Concurrent-session cap defaults to 4; per-session memory cap 2 GiB; 4-hour idle timeout. **Requires the VM image** — Docker deployments may not support Code Sessions reliably. See [Code Sessions](../guides/code-sessions.md).
 
 ### Identities
 
@@ -154,11 +154,38 @@ Operator-facing health summary that auto-refreshes every 15 seconds:
 
 If the gateway is unreachable, the page now renders an explicit error banner reading "Can't reach gateway: …. Retrying …" with a **Retry now** button so a transient failure no longer presents as a silent blank page.
 
+### Alerts (`/alerts`)
+
+The operator's surface for alerts — both those an agent raises with `alerts.send` and those the system's automatic monitors raise (high CPU / memory, disk pressure, audit-write failures, a service going down). Each row shows the severity (info / warning / critical), the source agent or monitor, the message, the timestamp, and whether it has been acknowledged; **Acknowledge** marks an alert as handled. The sidebar **Alerts** entry carries a badge showing the number of pending (unacknowledged) alerts, and critical alerts also raise a banner across the top of every page — so an alert an agent sends now reaches the operator wherever they are in the dashboard rather than going unnoticed.
+
 ### Service Proxy (`/proxy`)
 
 Per-service sync status for the proxy backends (Gmail / Slack adapters), auto-refreshing every 10 seconds. The top of the page carries a five-cell **overview strip** — Total services, Synced, With errors, Buffered ops, **Dead letters**. The Dead-letters cell is now first-class at the top of the page rather than buried inside each per-service card.
 
-Below the overview strip, each service renders a card with the sync header, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending buffered writes (with countdown + **Cancel**) and dead-letter writes (with **Retry** / **Discard**). All three actions go through a confirm modal before posting to `/api/proxy/status`.
+Below the overview strip, each service renders a card with the sync header, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending buffered writes (with countdown + **Cancel**) and dead-letter writes (with **Retry** / **Discard**). When a service's sync is failing, the card surfaces how many consecutive failures it has seen and the last sync error (for example, a Slack `missing_scope`), so a misconfigured connection is diagnosable from the tile instead of showing a bare "Never / Unknown" with no explanation. All three write actions go through a confirm modal before posting to `/api/proxy/status`.
+
+### Packs (`/packs`)
+
+Browse the community pack registry, install packs with one click, upload local `.tar.gz` archives, upgrade when a newer version is available, and remove packs you no longer need. Installed pack capabilities appear immediately in the policy editor and in agent tool lists — no gateway restart. See [Managing Packs](../guides/managing-packs.md).
+
+### Uploads (`/uploads`)
+
+Upload large files (GPU driver kits, pack tarballs, model weights) to `/data/kruxos/uploads/`. Files stream to disk so multi-GB uploads work. Uploaded paths can be referenced when installing drivers or packs.
+
+### Settings tabs
+
+Settings is tabbed. Each sub-page covers a distinct operator concern:
+
+| Tab | Path | What you do |
+|-----|------|-------------|
+| **Models** | `/settings` | Add/remove/test model providers; set role defaults |
+| **Inference** | `/settings/inference` | Browse catalog, pull on-appliance GGUF models, check engine status |
+| **Hardware** | `/settings/hardware` | Detect GPU, install/enable/disable NVIDIA drivers |
+| **Updates** | `/settings/updates` | Check, download, and apply A/B system updates; reboot into staged update |
+| **License** | `/settings/license` | View license status, revalidate, device-code activation |
+| **System** | `/settings/system` | Restart gateway, reboot appliance, SSH access, Tailscale remote access |
+
+See the dedicated guides: [On-Appliance Inference](../guides/on-appliance-inference.md), [GPU Drivers](../guides/gpu-drivers.md), [Updating KruxOS](../guides/updating.md), [SSH Access](../guides/ssh-access.md), [Remote Access](../guides/remote-access.md).
 
 ## Keyboard shortcuts
 

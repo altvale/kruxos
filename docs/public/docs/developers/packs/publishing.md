@@ -2,9 +2,6 @@
 
 Share your capability pack with the KruxOS community.
 
-!!! warning "Publishing flow ships in v0.0.2"
-    `kruxos pack validate / test / build / login / publish` and the GitHub-based publishing pipeline all ship in **v0.0.2**. v0.0.1 supports local-path installs only via `kruxos pack install <local-path>`. The rest of this page describes the v0.0.2 surface.
-
 ## Pre-publish checklist
 
 ```bash

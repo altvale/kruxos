@@ -46,7 +46,7 @@ Health status values:
 ### CLI health check
 
 ```bash
-kruxos alerts
+kruxos status
 ```
 
 Expected output:
@@ -165,7 +165,7 @@ kruxos alerts --last 24h
 kruxos alerts --severity critical
 ```
 
-On the dashboard, alerts appear as banners on every page and in detail on the Health page.
+On the dashboard, the **Alerts** page (`/alerts`) lists every alert and lets you acknowledge it once handled; its sidebar entry carries a count badge, and critical alerts also raise a banner on every page — so an alert an agent sends reaches you wherever you are. See [Web Dashboard → Alerts](../quickstart/dashboard.md#alerts-alerts) for the full breakdown.
 
 ### Alert deduplication
 
@@ -189,7 +189,7 @@ Proxy:      syncing (last: 2m ago)
 
 On the dashboard, navigate to **Service Proxy** at `/proxy` for detailed sync status, write buffer contents, and error history. The page auto-refreshes every 10 seconds and renders a five-cell overview strip at the top — **Total services**, **Synced**, **With errors**, **Buffered ops**, and **Dead letters** — so the dead-letter count is now visible at a glance instead of buried inside each per-service card.
 
-Below the overview strip, each service card shows sync status, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending writes with **Cancel** (for buffered) and **Retry** / **Discard** (for dead letters). All three actions go through a confirm modal.
+Below the overview strip, each service card shows sync status, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending writes with **Cancel** (for buffered) and **Retry** / **Discard** (for dead letters). When a service's sync is failing, the card also shows how many consecutive failures it has seen and the last sync error — so a missing scope, an expired token, or a network problem surfaces directly on the card instead of leaving the service stuck on "Never / Unknown" with no explanation. All three actions go through a confirm modal.
 
 ## External monitoring integration
 
