@@ -5,6 +5,7 @@ Day-to-day operations for running KruxOS.
 | Guide | What you'll learn |
 |-------|------------------|
 | [Model Providers](model-providers.md) | Configure Claude, OpenAI, Gemini, and Ollama |
+| [Local Models](local-models.md) | Run a model on the appliance itself — search Hugging Face, pull, and manage on-box models |
 | [Managing Agents](managing-agents.md) | Create, monitor, pause, and revoke agents |
 | [Approval Workflow](approval-workflow.md) | How operations that need human review work |
 | [Policies](policies.md) | Write and manage YAML policy rules |

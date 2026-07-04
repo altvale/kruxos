@@ -96,6 +96,7 @@ nav:
   - Guides:
     - guides/index.md
     - Model Providers: guides/model-providers.md
+    - Local Models: guides/local-models.md
     - Managing Agents: guides/managing-agents.md
     - Approval Workflow: guides/approval-workflow.md
     - Policies: guides/policies.md
