@@ -10,7 +10,7 @@ name = "kruxos-docs"
 # repo-root file as the canonical source-of-truth.
 # Path resolution: build runs from docs/public/, so `../../.well-known/`
 # is the repo-root .well-known/.
-build_command = "mkdocs build --strict && mkdir -p site/.well-known && cp ../../.well-known/security.txt site/.well-known/security.txt"
+build_command = "mkdocs build --strict && bash scripts/post-build-agent-readiness.sh"
 build_output_dir = "site"
 
 # Custom domain

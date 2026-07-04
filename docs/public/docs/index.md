@@ -6,6 +6,11 @@ KruxOS replaces the traditional Linux command line with typed, documented, gover
 
 No shell parsing. No permission guessing. No silent failures.
 
+!!! tip "For AI agents"
+    Machine-readable docs: [llms.txt](/llms.txt) · [auth.md](/auth.md) · [agent skills](/.well-known/agent-skills/index.json) · [API catalog](/.well-known/api-catalog)
+
+    Request any page with `Accept: text/markdown` to receive source markdown. Product agent guide: [kruxos.com/agents](https://kruxos.com/agents/).
+
 ---
 
 ## Who is KruxOS for?

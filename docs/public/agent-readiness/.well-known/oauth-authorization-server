@@ -1,0 +1,19 @@
+{
+  "issuer": "https://docs.kruxos.com",
+  "authorization_endpoint": "https://docs.kruxos.com/quickstart/dashboard/#user-token",
+  "token_endpoint": "https://docs.kruxos.com/developers/api/rest-api/#authentication",
+  "jwks_uri": "https://docs.kruxos.com/.well-known/jwks.json",
+  "grant_types_supported": ["client_credentials"],
+  "response_types_supported": ["token"],
+  "token_endpoint_auth_methods_supported": ["none"],
+  "scopes_supported": [],
+  "agent_auth": {
+    "skill": "https://kruxos.com/.well-known/agent-skills/kruxos-auth/SKILL.md",
+    "register_uri": "https://docs.kruxos.com/quickstart/dashboard/#user-token",
+    "identity_types_supported": ["anonymous"],
+    "anonymous": {
+      "credential_types_supported": ["bearer_token"],
+      "claim_uri": "https://docs.kruxos.com/auth.md"
+    }
+  }
+}
