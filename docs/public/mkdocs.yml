@@ -96,6 +96,7 @@ nav:
   - Guides:
     - guides/index.md
     - Model Providers: guides/model-providers.md
+    - Local Models (Hugging Face): guides/local-models.md
     - Managing Agents: guides/managing-agents.md
     - Approval Workflow: guides/approval-workflow.md
     - Policies: guides/policies.md
@@ -107,6 +108,7 @@ nav:
     - Autonomous Agents: guides/autonomous-agents.md
     - Docker Agent Isolation: guides/docker-isolation.md
     - Connecting Services: guides/connecting-services.md
+    - Secrets (Vault): guides/secrets.md
     - Slack Integration: guides/slack-integration.md
     - File Transfer: guides/file-transfer.md
     - First Conversation: guides/first-conversation.md

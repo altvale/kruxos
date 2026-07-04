@@ -5,6 +5,7 @@ Day-to-day operations for running KruxOS.
 | Guide | What you'll learn |
 |-------|------------------|
 | [Model Providers](model-providers.md) | Configure Claude, OpenAI, Gemini, and Ollama |
+| [Local Models (Hugging Face)](local-models.md) | Pull, enable, and manage GGUF models on the on-box engine |
 | [Managing Agents](managing-agents.md) | Create, monitor, pause, and revoke agents |
 | [Approval Workflow](approval-workflow.md) | How operations that need human review work |
 | [Policies](policies.md) | Write and manage YAML policy rules |
@@ -14,6 +15,7 @@ Day-to-day operations for running KruxOS.
 | [Updating KruxOS](updating.md) | Apply updates with automatic rollback |
 | [Migration from OpenClaw](migration-from-openclaw.md) | Step-by-step guide for OpenClaw users |
 | [Connecting Services](connecting-services.md) | Connect Gmail & Slack to the Service Proxy (dashboard or CLI) |
+| [Secrets (Vault)](secrets.md) | Store scoped, host-bound third-party API keys agents can use without seeing them |
 | [Slack Integration](slack-integration.md) | Connect Slack for agent messaging and search |
 | [File Transfer](file-transfer.md) | Get files onto the appliance for local pack installs, certs, and config |
 | [Docker Agent Isolation](docker-isolation.md) | Single-container vs multi-container deployment patterns |
