@@ -2,7 +2,7 @@
 
 By the end of this page, you'll know how to back up KruxOS data and restore from a backup.
 
-The backup CLI surface is `kruxos state backup / restore / backups` — there is **no `kruxos backup` namespace**. Daily backups also run automatically via a systemd timer at 02:00 UTC, and audit-log rotation runs at 03:00 UTC with a 90-day default retention.
+In v0.0.1 the backup CLI surface is `kruxos state backup / restore / backups` — there is **no `kruxos backup` namespace**. Daily backups also run automatically via a systemd timer at 02:00 UTC, and audit-log rotation runs at 03:00 UTC with a 90-day default retention.
 
 ## What gets backed up
 
@@ -49,7 +49,7 @@ Size: 18.1 MB (encrypted)
 
 ### Scheduled backups
 
-Daily backups run **automatically** on the appliance via a systemd timer at 02:00 UTC — see `systemctl list-timers '*kruxos*'`. No manual cron setup needed.
+Daily backups run **automatically** on the appliance via a systemd timer at 02:00 UTC — see `systemctl list-timers '*kruxos*'`. No manual cron setup needed in v0.0.1.
 
 If you want to add a second schedule (e.g., hourly increments), use the host's cron:
 

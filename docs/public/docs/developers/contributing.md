@@ -10,10 +10,12 @@ For the streamlined version of this page, see the repo root's [CONTRIBUTING.md](
 |---|---|---|
 | Bug reports + feature requests | [GitHub Issues](https://github.com/altvale/kruxos/issues) | now |
 | Documentation improvements (`docs/public/`) | Pull requests to the public repo | now |
-| Capability packs (`packs/`) | Pack development flow | now |
+| Capability packs (`packs/`) | Pack development flow ships with v0.0.2 | v0.0.2 |
 | Dashboard themes (`themes/`) | Theme system ships v0.0.3 | v0.0.3 |
 | Extension plugins (`plugins/`) | Plugin runtime ships v0.0.3 | v0.0.3 |
 | Community discussion | [KruxOS Discord](https://discord.gg/VXvQKNv6Jn) | now |
+
+For v0.0.1 specifically, the only live contribution surface is `docs/public/` — typo fixes, clarifications, additional examples. The other surfaces are placeholder-only until their release cycles light them up.
 
 ## Working on docs
 
@@ -34,16 +36,18 @@ The live site at [docs.kruxos.com](https://docs.kruxos.com) is built from the sa
 - Concrete, literal, AI-readable prose. Capability descriptions especially should avoid metaphors — agents read these descriptions to decide which tool to call.
 - Match the existing cadence of nearby pages rather than introducing new section structures.
 
-## Working on capability packs
+## Working on capability packs (v0.0.2+)
 
-The pack development flow — `@kruxos/pack-sdk`, registry-based publishing, scaffolded examples — is live. Develop packs locally against a running appliance or publish to the community registry:
+The pack development flow — pack-SDK CLI, registry-based publishing, scaffolded examples — ships with v0.0.2. Until then, `packs/` accepts placeholder material only; substantive pack PRs should wait for the v0.0.2 docs that land alongside the SDK.
+
+In v0.0.1 today, you can develop packs **locally** against a running appliance via the local-path install:
 
 ```bash
-# On a running appliance, after building your pack directory:
+# On a v0.0.1 appliance, after building your pack directory:
 kruxos pack install /path/to/my-pack
 ```
 
-The pack-development documentation lives under [developers/packs/](packs/quickstart.md) and describes the runtime contract for handlers and the YAML capability definitions.
+The pack-development documentation lives under [developers/packs/](packs/quickstart.md) and describes the runtime contract for handlers and the YAML capability definitions, even though the SDK distribution path arrives in v0.0.2.
 
 ## Pull request flow
 

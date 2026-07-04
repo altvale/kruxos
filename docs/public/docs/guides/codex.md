@@ -76,7 +76,7 @@ MCP-capable client launches it the same way.
     config outside the appliance.
 
 !!! warning "apply_patch routing"
-    Codex's built-in `apply_patch` tool is **not yet routed through
+    In v0.0.1, Codex's built-in `apply_patch` tool is **not yet routed through
     the KruxOS approval queue** — it's an upstream limitation. The MCP-proxy
     fix that closes that gap lands in **v0.0.4**. Other Codex tools (`shell`,
     `unified_exec`) are disabled at the user-config and requirements layers,

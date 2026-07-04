@@ -73,7 +73,7 @@ KruxOS Verify
   [PASS] Supervision WebSocket       listening on 0.0.0.0:7701
   [PASS] Dashboard (HTTPS)           listening on 0.0.0.0:7800
   [PASS] Vault                       unlocked
-  [PASS] Capability definitions      91 capabilities across 13 categories
+  [PASS] Capability definitions      89 capabilities across 13 categories
 ```
 
 !!! tip "CLI commands inside Docker"

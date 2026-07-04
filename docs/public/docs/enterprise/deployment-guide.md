@@ -185,7 +185,10 @@ Configure external alerting by polling the health endpoint or subscribing to the
 4. **Verify** after reboot: `kruxos status` and `kruxos audit stats`
 5. **Rollback** if issues: `kruxos update rollback`
 
-The A/B partition system ensures that failed updates automatically roll back. After reboot, an automated health probe confirms the new slot or fails back to the previous one — still run step 4 manually if you need immediate confirmation before relying on the new build. See [Updating](../guides/updating.md) for details.
+!!! info "Health-driven A/B rollback ships in v0.0.2"
+    The A/B partition layout and inactive-slot write path are in place in v0.0.1, but the **automated post-reboot health probe** that confirms the new slot (or fails back to the previous one) lands in **v0.0.2**. Until then, run step 4 manually before the boot flag is confirmed.
+
+The A/B partition system ensures that failed updates automatically roll back. See [Updating](../guides/updating.md) for details.
 
 ## Scaling considerations
 

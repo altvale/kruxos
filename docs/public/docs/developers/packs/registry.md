@@ -2,7 +2,10 @@
 
 The KruxOS pack registry is the community hub for discovering and installing capability packs.
 
-## Browsing packs
+!!! warning "Registry ships in v0.0.2"
+    v0.0.1 supports **local-path installs only** (`kruxos pack install ./path/to/pack`). The community registry, `kruxos pack search` / `kruxos pack info` discovery surfaces, GitHub-based publishing flow, seed packs, and the standalone `pack-sdk` CLI **all ship in v0.0.2**. The rest of this page describes the v0.0.2 surface.
+
+## Browsing packs (v0.0.2)
 
 ### CLI
 
@@ -32,9 +35,9 @@ my-weather-pack v1.1.0
 
 Browse the registry at [packs.kruxos.com](https://packs.kruxos.com).
 
-## Registry architecture
+## Registry architecture (v0.0.2)
 
-The registry is a GitHub repository acting as a package index:
+The registry that ships in v0.0.2 is a GitHub repository acting as a package index:
 
 ```mermaid
 graph LR
@@ -45,7 +48,7 @@ graph LR
     F[kruxos pack install] --> C
 ```
 
-This approach was chosen because:
+This approach was chosen for v0.0.2 because:
 
 - No infrastructure to host or maintain
 - Built-in authentication via GitHub

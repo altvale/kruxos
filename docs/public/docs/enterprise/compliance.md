@@ -98,9 +98,9 @@ kruxos audit stats
 | Access control configuration | `kruxos config show policy` |
 | Encryption configuration | `kruxos vault list` (shows algorithm, no raw values) |
 
-## Compliance gaps
+## Compliance gaps (v0.0.1)
 
-These areas are not fully addressed today and are available under enterprise contracts or planned for later v0.0.x releases:
+These areas are not fully addressed in v0.0.1 and are available under enterprise contracts or planned for later v0.0.x releases:
 
 | Gap | Status | Plan |
 |-----|--------|------|
@@ -112,4 +112,4 @@ These areas are not fully addressed today and are available under enterprise con
 | Automated compliance reporting | Manual | Enterprise contract / post-v0.0.x |
 
 !!! info
-    KruxOS provides the foundational security controls. Enterprise contracts add the management and reporting layers that large organizations need for formal compliance programs — contact [sales@altvale.com](mailto:sales@altvale.com).
+    KruxOS v0.0.1 provides the foundational security controls. Enterprise contracts add the management and reporting layers that large organizations need for formal compliance programs — contact [sales@altvale.com](mailto:sales@altvale.com).
