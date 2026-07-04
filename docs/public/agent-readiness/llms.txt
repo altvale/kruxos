@@ -31,6 +31,14 @@ Canonical docs site for install guides, API reference, capability catalog, polic
 | 7702 | Trigger-wake (UDP) | Loopback only |
 | 7703 | User API (HTTP) | `krx_user_*` bearer |
 
+## Install paths
+
+| Path | Guide anchor |
+|------|--------------|
+| Docker | https://docs.kruxos.com/quickstart/install/#option-1-docker-recommended-for-trying-out |
+| VM image | https://docs.kruxos.com/quickstart/install/#option-2-vm-image-full-appliance--code-sessions--sandbox |
+| Bare metal | https://docs.kruxos.com/quickstart/install/#option-3-bare-metal |
+
 ## Quick install (Docker)
 
 ```bash

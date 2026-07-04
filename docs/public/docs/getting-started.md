@@ -36,7 +36,6 @@ This page walks you from zero to a working KruxOS instance with a connected AI a
 
     Download the artefact for your hypervisor from <https://github.com/altvale/kruxos/releases>:
 
-    - `kruxos-x86_64.img.gz` / `kruxos-aarch64.img.gz` — raw disk image
     - `kruxos-x86_64.qcow2` — libvirt / KVM / QEMU
     - `kruxos-x86_64.vmdk` — VMware / VirtualBox
     - `kruxos-x86_64.box` — Vagrant (libvirt; x86_64 only)
@@ -44,6 +43,14 @@ This page walks you from zero to a working KruxOS instance with a connected AI a
     All artefacts are cosign-signed; per-artefact `.cosign.bundle` files include the Fulcio cert + Rekor inclusion proof for offline verification.
 
     See [Install KruxOS](quickstart/install.md#option-2-vm-image-full-appliance--code-sessions--sandbox) for the boot walkthrough.
+
+=== "Bare metal"
+
+    Download the raw image from <https://github.com/altvale/kruxos/releases>:
+
+    - `kruxos-x86_64.img.gz` / `kruxos-aarch64.img.gz` — decompress and write to USB / SSD / NVMe
+
+    See [Install KruxOS — bare metal](quickstart/install.md#option-3-bare-metal) for `dd`, boot, and network guidance.
 
 ---
 
