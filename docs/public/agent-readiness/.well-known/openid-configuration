@@ -1,0 +1,11 @@
+{
+  "issuer": "https://docs.kruxos.com",
+  "authorization_endpoint": "https://docs.kruxos.com/quickstart/dashboard/#user-token",
+  "token_endpoint": "https://docs.kruxos.com/developers/api/rest-api/#authentication",
+  "jwks_uri": "https://docs.kruxos.com/.well-known/jwks.json",
+  "grant_types_supported": ["client_credentials"],
+  "response_types_supported": ["token"],
+  "scopes_supported": ["openid"],
+  "subject_types_supported": ["public"],
+  "id_token_signing_alg_values_supported": []
+}

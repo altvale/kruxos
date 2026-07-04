@@ -1,0 +1,75 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://docs.kruxos.com/",
+      "service-doc": [
+        {
+          "href": "https://docs.kruxos.com/llms.txt",
+          "type": "text/plain"
+        },
+        {
+          "href": "https://docs.kruxos.com/getting-started/",
+          "type": "text/html"
+        }
+      ],
+      "service-desc": [
+        {
+          "href": "https://docs.kruxos.com/.well-known/openapi.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "anchor": "kruxos://mcp-gateway",
+      "service-doc": [
+        {
+          "href": "https://docs.kruxos.com/developers/api/gateway-mcp/",
+          "type": "text/html"
+        }
+      ],
+      "service-desc": [
+        {
+          "href": "https://docs.kruxos.com/.well-known/mcp/server-card.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "anchor": "kruxos://user-api",
+      "service-doc": [
+        {
+          "href": "https://docs.kruxos.com/developers/api/rest-api/",
+          "type": "text/html"
+        }
+      ],
+      "service-desc": [
+        {
+          "href": "https://docs.kruxos.com/.well-known/openapi.json",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "anchor": "kruxos://capabilities",
+      "service-doc": [
+        {
+          "href": "https://docs.kruxos.com/developers/capabilities/",
+          "type": "text/html"
+        }
+      ]
+    },
+    {
+      "anchor": "https://kruxos.com/",
+      "service-doc": [
+        {
+          "href": "https://kruxos.com/llms.txt",
+          "type": "text/plain"
+        },
+        {
+          "href": "https://kruxos.com/agents/",
+          "type": "text/html"
+        }
+      ]
+    }
+  ]
+}
