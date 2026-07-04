@@ -12,6 +12,23 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
+- Local Models — run a model on the appliance itself, managed from
+  **Settings › Local Models**. Search Hugging Face by a few letters, pick a
+  size (Small / Balanced / Large, with a **Recommended** default) and see an
+  estimated **Fits / Tight / May not fit** hardware tip and exact size before
+  you download. Pull single-file or multi-part (sharded) models in one click
+  with the checksum and size resolved automatically — no hand-typed sha256 —
+  with a pre-download size confirmation, a progress bar, and a **Cancel** that
+  keeps the partial download so pulling again resumes. Pulling no longer
+  always switches your active model: the first model activates automatically,
+  later pulls are staged for you to **Enable** (switching restarts the engine
+  and, if the new model fails to load, restores the previous one), **Disable**
+  (stops the engine, keeps the weights), or **Remove** (reclaims the disk).
+  Models that require a Hugging Face account (gated repositories) are shown but
+  not yet pullable. `kruxos inference` gains `activate`, `disable`, and
+  `remove` to manage on-box models from the terminal. A new **Local Models**
+  guide documents the whole flow.
+
 - Remote Access guide — recipes for reaching the dashboard from outside
   the LAN with Tailscale, Cloudflare Tunnel, or Ngrok. Covers the
   security trade-offs (expose only the dashboard port; keep the loopback
