@@ -29,7 +29,9 @@ A stored secret is bound to **two** things, and an agent can only use it when
 This is **deny-by-default**. A secret with no scope is stored but **no agent can
 use it**. A secret with no host binding is likewise unusable for a credentialed
 request. Neither is ever silently widened — binding a key to **every** host (a
-`*` wildcard) takes an explicit, deliberate confirmation.
+`*` wildcard) is always a deliberate choice you make explicitly, never a default.
+In the dashboard that choice is guarded by a confirmation checkbox before the
+form will accept it.
 
 The value itself is **write-only**: once you save it, it is encrypted in the
 vault and **never shown or read back** through the dashboard or CLI. To replace
@@ -88,6 +90,9 @@ kruxos vault add \
   space-separated** list. Both **default to empty** — so, exactly as in the
   dashboard, an omitted scope means agents are denied and an omitted host binding
   means the key is not yet usable. Neither is ever widened to `*` for you.
+- Unlike the dashboard, the CLI has no interactive confirm step: passing
+  `--allowed-hosts '*'` is **accepted with a warning** (no prompt). Bind specific
+  hosts unless you genuinely intend the key to reach any host.
 - `--type` is `api_key` or `oauth_token`.
 
 The command tells you if you left the scope or host binding empty, so you know
