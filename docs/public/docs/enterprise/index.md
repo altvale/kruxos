@@ -99,5 +99,5 @@ The Service Proxy prevents agents from causing damage to external services throu
 | [Compliance](compliance.md) | SOC2, ISO27001 readiness |
 | [Deployment Guide](deployment-guide.md) | Production deployment best practices |
 | [Service Proxy](service-proxy.md) | External service safety model |
-| [Pricing](pricing.md) | Personal (free), Commercial, and Enterprise tiers |
+| [Pricing](pricing.md) | Personal (free) and Enterprise (custom) tiers |
 | [Contact](contact.md) | Talk to the KruxOS team |
