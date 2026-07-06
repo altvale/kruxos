@@ -12,6 +12,20 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
+- Offline (air-gapped) OS updates — appliances without internet access can
+  now be updated from a file. Download the release's
+  `kruxos-<arch>-rootfs.img.gz` and its `.sig` on another device, upload
+  both from the new **Offline update** cards on **Settings › Updates**,
+  select the image (a badge shows whether its signature is present), and
+  apply. The update goes through the same signed A/B path as an online
+  update — the Ed25519 signature is verified against the appliance's
+  trusted keys before anything is written, and verification cannot be
+  skipped; an unsigned or tampered image is rejected and the disk is never
+  touched. Also works from the console:
+  `kruxos update apply <path-to-.img.gz>`. See the Updating guide's
+  "Offline (air-gapped) update" section, including the note about stepping
+  through releases that declare a minimum required version.
+
 - Remote Access guide — recipes for reaching the dashboard from outside
   the LAN with Tailscale, Cloudflare Tunnel, or Ngrok. Covers the
   security trade-offs (expose only the dashboard port; keep the loopback
