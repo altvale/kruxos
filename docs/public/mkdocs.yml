@@ -174,3 +174,7 @@ nav:
     - Service Proxy Adapters: developers/services.md
     - Agent Experience: developers/agent-experience.md
     - Contributing: developers/contributing.md
+
+  - Release Notes:
+    - v0.0.2: release-notes/v0.0.2.md
+    - v0.0.1: release-notes/v0.0.1.md

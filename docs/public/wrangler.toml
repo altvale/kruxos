@@ -1,31 +1,18 @@
 # Cloudflare Pages deployment configuration
 # Deploy: npx wrangler pages deploy site --project-name=kruxos-docs
+#
+# Git-connected production settings (kruxos-docs Pages project):
+#   root_dir: docs/public
+#   destination_dir: site
+#   build_command: see [pages] below
+#   PYTHON_VERSION: 3.11
 
 name = "kruxos-docs"
 
-# Pages configuration
 [pages]
-# mkdocs strips dot-prefixed dirs (verified empirically), so we copy
-# /.well-known/security.txt into the build output post-mkdocs. Keeps the
-# repo-root file as the canonical source-of-truth.
-# Path resolution: build runs from docs/public/, so `../../.well-known/`
-# is the repo-root .well-known/.
-build_command = "mkdocs build --strict && bash scripts/post-build-agent-readiness.sh"
+# mkdocs strips dot-prefixed dirs, so post-build copies agent-readiness assets
+# and mirrors source markdown into site/.well-known/, llms.txt, auth.md, etc.
+# security.txt canonical source: repo-root .well-known/security.txt
+# packs/: copied for /packs/ static hosting on docs.kruxos.com
+build_command = "pip install mkdocs mkdocs-material && mkdocs build --strict && mkdir -p site/.well-known && cp ../../.well-known/security.txt site/.well-known/security.txt && mkdir -p site/packs && cp -r ../../packs/* site/packs/ && bash scripts/post-build-agent-readiness.sh"
 build_output_dir = "site"
-
-# Custom domain
-# routes = [{ pattern = "docs.kruxos.com", custom_domain = true }]
-
-# Redirects
-# [[redirects]]
-# from = "/"
-# to = "/index.html"
-# status = 200
-
-# Headers for security
-# [[headers]]
-# for = "/*"
-# [headers.values]
-# X-Frame-Options = "DENY"
-# X-Content-Type-Options = "nosniff"
-# Referrer-Policy = "strict-origin-when-cross-origin"
