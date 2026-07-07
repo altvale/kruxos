@@ -2,7 +2,7 @@
 
 The community dashboard exposes REST endpoints for the web UI. These same endpoints can be used by custom tools and integrations.
 
-The Gateway's three machine-facing surfaces in v0.0.1 are:
+The Gateway's machine-facing surfaces are:
 
 | Port | Surface | Auth |
 |------|---------|------|
@@ -12,8 +12,8 @@ The Gateway's three machine-facing surfaces in v0.0.1 are:
 | 7703 | User API — bearer-auth loopback for CLI / mcp-bridge / cli-hook | User token (`krx_user_*`) |
 | 7800 | Dashboard — HTTPS-by-default, serves the REST endpoints documented below | Operator session |
 
-!!! note "v0.0.1 token formats"
-    v0.0.1 issues two kinds of bearer credentials:
+!!! note "Token formats"
+    KruxOS issues two kinds of bearer credentials:
 
       - **User tokens** — `krx_user_<base64url>` prefix.
       - **Agent tokens** — 64 hex characters (no prefix).

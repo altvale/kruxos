@@ -3,7 +3,7 @@
 **Free for personal use. Pay when KruxOS goes to work with you.**
 
 !!! note "Early beta"
-    v0.0.1 is early beta — **all tiers are free**. License enforcement
+    KruxOS is in early beta — **all tiers are free**. License enforcement
     lands in v0.0.3; until then the appliance can be used for any purpose.
     Sign up for Commercial early to lock in early-bird pricing.
 

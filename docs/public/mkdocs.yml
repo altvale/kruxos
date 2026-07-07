@@ -112,6 +112,11 @@ nav:
     - Slack Integration: guides/slack-integration.md
     - File Transfer: guides/file-transfer.md
     - First Conversation: guides/first-conversation.md
+    - Host CLI Integrations: guides/host-cli-integrations.md
+    - Managing Packs: guides/managing-packs.md
+    - User Identities & Tokens: guides/user-identities.md
+    - Code Sessions: guides/code-sessions.md
+    - Admin CLI Commands: guides/admin-cli.md
     - Dashboard Chat: guides/dashboard-chat.md
     - Troubleshooting: guides/troubleshooting.md
     - Error Reference: troubleshooting/errors.md

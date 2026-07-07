@@ -31,7 +31,7 @@ Commands:
   resume        Resume a paused agent's session
   state         Explore and manage agent state, plus backup/restore/backups
   model         Manage model providers (Claude, OpenAI, Gemini, Local)
-  pack          Manage capability packs (install <local-path> only in v0.0.1)
+  pack          Manage capability packs (search, install, update, remove)
   vault         Manage the secrets vault
   audit         Query audit logs
   user-token    Manage User bearer tokens (krx_user_*)
@@ -58,7 +58,7 @@ kruxos status
 Expected output:
 
 ```
-KruxOS v0.0.1
+KruxOS v0.0.2
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Gateway:    running (port 7700, MCP-native)
 Supervision: running (port 7701, 30s ping / 10s timeout keepalive)

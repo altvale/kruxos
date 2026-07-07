@@ -15,7 +15,7 @@ kruxos cli-config generate --write   # writes ~/.codex/config.toml + hooks.json
 The generator wires Codex through `mcp-bridge` + `cli-hook` so every tool call routes via the KruxOS approval queue. Codex's native `shell` and `unified_exec` tools are disabled at the user-config and requirements layers (`/etc/codex/requirements.toml`).
 
 !!! info "Codex apply_patch routing"
-    In v0.0.1, Codex's built-in `apply_patch` tool is **not yet routed through the KruxOS approval queue** — it's an upstream limitation. The MCP-proxy fix that closes that gap lands in **v0.0.4**.
+    Codex's built-in `apply_patch` tool is **not yet routed through the KruxOS approval queue** — it's an upstream limitation. The MCP-proxy fix that closes that gap lands in **v0.0.4**.
 
 ## Prerequisites (direct API use)
 

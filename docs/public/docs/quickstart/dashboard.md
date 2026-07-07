@@ -106,7 +106,7 @@ Four-column desktop layout — Agents · Conversations · Messages · Knowledge 
 
 ### Code Sessions (`/code`)
 
-xterm.js terminals through the Gateway sandbox. Concurrent-session cap defaults to 4; per-session memory cap 2 GiB; 4-hour idle timeout. **Not supported on the Docker image in v0.0.1** — use the VM image.
+xterm.js terminals through the Gateway sandbox. Concurrent-session cap defaults to 4; per-session memory cap 2 GiB; 4-hour idle timeout. **Requires the VM image** — Docker deployments may not support Code Sessions reliably. See [Code Sessions](../guides/code-sessions.md).
 
 ### Identities
 

@@ -2,8 +2,8 @@
 
 KruxOS provides a test harness that simulates the Gateway environment for pack testing. Tests run without a live Gateway instance.
 
-!!! info "Test harness distribution lands with the pack-sdk in v0.0.2"
-    The `kruxos.packs.testing` module ships inside the v0.0.1 in-appliance Python SDK at `/opt/kruxos/sdk/python/`. The standalone `pack-sdk` CLI distribution and the host-side `pip install kruxos` package land in **v0.0.2 / v0.0.3** respectively. Until then, run pack tests on the appliance or copy the SDK off it.
+!!! info "Test harness distribution"
+    The `kruxos.packs.testing` module ships inside the in-appliance Python SDK at `/opt/kruxos/sdk/python/`. The standalone `@kruxos/pack-sdk` npm package is also available for host-side development. The host-side `pip install kruxos` package lands in **v0.0.3**. You can run pack tests on the appliance or copy the SDK off it.
 
 ## Test harness
 

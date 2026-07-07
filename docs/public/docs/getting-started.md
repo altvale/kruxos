@@ -29,8 +29,8 @@ This page walks you from zero to a working KruxOS instance with a connected AI a
     !!! tip "Full Docker reference"
         See [Install KruxOS](quickstart/install.md) for port details, sandbox notes, and troubleshooting.
 
-    !!! warning "Code Sessions not supported on Docker in v0.0.1"
-        Code Sessions (`/code` page + `kruxos code …` subcommands) need cgroup v2 delegation that isn't reliable through Docker. All other features work normally. Docker-side fix ships in v0.0.2.
+    !!! warning "Code Sessions may not work on Docker"
+        Code Sessions (`/code` page + `kruxos code …` subcommands) need cgroup v2 delegation that isn't reliable through Docker. All other features work normally. Use the VM image for Code Sessions.
 
 === "VM image (full appliance)"
 
@@ -42,7 +42,7 @@ This page walks you from zero to a working KruxOS instance with a connected AI a
 
     All artefacts are cosign-signed; per-artefact `.cosign.bundle` files include the Fulcio cert + Rekor inclusion proof for offline verification.
 
-    See [Install KruxOS](quickstart/install.md#option-2-vm-image-full-appliance--code-sessions--sandbox) for the boot walkthrough.
+    See [Install KruxOS — VM image](quickstart/install.md#option-2-vm-image-full-appliance--code-sessions--sandbox) for the boot walkthrough.
 
 === "Bare metal"
 
@@ -116,7 +116,7 @@ Open <https://localhost:7800> in your browser (HTTPS-by-default with an auto-gen
 | **Approvals** | Pending / Approved / Rejected / Timed Out tabs; default 24-hour hold for User MCP calls |
 | **Audit** | Searchable hash-chained audit log with Principal-aware filtering |
 | **Chat** | Multi-model chat with persisted sessions, knowledge panel, inline approvals |
-| **Code Sessions** (`/code`) | xterm.js terminals through the sandbox — VM image only in v0.0.1 |
+| **Code Sessions** (`/code`) | xterm.js terminals through the sandbox — VM image only |
 | **Identities** | User-principal surface: bearer-token CRUD with one-time raw-token reveal, plus User policy (retention quick input + YAML editor) |
 | **Integrations** | Claude Code / Codex install + regenerate seed configs (cards show install/version status + View config) |
 | **Policies** | Visual + YAML editor, per-agent overrides |
@@ -159,5 +159,6 @@ Once connected, try these in a conversation:
 - **[Email capabilities](quickstart/gmail.md)** — adapters ship today; operator-facing OAuth lands v0.0.2
 - **[Autonomous Agents](guides/autonomous-agents.md)** — five-field cron schedules, one-shot delays, manual trigger
 - **[Dashboard Chat](guides/dashboard-chat.md)** — chat with your agent from the web UI
-- **[Pack Development](developers/packs/quickstart.md)** — local-path packs work today; registry + publishing flow ships v0.0.2
+- **[Pack Development](developers/packs/quickstart.md)** — create and publish capability packs
+- **[Managing Packs](guides/managing-packs.md)** — install packs from the registry
 - **[Security Whitepaper](security/whitepaper.md)** — sandbox primitives, identity model, secrets vault
