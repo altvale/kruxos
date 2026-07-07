@@ -69,11 +69,11 @@ KruxOS exposes every OS operation as a **typed, documented API**:
 - **Deterministic policy engine** — four-tier model (`autonomous` / `notify` / `approval_required` / `blocked`), hot-reloadable YAML at `/data/kruxos/policies/`, per-agent overrides, no LLM in the hot path.
 - **One approval surface** — Claude Code, OpenAI Codex, and any cli-config'd CLI route every gated tool call through the KruxOS queue. No in-CLI prompts; no governance bypass via native shell tools.
 - **Per-agent sandbox** — Linux user/network namespaces, cgroup v2 limits (512 MiB memory / 50% CPU / 100 PIDs / 50 MiB/s read / 25 MiB/s write defaults), seccomp BPF allowlist, nftables defense-in-depth.
-- **Service Proxy** — read-replica + write-buffer + batch-protection chain for Gmail and Slack (adapters ship in v0.0.1; operator-facing OAuth UX lands in v0.0.2).
+- **Service Proxy** — read-replica + write-buffer + batch-protection chain for Gmail and Slack, with dashboard and CLI OAuth connect flows.
 - **Multi-agent runtime** — five-field cron schedules, one-shot delays, manual trigger via `kruxos agent run`, topic-based inter-agent comms broker, three state scopes (session / persistent / shared).
 - **Secrets vault** — AES-256-GCM SQLite. Use-not-read contract: capability handlers reference vault entries by id, never the raw secret.
 - **Hash-chained audit** — length-prefixed CBOR, Principal-aware actor field, daily rotation, 90-day retention default.
-- **Web dashboard** — real-time supervision, approval queue, audit viewer, multi-model chat with persisted sessions, visual + YAML policy editor, first-boot wizard, code sessions (VM image only in v0.0.1).
+- **Web dashboard** — real-time supervision, approval queue, audit viewer, multi-model chat with persisted sessions, visual + YAML policy editor, first-boot wizard, code sessions (VM image only).
 - **Model-agnostic** — Anthropic, OpenAI (+ Codex + DeepSeek / Grok / Mistral / Groq / GLM via `base_url`), OpenRouter (200+ models), Google Gemini, Local (Ollama / vLLM / LM Studio / llama.cpp).
 
 ---

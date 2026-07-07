@@ -2,9 +2,6 @@
 
 By the end of this page, you'll know how to apply KruxOS updates safely with automatic rollback protection.
 
-!!! info "v0.0.1 status of the update path"
-    A/B partition layout, the inactive-slot write path, and the `kruxos migrate` data-portability flow all ship in v0.0.1. The **health-driven rollback automation** (post-reboot probe, automatic A/B fail-back) lands in **v0.0.2** — until then, the partition swap works but operators verify health manually before confirming the new slot.
-
 ## How updates work
 
 KruxOS uses **A/B partitions** for safe updates:

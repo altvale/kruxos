@@ -1,6 +1,6 @@
 # Filesystem Capabilities
 
-Read, write, search, copy, move, delete, watch, and restore files and directories. **12 capabilities in v0.0.1.**
+Read, write, search, copy, move, delete, watch, and restore files and directories. **12 built-in capabilities.**
 
 ## Overview
 

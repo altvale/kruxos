@@ -169,7 +169,7 @@ These errors occur during the WebSocket handshake before a session is establishe
 |---|---|
 | **Message** | Invalid input: field '{field}' -- {reason} |
 | **Cause** | A capability input parameter failed validation (wrong type, missing required field, out of range). |
-| **Fix** | Read the `reason` and correct the `field` value. To inspect a capability's schema, call MCP `tools/list` (or JSON-RPC `capabilities.list`) and find the entry by name — v0.0.1 does not ship a `kruxos cap` CLI subcommand. |
+| **Fix** | Read the `reason` and correct the `field` value. To inspect a capability's schema, call MCP `tools/list` (or JSON-RPC `capabilities.list`) and find the entry by name — there is no `kruxos cap` CLI subcommand. |
 | **Retryable** | No |
 | **SDK exception** | `InvalidInputError` |
 | **Recovery actions** | `fix_input` |

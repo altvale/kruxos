@@ -89,7 +89,7 @@ kruxos watch --agent deploy-bot
 
 ## Session management
 
-In v0.0.1 the session-control subcommands live at the top level of the CLI (`kruxos pause / resume / kill <name>`), not under a `kruxos session` namespace.
+Session-control subcommands live at the top level of the CLI (`kruxos pause / resume / kill <name>`), not under a `kruxos session` namespace.
 
 ### Pause an agent
 
