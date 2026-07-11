@@ -25,6 +25,15 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Security model page: documented the **enforced + audited** use-not-read
+  secrets model (deny-by-default scope, a `secrets.use` audit entry per
+  resolution, reflected-credential scrubbing) and operator secret
+  provisioning (**Settings › Secrets** and `kruxos vault add` with
+  capability/host scoping). Corrected the **network port map** — retired
+  the supervision port, added the loopback User API (7703) and health
+  (7704) ports, clarified that the agent gateway binds `0.0.0.0` (per-Agent
+  bearer is the boundary), and added a **TLS reverse-proxy** note.
+
 - Backup & Restore guide: corrected the encryption description — state
   backups are AES-256-GCM with a key derived from the **vault passphrase
   via Argon2id** (with a per-file salt), and older backups still restore
