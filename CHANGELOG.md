@@ -44,6 +44,18 @@ Per-release notes with more narrative detail live under
   fingerprint-verifying an SSH key; documented there and in the security
   whitepaper.
 
+### Changed
+
+- GPU Drivers guide rewritten around the new **one-click Install Now** flow:
+  after an NVIDIA license attestation the appliance fetches the version-pinned
+  driver directly from NVIDIA and the KruxOS GPU kit from the signed GitHub
+  Release, then verifies the kit signature and hash-checks the driver against a
+  checksum signed into the kit (an auto-fetched mismatch blocks the install; a
+  manual-upload mismatch only warns). The manual two-upload flow stays available
+  as the air-gap path. Corrected the framing that KruxOS "never downloads" the
+  driver — it never *hosts or redistributes* NVIDIA's driver, which always comes
+  straight from NVIDIA.
+
 ### Fixed
 
 - Security model page: documented the **enforced + audited** use-not-read
