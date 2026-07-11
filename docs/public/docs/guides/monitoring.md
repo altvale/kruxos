@@ -6,34 +6,60 @@ By the end of this page, you'll know how to monitor system health, view metrics,
 
 ### HTTP endpoint
 
-KruxOS exposes a health endpoint on port 7701:
+KruxOS exposes a health endpoint on port 7704 (bound to loopback):
 
 ```bash
-curl -s http://localhost:7701/health | python3 -m json.tool
+curl -s http://localhost:7704/health | python3 -m json.tool
 ```
 
 Expected output:
 
 ```json
 {
-    "status": "healthy",
-    "version": "1.0.0",
-    "uptime_seconds": 14400,
-    "services": {
-        "gateway": "healthy",
-        "vault": "healthy",
-        "proxy": "healthy",
-        "audit": "healthy",
-        "state": "healthy"
-    },
+    "status": "degraded",
+    "services": [
+        {
+            "name": "sandbox-confinement",
+            "status": "healthy",
+            "latency_ms": 0,
+            "details": "Landlock enforced at kernel ABI ceiling",
+            "checked_at": "2026-07-11T14:03:21.482Z"
+        },
+        {
+            "name": "inference-engine",
+            "status": "degraded",
+            "latency_ms": 3,
+            "details": "engine configured but socket not responding",
+            "checked_at": "2026-07-11T14:03:21.485Z"
+        }
+    ],
     "resources": {
         "cpu_percent": 12.5,
-        "memory_used_mb": 256,
-        "memory_total_mb": 2048,
-        "disk_used_percent": 34.2
-    }
+        "memory_used_bytes": 268435456,
+        "memory_total_bytes": 2147483648,
+        "memory_percent": 12.5,
+        "disk_used_bytes": 128027547648,
+        "disk_total_bytes": 512110190592,
+        "disk_percent": 25.0,
+        "load_average_1m": 0.42,
+        "load_average_5m": 0.37,
+        "load_average_15m": 0.29,
+        "collected_at": "2026-07-11T14:03:21.485Z"
+    },
+    "agent_metrics": {
+        "active_sessions": 2,
+        "total_invocations": 1487,
+        "approval_queue_depth": 0,
+        "dead_letter_queue_depth": 0,
+        "comms_queue_depth": 1,
+        "collected_at": "2026-07-11T14:03:21.485Z"
+    },
+    "generated_at": "2026-07-11T14:03:21.485Z",
+    "total_latency_ms": 4
 }
 ```
+
+`services` is an **array** — one object per registered service check (`name`, `status`, `latency_ms`, `details`, `checked_at`). The top-level `status` is the worst status across all services.
 
 Health status values:
 
@@ -41,7 +67,9 @@ Health status values:
 |--------|---------|
 | `healthy` | All services operating normally |
 | `degraded` | Some services have issues but the system is functional |
-| `unhealthy` | Critical services are down |
+| `critical` | Critical services are down |
+
+`GET /health/ready` returns a minimal readiness body instead — `{"ready": true, "status": "healthy"}` (or `"ready": false` / `"status": "critical"` when not ready).
 
 ### CLI health check
 
@@ -195,7 +223,7 @@ Below the overview strip, each service card shows sync status, last-started / la
 
 ### Health endpoint for load balancers
 
-The `/health` endpoint returns HTTP 200 when healthy and HTTP 503 when unhealthy. Use this for:
+The `/health` endpoint returns HTTP 200 when the overall status is `healthy` or `degraded`, and HTTP 503 when it is `critical`. Use this for:
 
 - Load balancer health checks
 - Kubernetes liveness/readiness probes
@@ -206,11 +234,11 @@ The `/health` endpoint returns HTTP 200 when healthy and HTTP 503 when unhealthy
 KruxOS exposes metrics in a format suitable for collection:
 
 ```bash
-curl -s http://localhost:7701/health | python3 -c "
+curl -s http://localhost:7704/health | python3 -c "
 import json, sys
 data = json.load(sys.stdin)
 print(f'kruxos_cpu_percent {data[\"resources\"][\"cpu_percent\"]}')
-print(f'kruxos_memory_used_mb {data[\"resources\"][\"memory_used_mb\"]}')
+print(f'kruxos_memory_used_bytes {data[\"resources\"][\"memory_used_bytes\"]}')
 print(f'kruxos_status {{status=\"{data[\"status\"]}\"}} 1')
 "
 ```

@@ -20,6 +20,11 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Monitoring guide: corrected the health endpoint reference to the real
+  API — port **7704** (was 7701), the `services` field is a JSON **array**
+  (was an object), the overall status value is **`critical`** (was
+  "unhealthy"), and the example response now matches the live field names.
+
 - Documentation site dark mode: restored the code-block padding that was
   missing in the dark (slate) theme, so code samples no longer sit flush
   against their border. Light mode was unaffected.
