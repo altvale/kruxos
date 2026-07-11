@@ -20,6 +20,15 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Model Providers guide: documented the unified **Local model
+  (self-hosted)** provider — the engine sub-selector (Ollama native /
+  OpenAI-compatible over `/v1` / KruxOS on-box engine), the optional API
+  key for keyed OpenAI-compatible servers, and the system-managed on-box
+  engine (added from **Settings › Local Models**). Also corrected the
+  context-compaction descriptions: OpenAI/Codex use client-side, same-model
+  compaction (there is no server-side `compact_threshold`), and Anthropic's
+  native server-side compaction applies to its 4.6 models.
+
 - Install guide: removed the retired supervision port from the Docker,
   QEMU, VirtualBox and firewall steps and the port tables; recommended
   **bridged** networking for the VM (real LAN IP, no forwards); and

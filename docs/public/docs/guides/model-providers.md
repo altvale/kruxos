@@ -28,7 +28,7 @@ kruxos model add openai --auth api-key --name deepseek \
 | **Auth** | API Key |
 | **Thinking** | Yes — adaptive effort (low/medium/high/max) on 4.6 models, budget_tokens on older |
 | **Prompt Caching** | Yes — requires explicit `cache_control`, auto-managed by KruxOS |
-| **Context Compaction** | Yes — native server-side via `context_management.edits` |
+| **Context Compaction** | Yes — native server-side compaction on Sonnet/Opus 4.6; older Claude models get native tool-clearing (`context_management.edits`) plus client-side compaction |
 | **Batch Mode** | Yes — 50% discount, processed within 24 hours |
 | **Token Counting** | Yes — `/messages/count-tokens` pre-flight endpoint |
 
@@ -65,7 +65,7 @@ providers:
 | **Auth** | API Key |
 | **Thinking** | Yes — `reasoning.effort` (none/low/medium/high), `xhigh` for max |
 | **Prompt Caching** | Automatic — no config needed. `prompt_cache_retention: "extended"` for autonomous agents |
-| **Context Compaction** | Yes — native server-side via Responses API `compact_threshold` |
+| **Context Compaction** | No native server-side compaction on `/chat/completions` — uses client-side, same-model compaction |
 | **Batch Mode** | Yes — similar discount to Anthropic |
 | **Token Counting** | No pre-flight endpoint |
 
@@ -98,7 +98,7 @@ providers:
 | **Auth** | OAuth (device code flow) — sign in with your ChatGPT account |
 | **Thinking** | Same as OpenAI |
 | **Prompt Caching** | Automatic |
-| **Context Compaction** | Same as OpenAI |
+| **Context Compaction** | Same as OpenAI — client-side, same-model compaction |
 | **Batch Mode** | No (flat rate already) |
 
 Uses your ChatGPT subscription ($20/mo flat rate) instead of per-token billing. OpenAI explicitly permits subscription OAuth for third-party tools.
@@ -413,9 +413,9 @@ kruxos model add ollama --name local-default \
 
 | Provider | Auth | Thinking | Caching | Compaction | Batch | Token Pre-flight |
 |----------|------|----------|---------|------------|-------|-----------------|
-| **Anthropic** | API Key | Adaptive effort | Explicit (auto-managed) | Native server-side | 50% discount | Yes |
-| **OpenAI** | API Key | Reasoning effort | Automatic | Native (Responses API) | Yes | No |
-| **OpenAI Codex** | OAuth | Same as OpenAI | Automatic | Same as OpenAI | No (flat rate) | No |
+| **Anthropic** | API Key | Adaptive effort | Explicit (auto-managed) | Native server-side (4.6); client-side otherwise | 50% discount | Yes |
+| **OpenAI** | API Key | Reasoning effort | Automatic | Client-side fallback | Yes | No |
+| **OpenAI Codex** | OAuth | Same as OpenAI | Automatic | Client-side fallback | No (flat rate) | No |
 | **Gemini** | API Key | Partial (low/med/high) | Automatic | Client-side fallback | No | No |
 | **DeepSeek** | API Key | Always-on (no control) | Automatic | Client-side fallback | No | No |
 | **GLM** | API Key | Binary (on/off) | Automatic | Client-side fallback | No | No |
@@ -487,11 +487,24 @@ The Add Provider form supports six provider types, with auth-conditional fields 
 | **OpenAI Codex** | OAuth device code | "Sign in" launches the ChatGPT subscription device-code flow — KruxOS shows a verification URL and copy-to-clipboard code, then polls until you approve in the browser |
 | **Gemini** | API key | Built-in base URL |
 | **OpenRouter** | API key | Inline info banner with a link to `openrouter.ai/keys` |
-| **Local** | None | Runtime preset dropdown (Ollama / vLLM / LM Studio / llama.cpp) auto-fills the endpoint |
+| **Local model (self-hosted)** | None (optional API key) | Pick an **engine**: Ollama (native API), OpenAI-compatible (vLLM / LM Studio / llama.cpp over `/v1`), or the KruxOS on-box engine — see [Local model (self-hosted)](#local-model-self-hosted) below |
 
 Each provider card on the page shows a credentials-status dot (configured vs missing), the default model selector, a Base URL field, the agent assignments referencing this provider, and three action buttons: **Test** (probes the upstream and renders the result inline), **Set Default** (for chat / autonomous / fallback), and **Remove** (confirm-modal — also wipes the vault-stored credentials).
 
 If the vault is locked when you open the page, the cards are gated behind a banner prompting you to unlock the vault first.
+
+#### Local model (self-hosted)
+
+Choosing **Local model (self-hosted)** in the Add Provider form (and in the first-boot wizard's AdminAgent step) opens an **engine** sub-selector — how KruxOS should talk to your local server:
+
+- **Ollama** (native API) — KruxOS uses Ollama's native endpoints; point it at the server root with **no `/v1`**. The endpoint field offers **Ollama (default)** (`http://localhost:11434`) or **Custom**. No API key.
+- **OpenAI-compatible** (vLLM / LM Studio / llama.cpp) — for servers that speak the OpenAI format over `/v1`. These run keyless by default, so the **API key is optional** — leave it blank unless you started the server with one (e.g. `vllm --api-key`). Supplying a key switches the provider's auth from `none` to `api_key`.
+- **KruxOS on-box engine** — the inference engine that runs on the appliance itself. It is shown here for discoverability but is **greyed out and not created from this form**: it is a system-managed provider that self-registers once you pull a model in **Settings › Local Models**. See [On-appliance inference](on-appliance-inference.md).
+
+The first-boot wizard offers the same Local model tab; the on-box engine appears there too but can't be created during onboarding (no model is pulled yet) — pick **Skip** and pull a model in **Settings › Local Models** afterward, where it registers itself as a provider.
+
+!!! note "Use a LAN IP, not localhost"
+    On a bridged appliance, `localhost` is the appliance itself — not your laptop or a separate GPU box. Point the endpoint at the other machine's LAN IP (e.g. `http://192.168.1.50:11434`) and make sure the server listens on it (for Ollama, `OLLAMA_HOST=0.0.0.0`).
 
 ### Via models.yaml
 
