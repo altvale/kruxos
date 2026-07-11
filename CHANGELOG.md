@@ -59,7 +59,13 @@ Per-release notes with more narrative detail live under
   engine (added from **Settings › Local Models**). Also corrected the
   context-compaction descriptions: OpenAI/Codex use client-side, same-model
   compaction (there is no server-side `compact_threshold`), and Anthropic's
-  native server-side compaction applies to its 4.6 models.
+  native server-side compaction applies to its 4.6 models. Tightened the
+  Anthropic tool-clearing note — native tool-clearing is **Haiku 4.5 /
+  Sonnet 4+ / Opus 4+ only**; Claude 3.x is client-side only. Fixed the
+  `models.yaml` key-registration example: model-provider keys are added
+  through the managed flow (`kruxos model add` or **Settings › Models**),
+  not `kruxos vault add` — which refuses the managed `model-provider:*`
+  namespace.
 
 - Install guide: removed the retired supervision port from the Docker,
   QEMU, VirtualBox and firewall steps and the port tables; recommended

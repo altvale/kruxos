@@ -28,7 +28,7 @@ kruxos model add openai --auth api-key --name deepseek \
 | **Auth** | API Key |
 | **Thinking** | Yes — adaptive effort (low/medium/high/max) on 4.6 models, budget_tokens on older |
 | **Prompt Caching** | Yes — requires explicit `cache_control`, auto-managed by KruxOS |
-| **Context Compaction** | Yes — native server-side compaction on Sonnet/Opus 4.6; older Claude models get native tool-clearing (`context_management.edits`) plus client-side compaction |
+| **Context Compaction** | Yes — native server-side compaction on Sonnet/Opus 4.6; Haiku 4.5 / Sonnet 4+ / Opus 4+ get native tool-clearing (`context_management.edits`) plus client-side compaction; Claude 3.x is client-side only |
 | **Batch Mode** | Yes — 50% discount, processed within 24 hours |
 | **Token Counting** | Yes — `/messages/count-tokens` pre-flight endpoint |
 
@@ -508,12 +508,17 @@ The first-boot wizard offers the same Local model tab; the on-box engine appears
 
 ### Via models.yaml
 
-The default `models.yaml` includes commented-out examples for all providers. Uncomment and add your API key via `kruxos vault add model-provider:<name> api-key`:
+The default `models.yaml` includes commented-out examples for all providers. Uncomment the one you want, then register its API key through the **managed provider flow** — `kruxos model add` (or **Settings › Models**). Model-provider keys live in a KruxOS-managed vault namespace, so `kruxos vault add` deliberately refuses a `model-provider:*` name; use the managed flow instead:
 
 ```bash
-# After uncommenting a provider in models.yaml:
-kruxos vault add model-provider:deepseek api-key
-# Enter API key when prompted
+# After uncommenting a provider in models.yaml, register its key.
+# The key is read from stdin at the "API key:" prompt, so it never
+# lands in shell history:
+kruxos model add anthropic --auth api-key
+
+# OpenAI-compatible providers (e.g. DeepSeek) name the instance:
+kruxos model add openai --auth api-key --name deepseek \
+  --endpoint https://api.deepseek.com/v1 --model deepseek-chat
 ```
 
 ## Managing Providers
