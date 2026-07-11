@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "models": [
+    {
+      "id": "tinyllama-1.1b-chat-v1.0-q4_k_m",
+      "label": "TinyLlama 1.1B Chat v1.0 (Q4_K_M)",
+      "params": "1.1B",
+      "license_tag": "Apache-2.0",
+      "url": "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/52e7645ba7c309695bec7ac98f4f005b139cf465/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+      "sha256": "9fecc3b3cd76bba89d504f29b616eedf7da85b96540e490ca5824d3f7d2776a0",
+      "size_bytes": 668788096,
+      "description": "Compact 1.1B-parameter Llama-architecture chat model, 4-bit Q4_K_M GGUF quantization (~638 MiB). Apache-2.0 licensed and CPU-friendly — a good starter model for small appliances."
+    }
+  ]
+}

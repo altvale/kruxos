@@ -12,6 +12,17 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
+- Community inference-model catalog — the appliance now merges a
+  contributor-maintained list of local GGUF models
+  (`https://docs.kruxos.com/inference/models.json`) into its built-in set, so
+  community models appear in the **Settings → Inference** picker. Every entry
+  is hash-verified before use, is additive-only (it can never modify or replace
+  a built-in model), and lands only via maintainer-reviewed pull request. New
+  **Inference Model Catalog** developer guide covers the file format, the
+  field-by-field rules, and how to obtain a real `sha256`/`size_bytes` from
+  Hugging Face LFS metadata without downloading the weights. Seeded with
+  TinyLlama 1.1B Chat (Q4_K_M, Apache-2.0).
+
 - Documented the **`network.credentialed_request`** capability: the gateway
   attaches an operator-provisioned, vault-stored credential at the network
   boundary; the agent references the secret by name and never sees the

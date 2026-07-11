@@ -188,4 +188,5 @@ nav:
       - Slack: developers/capabilities/slack.md
     - Service Proxy Adapters: developers/services.md
     - Agent Experience: developers/agent-experience.md
+    - Inference Model Catalog: developers/inference-model-catalog.md
     - Contributing: developers/contributing.md
