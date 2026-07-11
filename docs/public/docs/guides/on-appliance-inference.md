@@ -4,6 +4,8 @@ By the end of this page, you'll know how to run local AI models directly on your
 
 KruxOS ships a built-in inference engine (llama.cpp) that runs GGUF models on the appliance itself. Models are pulled from a curated catalog, stored under `/data/kruxos/models/`, and exposed to agents through the same model-provider system as Claude or OpenAI.
 
+The catalog is a small built-in set plus community-contributed models that are reviewed and merged through the public repository, so they appear alongside the built-ins in the picker. To propose a model of your own, see [Inference Model Catalog](../developers/inference-model-catalog.md).
+
 ```mermaid
 flowchart TB
     subgraph Dashboard
