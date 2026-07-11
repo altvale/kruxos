@@ -56,7 +56,7 @@ Install:     kruxos pack install my-weather-pack
 
 ### 3. Update an existing pack
 
-Bump the version in `pack.yaml`, then publish again:
+Bump the version in `manifest.yaml`, then publish again:
 
 ```bash
 kruxos pack publish

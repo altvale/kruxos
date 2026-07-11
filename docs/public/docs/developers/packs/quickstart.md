@@ -23,7 +23,7 @@ This creates:
 
 ```
 my-weather-pack/
-├── pack.yaml              # Pack metadata
+├── manifest.yaml          # Pack metadata
 ├── definitions/
 │   └── weather.yaml       # Capability definitions
 ├── implementations/
@@ -170,7 +170,7 @@ Running pack tests...
 
 ## Configure pack metadata
 
-Edit `pack.yaml`:
+Edit `manifest.yaml`:
 
 ```yaml
 name: my-weather-pack
@@ -180,8 +180,11 @@ author: "Your Name"
 license: "MIT"
 homepage: "https://github.com/you/my-weather-pack"
 
+# capabilities lists the definition FILES in this pack (paths relative to the
+# pack root), not capability name-strings. The name-strings (e.g.
+# weather.current) live inside each referenced file as `- name: …` entries.
 capabilities:
-  - weather.current
+  - definitions/weather.yaml
 
 secrets:
   - name: WEATHER_API_KEY

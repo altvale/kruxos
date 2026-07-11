@@ -12,6 +12,11 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
+- Documented the **`network.credentialed_request`** capability: the gateway
+  attaches an operator-provisioned, vault-stored credential at the network
+  boundary; the agent references the secret by name and never sees the
+  value, and the secret must be scoped to the capability and host-bound.
+
 - Remote Access guide — recipes for reaching the dashboard from outside
   the LAN with Tailscale, Cloudflare Tunnel, or Ngrok. Covers the
   security trade-offs (expose only the dashboard port; keep the loopback
@@ -29,6 +34,79 @@ Per-release notes with more narrative detail live under
   whitepaper.
 
 ### Fixed
+
+- Security model page: documented the **enforced + audited** use-not-read
+  secrets model (deny-by-default scope, a `secrets.use` audit entry per
+  resolution, reflected-credential scrubbing) and operator secret
+  provisioning (**Settings › Secrets** and `kruxos vault add` with
+  capability/host scoping). Corrected the **network port map** — retired
+  the supervision port, added the loopback User API (7703) and health
+  (7704) ports, clarified that the agent gateway binds `0.0.0.0` (per-Agent
+  bearer is the boundary), and added a **TLS reverse-proxy** note.
+
+- Backup & Restore guide: corrected the encryption description — state
+  backups are AES-256-GCM with a key derived from the **vault passphrase
+  via Argon2id** (with a per-file salt), and older backups still restore
+  (the format version is auto-detected).
+
+- Security whitepaper: supervision is now described as a **root-only local
+  control socket** (peer-credential, uid 0) instead of a network port with
+  an admin passphrase — the AC-17 mapping row, the principal table, and the
+  TLS/limitations sections were corrected. Also documents the **opt-in
+  Tailscale tailnet** surface (userspace daemon, `tailscale serve`
+  publishing only the dashboard — plus the opt-in SSH console when enabled —
+  an egress guard fencing the loopback ports). Corrected three residual
+  claims: the `/code` CLI tools mint their credential over the distinct
+  **auth socket** (`/run/kruxos/auth.sock`), not the uid-0 control socket;
+  and the agent gateway (7700) binds **`0.0.0.0`** by default (per-Agent
+  bearer is the boundary; restrict via `server.host`), not `127.0.0.1` —
+  fixed consistently across the threat model, §4.4, and the SSRF note.
+
+- Model Providers guide: documented the unified **Local model
+  (self-hosted)** provider — the engine sub-selector (Ollama native /
+  OpenAI-compatible over `/v1` / KruxOS on-box engine), the optional API
+  key for keyed OpenAI-compatible servers, and the system-managed on-box
+  engine (added from **Settings › Local Models**). Also corrected the
+  context-compaction descriptions: OpenAI/Codex use client-side, same-model
+  compaction (there is no server-side `compact_threshold`), and Anthropic's
+  native server-side compaction applies to its 4.6 models. Tightened the
+  Anthropic tool-clearing note — native tool-clearing is **Haiku 4.5 /
+  Sonnet 4+ / Opus 4+ only**; Claude 3.x is client-side only. Fixed the
+  `models.yaml` key-registration example: model-provider keys are added
+  through the managed flow (`kruxos model add` or **Settings › Models**),
+  not `kruxos vault add` — which refuses the managed `model-provider:*`
+  namespace.
+
+- Install guide: removed the retired supervision port from the Docker,
+  QEMU, VirtualBox and firewall steps and the port tables; recommended
+  **bridged** networking for the VM (real LAN IP, no forwards); and
+  replaced the misleading "20 GiB disk minimum" with the real model —
+  the image is ~8 GiB and **`/data` auto-expands to fill the disk on
+  first boot**. Clarified that grow-to-fill is a **one-time, first-boot**
+  step: size the disk *before* first boot, because enlarging it later
+  does not re-expand `/data` on its own and requires a manual partition
+  + `resize2fs` grow (it is a required step, not the optional convenience
+  it was first framed as). The first-boot firewall line now lists the
+  ports actually accepted — **TCP 7700 + 7800 only** (7702 trigger-wake
+  is UDP on loopback, with no inbound rule). Dropped stale
+  v0.0.1-specific framing.
+
+- Pack authoring guides: the manifest file is **`manifest.yaml`** (the
+  Pack SDK scaffolds and requires it — `pack.yaml` is rejected), and the
+  `capabilities:` list holds **definition-file paths** (e.g.
+  `definitions/weather.yaml`), not capability name-strings. Updated the
+  quickstart, publishing, and service-proxy pack guides.
+
+- Capability reference: corrected the counts to the current registry —
+  **92 typed capabilities across 13 categories** (was 89). The Network
+  row now shows **5** (adds the gateway-mediated credentialed request),
+  Filesystem **13**, and Git **9**; the Git row also no longer lists a
+  non-existent "stash" capability.
+
+- Monitoring guide: corrected the health endpoint reference to the real
+  API — port **7704** (was 7701), the `services` field is a JSON **array**
+  (was an object), the overall status value is **`critical`** (was
+  "unhealthy"), and the example response now matches the live field names.
 
 - Documentation site dark mode: restored the code-block padding that was
   missing in the dark (slate) theme, so code samples no longer sit flush

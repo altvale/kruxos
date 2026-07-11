@@ -27,7 +27,7 @@ This creates the standard pack structure plus proxy-specific files:
 
 ```
 my-slack-pack/
-├── pack.yaml
+├── manifest.yaml
 ├── definitions/
 │   └── slack.yaml           # Capability definitions
 ├── implementations/
@@ -159,7 +159,7 @@ class SlackAdapter(ProxyAdapter):
   tags: ["slack", "write", "buffered", "cancellable"]
 ```
 
-## Configure proxy settings in pack.yaml
+## Configure proxy settings in manifest.yaml
 
 ```yaml
 name: my-slack-pack

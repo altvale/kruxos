@@ -2,7 +2,7 @@
 
 By the end of this page, you'll have a running KruxOS instance ready to accept agent connections.
 
-KruxOS v0.0.1 ships as a self-hosted appliance with two distribution paths:
+KruxOS ships as a self-hosted appliance with two distribution paths:
 
 - **Docker image** on Docker Hub (`altvale/kruxos`) — fastest to try out
 - **VM image** as `.img.gz` / `.qcow2` / `.vmdk` / Vagrant `.box` for x86_64 and aarch64 — full sandbox + Code Sessions
@@ -22,7 +22,6 @@ docker run -d --name kruxos --privileged \
   -e KRUXOS_VAULT_PASSPHRASE='choose-a-strong-passphrase' \
   -p 7800:7800 \
   -p 7700:7700 \
-  -p 7701:7701 \
   -v kruxos-data:/data/kruxos \
   altvale/kruxos:latest
 ```
@@ -30,8 +29,9 @@ docker run -d --name kruxos --privileged \
 | Port | Service | Purpose |
 |------|---------|---------|
 | 7700 | Gateway | MCP-native (JSON-RPC fallback) — agents connect here |
-| 7701 | Supervision | WebSocket — dashboard live stream, audit events |
 | 7800 | Dashboard | First-boot wizard + web UI (HTTPS by default) |
+
+Only these two ports need publishing. The User API (7703) and health endpoint (7704) bind to loopback inside the appliance and are reached through the dashboard, not exposed. The old supervision port (7701) is retired — supervision now rides an in-guest root-only control socket, not a TCP port.
 
 !!! note "About `--privileged`"
     The KruxOS sandbox needs user/network namespaces, cgroup v2 and nftables. `--privileged` is the simplest way to grant those on Docker; if you'd rather use targeted capabilities, see the [Docker isolation guide](../guides/docker-isolation.md).
@@ -44,7 +44,7 @@ Open <https://localhost:7800> — the first-boot wizard walks you through eight 
 2. **Vault passphrase** — same value you passed via `KRUXOS_VAULT_PASSPHRASE`. Unlocks the vault, dashboard login, and console root login. A live strength meter scores the passphrase before submit.
 3. **Workspace** — picks the AdminAgent's home directory. The default `/data/kruxos/users/admin` is auto-created. A click-through **directory browser** opens a modal listing subdirectories with writability dots and an inline "New folder" affordance (under `/data/`). A "Type path instead" fallback toggles a free-text input for clipboard pastes.
 4. **AdminAgent (Identity)** — names the first agent and optionally configures its model provider inline. Five provider types are wired in — **Anthropic**, **OpenAI**, **OpenAI Codex** (OAuth device-code), **OpenRouter**, **Local** — plus a **Skip** tab that defers provider setup to Settings. Provider and agent are persisted atomically (provider first; if provider registration fails, the agent is not created).
-5. **License activation** — paste a JWT or skip (v0.0.1 logs a warning but keeps serving).
+5. **License activation** — paste a JWT or skip (skipping logs a warning but keeps serving).
 6. **User token** — generates a `krx_user_*` bearer token; shown **once** for the loopback User API and CLI installs.
 7. **Install CLI Tools** — optional. Installs Claude Code and/or Codex CLI seed configs in-process. Both can be installed later from Dashboard → Integrations.
 8. **Done** — confirmation screen.
@@ -62,8 +62,8 @@ Expected output (abbreviated):
 ```
 KruxOS Verify
   [PASS] Gateway (MCP)               listening on 0.0.0.0:7700
-  [PASS] Supervision WebSocket       listening on 0.0.0.0:7701
   [PASS] Dashboard (HTTPS)           listening on 0.0.0.0:7800
+  [PASS] Health endpoint             listening on 127.0.0.1:7704
   [PASS] Vault                       unlocked
   [PASS] Capability definitions      91 capabilities across 13 categories
 ```
@@ -76,7 +76,7 @@ KruxOS Verify
     docker exec kruxos kruxos --help
     ```
 
-!!! warning "Code Sessions are not supported in the Docker image (v0.0.1)"
+!!! warning "Code Sessions are not supported in the Docker image"
     The dashboard `/code` page (xterm.js terminals through the sandbox) needs cgroup v2 delegation that isn't reliable through Docker even with `--privileged`. All other features — gateway, dashboard, agents, capabilities, vault, audit, comms — work normally. Use the VM image for code-session workloads.
 
 Your KruxOS instance is ready. Continue to connect your AI model or CLI:
@@ -95,13 +95,13 @@ Your KruxOS instance is ready. Continue to connect your AI model or CLI:
 
 - A VM hypervisor (KVM / QEMU / libvirt, VirtualBox, or VMware) or bare-metal x86_64 / aarch64 hardware
 - 2 GiB RAM minimum, 4 GiB recommended
-- 20 GiB disk minimum
+- No fixed disk minimum — the shipped image is ~8 GiB and works out of the box (see [Disk sizing](#disk-sizing) below)
 
-Tested in v0.0.1: KVM and VirtualBox on x86_64. The aarch64 artefact ships, but the v0.0.1 acceptance walkthrough was performed on x86_64 only. **Hyper-V Gen 2 is not supported.**
+Validated on KVM and VirtualBox on x86_64. The aarch64 artefact ships, but the acceptance walkthrough was performed on x86_64 only. **Hyper-V Gen 2 is not supported.**
 
 ### Download
 
-Release artefacts for v0.0.1 are published on GitHub Releases at <https://github.com/altvale/kruxos/releases>:
+Release artefacts are published on GitHub Releases at <https://github.com/altvale/kruxos/releases>:
 
 - `kruxos-x86_64.img.gz` / `kruxos-aarch64.img.gz` — raw disk image
 - `kruxos-x86_64.qcow2` / `kruxos-aarch64.qcow2` — libvirt / KVM / QEMU
@@ -129,17 +129,21 @@ cosign verify-blob \
 qemu-system-x86_64 \
   -m 2048 \
   -drive file=kruxos-x86_64.qcow2,format=qcow2,if=virtio \
-  -netdev user,id=net0,hostfwd=tcp::7700-:7700,hostfwd=tcp::7701-:7701,hostfwd=tcp::7800-:7800 \
+  -netdev user,id=net0,hostfwd=tcp::7700-:7700,hostfwd=tcp::7800-:7800 \
   -device virtio-net-pci,netdev=net0
 ```
 
 ### Boot in VirtualBox
 
+**Bridged networking is simplest for an appliance:** the VM gets a real LAN IP, so you reach the dashboard at `https://<vm-ip>:7800` with no port forwarding.
+
 1. Create a new VM: Linux, Other Linux (64-bit)
 2. Allocate 2048 MB RAM
 3. Attach the `.vmdk` as the boot disk
-4. Forward ports 7700, 7701, 7800
+4. Set the network adapter to **Bridged** (Settings → Network → Attached to: Bridged Adapter)
 5. Start the VM
+
+If you must stay on NAT instead, forward host ports **7700** and **7800** to the guest (the dashboard and gateway are the only ports you need).
 
 ### Boot via Vagrant (x86_64)
 
@@ -151,9 +155,22 @@ vagrant up
 
 ### First boot
 
-The default firewall accepts TCP 22 / 7700 / 7701 / 7702 / 7800. Open `https://<vm-ip>:7800` in your browser and run through the same dashboard wizard described in Option 1 (welcome, vault passphrase, workspace, AdminAgent, license, User token, Install CLI Tools, done).
+The default firewall accepts TCP 7700 (agent gateway) and 7800 (dashboard) only — SSH on 22 is opt-in and off by default, and port 7702 (trigger-wake) is UDP on loopback only, so it has no inbound firewall rule by design. Open `https://<vm-ip>:7800` in your browser and run through the same dashboard wizard described in Option 1 (welcome, vault passphrase, workspace, AdminAgent, license, User token, Install CLI Tools, done).
 
 Daily state backups (02:00 UTC) and audit-log rotation (03:00 UTC, 90-day retention) run on systemd timers out of the box.
+
+### Disk sizing
+
+The shipped image is a fixed ~8 GiB disk with a 4 GiB `/data` partition — enough to try KruxOS out of the box. Grow-to-fill is a **one-time, first-boot step**: on the very first boot KruxOS auto-expands `/data` to fill whatever disk it finds, records a marker, and then never runs the auto-grow again. So the rule is simple — **size the disk generously _before_ first boot** and you never have to repartition by hand: whatever size the disk is at first boot, `/data` claims all of it automatically.
+
+To start bigger (local models, long agent history, large workspaces), enlarge the virtual disk **before** you boot the image for the first time:
+
+- **Cloud:** pick the disk size when you create the instance.
+- **QEMU / libvirt:** `qemu-img resize kruxos-x86_64.qcow2 20G` **before** first boot.
+- **VMware:** expand the disk in the VM's settings.
+- **VirtualBox:** in the Virtual Media Manager, copy the `.vmdk` to a VDI and drag the size slider, or `VBoxManage modifymedium <disk>.vdi --resize 20480`.
+
+**Enlarging after first boot is a manual, required step.** Because the auto-grow only runs once, resizing the virtual disk *later* does **not** re-expand `/data` on its own. From the VM console, resize the disk (one of the commands above), then grow partition 4 and run `resize2fs` on the `/data` filesystem to claim the new space.
 
 ### Verify
 
