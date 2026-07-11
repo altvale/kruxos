@@ -20,6 +20,14 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Install guide: removed the retired supervision port from the Docker,
+  QEMU, VirtualBox and firewall steps and the port tables; recommended
+  **bridged** networking for the VM (real LAN IP, no forwards); and
+  replaced the misleading "20 GiB disk minimum" with the real model —
+  the image is ~8 GiB and **`/data` auto-expands to fill the disk on
+  first boot**, with an optional resize recipe per hypervisor. Dropped
+  stale v0.0.1-specific framing.
+
 - Pack authoring guides: the manifest file is **`manifest.yaml`** (the
   Pack SDK scaffolds and requires it — `pack.yaml` is rejected), and the
   `capabilities:` list holds **definition-file paths** (e.g.
