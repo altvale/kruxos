@@ -1,6 +1,6 @@
 # Capability Reference
 
-Auto-generated from `definitions/*.yaml`. **92 typed capabilities across 13 categories**. Every capability available to agents through the KruxOS Gateway is listed here.
+Auto-generated from `definitions/*.yaml`. **92 typed capabilities across 13 categories** in the current release. Every built-in capability available to agents through the KruxOS Gateway is listed here. Pack-installed capabilities are documented in each pack's README.
 
 Capabilities are surfaced over MCP (`tools/list`) and JSON-RPC (`capabilities.list`). Each entry is annotated with its policy tier; capabilities at the `blocked` tier are omitted from listing entirely.
 

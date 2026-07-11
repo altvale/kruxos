@@ -1,8 +1,43 @@
 # Remote Access
 
-By the end of this page, you'll know how to reach your KruxOS dashboard from outside its local network using a tunnel, and how to do it without widening your attack surface more than necessary.
+By the end of this page, you'll know how to reach your KruxOS dashboard from outside its local network, and how to do it without widening your attack surface more than necessary.
 
-The dashboard binds to port `7800` on the appliance. On the same LAN you reach it at `https://<appliance-ip>:7800`. To reach it from anywhere else — your phone on cellular, a laptop on another network, a teammate's machine — you run a **tunnel client on the appliance** that publishes the dashboard outward.
+The dashboard binds to port `7800` on the appliance. On the same LAN you reach it at `https://<appliance-ip>:7800`. To reach it from anywhere else — your phone on cellular, a laptop on another network, a teammate's machine — you need a way to bridge the gap.
+
+## Built-in Tailscale (recommended)
+
+KruxOS ships a one-click Tailscale integration on the VM image. This is the easiest path for personal use — no manual install, no port forwarding.
+
+1. Open **Settings → System → Remote access**.
+2. Click **Enable remote access** and acknowledge the security notice.
+3. Complete login:
+   - **Interactive** — click the auth URL (or scan on your phone) and sign in to Tailscale.
+   - **Auth key** — paste a [pre-auth key](https://tailscale.com/kb/1085/auth-keys) from the Tailscale admin console.
+4. Once connected, KruxOS auto-publishes the dashboard via **Tailscale Serve**. Your URL looks like:
+
+   ```
+   https://<hostname>.<tailnet>.ts.net
+   ```
+
+   Browser-trusted HTTPS — no certificate warning, no port number.
+
+5. Optionally toggle **Allow SSH over Tailscale** (default off) to reach `ssh root@<hostname>.<tailnet>.ts.net`. See [SSH Access](ssh-access.md).
+
+!!! tip "First-boot shortcut"
+    The first-boot wizard includes an optional **Remote access** step that walks through the same flow.
+
+!!! warning "Enable HTTPS certificates on your tailnet"
+    Tailscale Serve needs HTTPS certificates enabled (admin console → **DNS** → enable MagicDNS and HTTPS certificates). The dashboard guides you through this if they're not enabled yet.
+
+### Built-in access control
+
+- Only devices on your tailnet can reach the appliance.
+- An nftables guard ensures tailscaled can only forward to port 7800 (and optionally 22) — the loopback User API stays private.
+- **Revoke** by disabling remote access on the Settings card, or removing the device from your Tailscale admin console.
+
+## Manual tunnel recipes
+
+If you prefer a different provider, or you're on Docker where the built-in integration isn't available, you can run a tunnel client yourself.
 
 !!! info "KruxOS doesn't ship a relay"
     There is no hosted KruxOS relay. You bring your own tunnel: a small client runs on the appliance, dials out to the tunnel provider, and exposes the dashboard at a URL you can reach remotely. The recipes below cover the three most common choices. All three dial **outbound**, so you don't need to open inbound ports on your router.
