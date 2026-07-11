@@ -58,6 +58,15 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Monitoring guide corrected against the shipped CLI: `kruxos alerts` takes no
+  `--last`/`--severity` flags (it lists live resource alerts plus agent-raised
+  alerts; use `--json` for machine-readable output); the `alerts.send` examples
+  (Monitoring guide and SDK guide) use the real `message`/`severity`/`context`
+  fields (there is no `title` field); and the Gmail sync-status section now
+  points at `kruxos connect status` for connection state and the dashboard
+  **Service Proxy** page for detailed sync / buffer / dead-letter status. The
+  proxy overview-strip label matches the UI (**Buffered operations**).
+
 - Security model page: documented the **enforced + audited** use-not-read
   secrets model (deny-by-default scope, a `secrets.use` audit entry per
   resolution, reflected-credential scrubbing) and operator secret

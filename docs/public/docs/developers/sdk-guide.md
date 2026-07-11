@@ -381,8 +381,8 @@ async def research_agent():
                 await agent.capabilities.invoke(
                     "alerts.send",
                     severity="warning",
-                    title=f"Research failed on page {page}",
-                    message=str(e)
+                    message=f"Research failed on page {page}: {e}",
+                    context={"page": page}
                 )
                 break
 
