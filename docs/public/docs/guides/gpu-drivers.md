@@ -34,12 +34,12 @@ Two components go into a working driver:
    - **Fetching NVIDIA driver** — download the `.run` straight from NVIDIA, with a byte-progress bar (this step runs strictly *after* your attestation).
    - **Extracting driver** and **Staging files** — unpack the userspace + GSP firmware.
    - **Checking versions** — confirm the driver, kernel module, and compute backend all match this image.
-   - **Finalising** — write the manifest and load the driver.
+   - **Finalising** — write the install manifest and complete staging. (The driver is *loaded* later, when you **Enable GPU inference** — see below.)
 
    If any check fails, the install stops cleanly and tells you what to do — nothing is left half-installed.
 
 !!! info "The driver download is hash-checked"
-    The appliance verifies the driver it fetches from NVIDIA against a checksum **signed into the GPU kit**. On the one-click path a mismatch **blocks** the install (KruxOS refuses to extract an unexpected driver). If the kit for your image carries no such signed checksum, KruxOS will **not** auto-fetch the driver at all — it asks you to download the `.run` from NVIDIA and upload it manually instead.
+    The appliance verifies the driver it fetches from NVIDIA against a checksum **signed into the GPU kit**. On the one-click path a mismatch **blocks** the install — KruxOS refuses to extract an unexpected driver, discards the downloaded bytes, and installs nothing. The same fail-closed rule applies if the kit carries *no* signed checksum: the appliance downloads the driver, finds nothing to verify it against, and refuses to continue — so the progress bar may finish before the install stops. When that happens, download the `.run` from NVIDIA yourself and use the manual path below.
 
 ## Manual / air-gapped install
 
