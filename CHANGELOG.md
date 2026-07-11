@@ -44,7 +44,13 @@ Per-release notes with more narrative detail live under
   an admin passphrase — the AC-17 mapping row, the principal table, and the
   TLS/limitations sections were corrected. Also documents the **opt-in
   Tailscale tailnet** surface (userspace daemon, `tailscale serve`
-  publishing only the dashboard, an egress guard fencing the loopback ports).
+  publishing only the dashboard — plus the opt-in SSH console when enabled —
+  an egress guard fencing the loopback ports). Corrected three residual
+  claims: the `/code` CLI tools mint their credential over the distinct
+  **auth socket** (`/run/kruxos/auth.sock`), not the uid-0 control socket;
+  and the agent gateway (7700) binds **`0.0.0.0`** by default (per-Agent
+  bearer is the boundary; restrict via `server.host`), not `127.0.0.1` —
+  fixed consistently across the threat model, §4.4, and the SSRF note.
 
 - Model Providers guide: documented the unified **Local model
   (self-hosted)** provider — the engine sub-selector (Ollama native /
