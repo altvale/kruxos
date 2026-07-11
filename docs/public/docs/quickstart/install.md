@@ -155,22 +155,22 @@ vagrant up
 
 ### First boot
 
-The default firewall accepts TCP 7700 / 7702 / 7800 (SSH on 22 is opt-in and off by default). Open `https://<vm-ip>:7800` in your browser and run through the same dashboard wizard described in Option 1 (welcome, vault passphrase, workspace, AdminAgent, license, User token, Install CLI Tools, done).
+The default firewall accepts TCP 7700 (agent gateway) and 7800 (dashboard) only — SSH on 22 is opt-in and off by default, and port 7702 (trigger-wake) is UDP on loopback only, so it has no inbound firewall rule by design. Open `https://<vm-ip>:7800` in your browser and run through the same dashboard wizard described in Option 1 (welcome, vault passphrase, workspace, AdminAgent, license, User token, Install CLI Tools, done).
 
 Daily state backups (02:00 UTC) and audit-log rotation (03:00 UTC, 90-day retention) run on systemd timers out of the box.
 
 ### Disk sizing
 
-The shipped image is a fixed ~8 GiB disk with a 4 GiB `/data` partition — enough to try KruxOS out of the box. On first boot, KruxOS **auto-expands `/data` to fill whatever disk it finds**, so you never have to repartition by hand: give the VM a bigger disk and the extra space is claimed on the next boot.
+The shipped image is a fixed ~8 GiB disk with a 4 GiB `/data` partition — enough to try KruxOS out of the box. Grow-to-fill is a **one-time, first-boot step**: on the very first boot KruxOS auto-expands `/data` to fill whatever disk it finds, records a marker, and then never runs the auto-grow again. So the rule is simple — **size the disk generously _before_ first boot** and you never have to repartition by hand: whatever size the disk is at first boot, `/data` claims all of it automatically.
 
-Enlarge the disk only if you need the room (local models, long agent history, large workspaces):
+To start bigger (local models, long agent history, large workspaces), enlarge the virtual disk **before** you boot the image for the first time:
 
 - **Cloud:** pick the disk size when you create the instance.
 - **QEMU / libvirt:** `qemu-img resize kruxos-x86_64.qcow2 20G` **before** first boot.
 - **VMware:** expand the disk in the VM's settings.
 - **VirtualBox:** in the Virtual Media Manager, copy the `.vmdk` to a VDI and drag the size slider, or `VBoxManage modifymedium <disk>.vdi --resize 20480`.
 
-`/data` fills the new space automatically on the next boot — the resize above is an optional power-user step, not part of a normal install.
+**Enlarging after first boot is a manual, required step.** Because the auto-grow only runs once, resizing the virtual disk *later* does **not** re-expand `/data` on its own. From the VM console, resize the disk (one of the commands above), then grow partition 4 and run `resize2fs` on the `/data` filesystem to claim the new space.
 
 ### Verify
 

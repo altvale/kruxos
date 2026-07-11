@@ -60,8 +60,14 @@ Per-release notes with more narrative detail live under
   **bridged** networking for the VM (real LAN IP, no forwards); and
   replaced the misleading "20 GiB disk minimum" with the real model —
   the image is ~8 GiB and **`/data` auto-expands to fill the disk on
-  first boot**, with an optional resize recipe per hypervisor. Dropped
-  stale v0.0.1-specific framing.
+  first boot**. Clarified that grow-to-fill is a **one-time, first-boot**
+  step: size the disk *before* first boot, because enlarging it later
+  does not re-expand `/data` on its own and requires a manual partition
+  + `resize2fs` grow (it is a required step, not the optional convenience
+  it was first framed as). The first-boot firewall line now lists the
+  ports actually accepted — **TCP 7700 + 7800 only** (7702 trigger-wake
+  is UDP on loopback, with no inbound rule). Dropped stale
+  v0.0.1-specific framing.
 
 - Pack authoring guides: the manifest file is **`manifest.yaml`** (the
   Pack SDK scaffolds and requires it — `pack.yaml` is rejected), and the
