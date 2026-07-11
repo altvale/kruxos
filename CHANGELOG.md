@@ -75,6 +75,12 @@ Per-release notes with more narrative detail live under
   `definitions/weather.yaml`), not capability name-strings. Updated the
   quickstart, publishing, and service-proxy pack guides.
 
+- Capability reference: corrected the counts to the current registry —
+  **92 typed capabilities across 13 categories** (was 89). The Network
+  row now shows **5** (adds the gateway-mediated credentialed request),
+  Filesystem **13**, and Git **9**; the Git row also no longer lists a
+  non-existent "stash" capability.
+
 - Monitoring guide: corrected the health endpoint reference to the real
   API — port **7704** (was 7701), the `services` field is a JSON **array**
   (was an object), the overall status value is **`critical`** (was

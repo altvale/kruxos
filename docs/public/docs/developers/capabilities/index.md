@@ -1,6 +1,6 @@
 # Capability Reference
 
-Auto-generated from `definitions/*.yaml`. **89 typed capabilities across 13 categories** in v0.0.1. Every capability available to agents through the KruxOS Gateway is listed here.
+Auto-generated from `definitions/*.yaml`. **92 typed capabilities across 13 categories**. Every capability available to agents through the KruxOS Gateway is listed here.
 
 Capabilities are surfaced over MCP (`tools/list`) and JSON-RPC (`capabilities.list`). Each entry is annotated with its policy tier; capabilities at the `blocked` tier are omitted from listing entirely.
 
@@ -13,7 +13,7 @@ Capabilities are surfaced over MCP (`tools/list`) and JSON-RPC (`capabilities.li
 | 🟡 `approval_required` | Agent must wait for supervisor approval before execution (default 24-hour hold for User MCP calls) |
 | 🔴 `blocked` | Blocked unconditionally — requires explicit policy override to surface |
 
-## Categories (89 capabilities)
+## Categories (92 capabilities)
 
 | Category | Capabilities | Description |
 |----------|:------------:|-------------|
@@ -21,9 +21,9 @@ Capabilities are surfaced over MCP (`tools/list`) and JSON-RPC (`capabilities.li
 | [Alerts](alerts.md) | 3 | Send, list, and acknowledge supervisor alerts. |
 | [Communications](comms.md) | 4 | Agent-to-agent messaging, broadcast, pub/sub channels, and inbox polling. |
 | [Email (Gmail)](email.md) | 7 | Search, read, send, delete, move, and draft emails via the Service Proxy. |
-| [Filesystem](filesystem.md) | 12 | Read, write, search, copy, move, delete, watch, and restore files and directories. |
-| [Git](git.md) | 8 | Clone, pull, push, commit, diff, log, branch, and stash management. |
-| [Network](network.md) | 4 | HTTP requests, DNS lookups, file downloads, and port checks. |
+| [Filesystem](filesystem.md) | 13 | Read, write, append, edit, search, copy, move, delete, watch, and restore files and directories. |
+| [Git](git.md) | 9 | Init, clone, pull, push, commit, diff, log, branch, and status. |
+| [Network](network.md) | 5 | HTTP requests, DNS lookups, file downloads, port checks, and gateway-mediated credentialed requests. |
 | [Process](process.md) | 5 | Execute commands, monitor background processes, and retrieve output. |
 | [Scheduler](scheduler.md) | 4 | Create, list, and delete cron-scheduled invocations, and delay execution. |
 | [Secrets](secrets.md) | 3 | List available secrets and request rotation. Raw values are never exposed (use-not-read contract). |
