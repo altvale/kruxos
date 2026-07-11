@@ -45,7 +45,7 @@ Size: 18.1 MB (encrypted)
 ```
 
 !!! info "Encryption"
-    Backups are encrypted with AES-256-GCM using a key derived from the vault master key. You need the vault passphrase to restore.
+    Backups are encrypted with AES-256-GCM. The encryption key is derived from your **vault passphrase** with **Argon2id** (plus a per-file salt), matching the vault's own key-derivation — so you need the vault passphrase to restore. Older backups (a single unsalted key-derivation) still restore: the format version is recorded in each file's header and detected automatically.
 
 ### Scheduled backups
 

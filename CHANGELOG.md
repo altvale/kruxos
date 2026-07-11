@@ -12,6 +12,11 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
+- Documented the **`network.credentialed_request`** capability: the gateway
+  attaches an operator-provisioned, vault-stored credential at the network
+  boundary; the agent references the secret by name and never sees the
+  value, and the secret must be scoped to the capability and host-bound.
+
 - Remote Access guide — recipes for reaching the dashboard from outside
   the LAN with Tailscale, Cloudflare Tunnel, or Ngrok. Covers the
   security trade-offs (expose only the dashboard port; keep the loopback
@@ -19,6 +24,11 @@ Per-release notes with more narrative detail live under
   troubleshooting.
 
 ### Fixed
+
+- Backup & Restore guide: corrected the encryption description — state
+  backups are AES-256-GCM with a key derived from the **vault passphrase
+  via Argon2id** (with a per-file salt), and older backups still restore
+  (the format version is auto-detected).
 
 - Security whitepaper: supervision is now described as a **root-only local
   control socket** (peer-credential, uid 0) instead of a network port with
