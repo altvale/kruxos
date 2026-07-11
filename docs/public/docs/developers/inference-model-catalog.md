@@ -115,15 +115,47 @@ appliances everywhere. Two properties make this safe to open to contributions:
 3. **Edit `docs/public/docs/inference/models.json`** — add your object to the
    `models` array. Keep the existing entries intact.
 
-4. **Validate locally** before opening the PR:
-
-   ```bash
-   python3 -m json.tool docs/public/docs/inference/models.json > /dev/null && echo OK
-   ```
+4. **Validate the shape locally** before opening the PR — a plain JSON syntax
+   check is *not* enough (see [Validate before you open a PR](#validate-before-you-open-a-pr)
+   below). Run the shape check and fix anything it flags.
 
 5. **Open a pull request** describing the model, its license, and how you
    obtained the `sha256`/`size_bytes` (paste the commands above and their
    output). Flag anything unusual about the license.
+
+## Validate before you open a PR
+
+!!! danger "A structural mistake breaks the catalog for *every* appliance"
+    The appliance deserializes the whole file in one pass, so a **missing or
+    misspelled required key**, or a **wrong field type** — for example
+    `"size_bytes": "123"` (a string) instead of `123` (an integer) — fails the
+    *entire* file and takes every appliance's catalog offline until it's fixed.
+    These mistakes are still valid JSON, so a plain syntax check (`json.tool`)
+    passes them. Per-entry dropping only rescues entries that *parse* but fail a
+    value rule (bad id, non-https url, malformed `sha256`, zero size) — it does
+    **not** rescue a shape error.
+
+Validate the *shape*, not just the JSON syntax:
+
+```bash
+python3 - <<'PY'
+import json, re
+d = json.load(open("docs/public/docs/inference/models.json"))
+assert d.get("schema_version") == 1, "schema_version must be 1"
+slug = re.compile(r"^[A-Za-z0-9._-]{1,128}$")
+for m in d["models"]:
+    for k in ("id", "url", "sha256", "size_bytes"):
+        assert k in m, f"missing required key: {k}"
+    i = m["id"]
+    assert slug.match(i) and ".." not in i and i[0] not in ".-", f"bad id: {i}"
+    assert not i.startswith(("hf-", "byom-")), f"reserved id prefix: {i}"
+    assert m["url"].startswith("https://"), f"url must be https: {i}"
+    assert re.fullmatch(r"[0-9a-f]{64}", m["sha256"]), f"sha256 must be 64 lowercase hex: {i}"
+    assert isinstance(m["size_bytes"], int) and not isinstance(m["size_bytes"], bool) \
+        and m["size_bytes"] > 0, f"size_bytes must be an integer > 0: {i}"
+print("OK —", len(d["models"]), "entries valid")
+PY
+```
 
 ## Review and trust
 
@@ -133,9 +165,21 @@ ingestion. Reviewers check that the license is genuinely permissive, that the
 `sha256`/`size_bytes` are real and verifiable by the method above, and that the
 `id` is sane and additive.
 
-Because the catalog is additive-only and hash-verified, the worst a bad entry
-can do is fail to install (a hash mismatch is refused on the appliance). It can
-never shadow, downgrade, or replace a built-in model.
+Be precise about what the `sha256` proves and what it doesn't. It guarantees
+every appliance receives **exactly the bytes the reviewer approved** — it does
+*not* prove the model is benign. A malicious model that matches its own declared
+hash still installs and runs; the hash only rules out substitution and
+corruption, not intent. That is why **maintainer PR review is the trust gate**
+for what a model actually is.
+
+Two things bound the blast radius even so:
+
+- The catalog is **additive-only** — an entry can never shadow, downgrade, or
+  replace a built-in model.
+- The inference engine runs models in a **sandboxed, unprivileged service** —
+  no network beyond a local socket, a read-only model store, and no access to
+  your vault or agent state — so a hostile model's worst case is bad *outputs*,
+  not a compromised appliance.
 
 ## What happens on the appliance
 
@@ -143,9 +187,12 @@ When an appliance loads the catalog, it:
 
 - **Fetches over HTTPS with a size cap** — the download is bounded, so a
   hostile or misconfigured host cannot flood the appliance.
-- **Validates the schema** — malformed entries (bad id, non-https url, wrong
-  `sha256` format, zero size) are dropped individually; one bad entry never
-  breaks the rest of the catalog.
+- **Validates each entry** — an entry that *parses* but fails a value rule (bad
+  id, non-https url, malformed `sha256`, zero size) is dropped on its own and
+  the rest of the catalog still loads. A **structural** error is different — a
+  missing or misspelled required key, or a wrong field type fails the
+  whole-file parse (see [Validate before you open a PR](#validate-before-you-open-a-pr)),
+  so keep the shape valid.
 - **Merges built-ins first** — built-in models always win an id collision, and
   reserved-prefix entries are refused.
 - **Caches the result** and **degrades gracefully** — if the catalog is
