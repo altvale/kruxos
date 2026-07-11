@@ -20,6 +20,12 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Pack authoring guides: the manifest file is **`manifest.yaml`** (the
+  Pack SDK scaffolds and requires it — `pack.yaml` is rejected), and the
+  `capabilities:` list holds **definition-file paths** (e.g.
+  `definitions/weather.yaml`), not capability name-strings. Updated the
+  quickstart, publishing, and service-proxy pack guides.
+
 - Monitoring guide: corrected the health endpoint reference to the real
   API — port **7704** (was 7701), the `services` field is a JSON **array**
   (was an object), the overall status value is **`critical`** (was
