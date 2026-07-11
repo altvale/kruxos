@@ -20,6 +20,13 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Security whitepaper: supervision is now described as a **root-only local
+  control socket** (peer-credential, uid 0) instead of a network port with
+  an admin passphrase — the AC-17 mapping row, the principal table, and the
+  TLS/limitations sections were corrected. Also documents the **opt-in
+  Tailscale tailnet** surface (userspace daemon, `tailscale serve`
+  publishing only the dashboard, an egress guard fencing the loopback ports).
+
 - Model Providers guide: documented the unified **Local model
   (self-hosted)** provider — the engine sub-selector (Ollama native /
   OpenAI-compatible over `/v1` / KruxOS on-box engine), the optional API
