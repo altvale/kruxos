@@ -20,7 +20,7 @@ async def main():
     async with await KruxOS.connect_async(
         endpoint="ws://localhost:7700",
         agent_name="my-agent",
-        api_key="aos_your_key_here",
+        api_key="<64-char hex key from kruxos agent create>",
     ) as agent:
         # Discover capabilities
         caps = await agent.capabilities.list_async()
@@ -48,7 +48,7 @@ from kruxos import KruxOS
 async with await KruxOS.connect_async(
     endpoint="ws://localhost:7700",
     agent_name="my-agent",
-    api_key="aos_your_key_here",
+    api_key="<64-char hex key from kruxos agent create>",
 ) as agent:
     # agent is connected and authenticated
     pass
@@ -61,7 +61,7 @@ Prefer to manage the connection yourself? Await the factory and close explicitly
 agent = await KruxOS.connect_async(
     endpoint="ws://localhost:7700",
     agent_name="my-agent",
-    api_key="aos_your_key_here",
+    api_key="<64-char hex key from kruxos agent create>",
 )
 try:
     ...
@@ -77,7 +77,7 @@ from kruxos import KruxOS
 agent = KruxOS.connect(
     endpoint="ws://localhost:7700",
     agent_name="my-agent",
-    api_key="aos_your_key_here",
+    api_key="<64-char hex key from kruxos agent create>",
 )
 result = agent.call("filesystem.list", path="/workspace")
 agent.close()
@@ -151,8 +151,13 @@ result = await agent.call_async(
 
 if result.status == ResponseStatus.SUCCESS:
     print(result.data["content"])
-elif result.error:
-    print(f"Error: {result.error.error_type} — {result.error.description}")
+else:
+    # On the default MCP protocol a failure comes back as a non-SUCCESS status
+    # with the message in result.data; structured `result.error` objects are not
+    # populated here. Most failures instead raise a typed exception — see
+    # "With error handling" below.
+    message = result.data.get("text") if result.data else None
+    print(f"Failed: {message or 'unknown error'}")
 ```
 
 ### With error handling
@@ -204,8 +209,9 @@ except ApprovalRequiredError as e:
     if result.status == ResponseStatus.SUCCESS:
         print(f"Approved! Result: {result.data}")
     else:
-        reason = result.error.description if result.error else "unknown"
-        print(f"Rejected: {reason}")
+        # Rejected/failed: on the default MCP protocol the reason is in result.data
+        detail = result.data.get("text") if result.data else None
+        print(f"Rejected: {detail or 'no reason given'}")
 ```
 
 ### Non-blocking (poll)
@@ -268,16 +274,18 @@ keys = await agent.state.list_async(prefix="config.")
 ### Shared state (cross-agent)
 
 ```python
-from kruxos.errors import ConflictError
+from kruxos.errors import KruxOSError
 
 # Read a value visible to all agents
 value = await agent.state.get_async("counter", tier="shared")
 
-# Update it — concurrent writers may raise ConflictError
+# Update it. Shared writes are last-write-wins through the SDK — there is no
+# expected-version / optimistic-locking argument, so concurrent writers do not
+# raise a conflict; the most recent write simply prevails.
 try:
     await agent.state.set_async("counter", (value or 0) + 1, tier="shared")
-except ConflictError:
-    # Another agent updated concurrently — re-read and retry
+except KruxOSError:
+    # Surfaces transport or gateway errors (base class for all SDK errors)
     pass
 ```
 
@@ -333,14 +341,15 @@ Claude Desktop connects to KruxOS through a small stdio bridge. Generate the
 config entry with `generate_claude_desktop_config`:
 
 ```python
+import json
 from kruxos.connectors import generate_claude_desktop_config
 
 config = generate_claude_desktop_config(
     endpoint="ws://localhost:7700",
     agent_name="my-agent",
-    api_key="aos_your_key_here",
+    api_key="<64-char hex key from kruxos agent create>",
 )
-print(config)
+print(json.dumps(config, indent=2))
 ```
 
 Output:
@@ -349,11 +358,14 @@ Output:
 {
   "kruxos": {
     "command": "python3",
-    "args": ["-m", "kruxos.connectors.claude_bridge"],
+    "args": [
+      "-m",
+      "kruxos.connectors.claude_bridge"
+    ],
     "env": {
       "KRUXOS_ENDPOINT": "ws://localhost:7700",
       "KRUXOS_AGENT_NAME": "my-agent",
-      "KRUXOS_API_KEY": "aos_your_key_here"
+      "KRUXOS_API_KEY": "<64-char hex key from kruxos agent create>"
     }
   }
 }
@@ -398,7 +410,7 @@ async def research_agent():
     async with await KruxOS.connect_async(
         endpoint="ws://localhost:7700",
         agent_name="research-agent",
-        api_key="aos_your_key_here",
+        api_key="<64-char hex key from kruxos agent create>",
     ) as agent:
         # Check what happened while we were offline
         briefing = await agent.briefing_async()
