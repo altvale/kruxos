@@ -178,20 +178,24 @@ Agents can send alerts to supervisors:
 await os.call_async(
     "alerts.send",
     severity="warning",
-    title="Deployment failed",
-    message="Tests failed on commit abc1234. Manual review needed.",
+    message="Deployment failed: tests failed on commit abc1234. Manual review needed.",
+    context={"commit": "abc1234", "stage": "tests"},
 )
 ```
+
+`alerts.send` takes `message` (required), `severity` (`info` / `warning` / `critical`, default `info`), and an optional structured `context` object.
 
 ### Viewing alerts
 
 ```bash
-# Recent alerts
-kruxos alerts --last 24h
+# Show active alerts — live resource alerts plus any alerts agents have raised
+kruxos alerts
 
-# Critical only
-kruxos alerts --severity critical
+# Machine-readable output (for scripting)
+kruxos alerts --json
 ```
+
+`kruxos alerts` groups its output into **Resource Alerts** (disk-usage and CPU-load conditions checked live) and **Agent Alerts** (raised via `alerts.send`, newest first — each with its severity, message, structured context, and whether it's been acknowledged).
 
 On the dashboard, the **Alerts** page (`/alerts`) lists every alert and lets you acknowledge it once handled; its sidebar entry carries a count badge, and critical alerts also raise a banner on every page — so an alert an agent sends reaches you wherever you are. See [Web Dashboard → Alerts](../quickstart/dashboard.md#alerts-alerts) for the full breakdown.
 
@@ -203,19 +207,23 @@ KruxOS deduplicates identical alerts. If the same condition triggers repeatedly,
 
 ### Gmail sync status
 
+To check whether Gmail (or Slack) is connected and its token healthy:
+
 ```bash
-kruxos status
+kruxos connect status
 ```
 
-The status output includes proxy health:
+Example output:
 
 ```
-Proxy:      syncing (last: 2m ago)
-  Gmail:    connected, 2347 messages synced
-  Buffer:   0 pending writes
+● Gmail: connected (you@example.com)
+    token expires: 2026-07-12T14:03:21Z
+○ Slack: not connected — run `kruxos connect slack`
 ```
 
-On the dashboard, navigate to **Service Proxy** at `/proxy` for detailed sync status, write buffer contents, and error history. The page auto-refreshes every 10 seconds and renders a five-cell overview strip at the top — **Total services**, **Synced**, **With errors**, **Buffered ops**, and **Dead letters** — so the dead-letter count is now visible at a glance instead of buried inside each per-service card.
+If a connection needs re-authorising, the line shows **needs attention — reconnect recommended**. For detailed sync status — last sync time, buffered writes, dead letters, and errors — use the dashboard **Service Proxy** page described below.
+
+On the dashboard, navigate to **Service Proxy** at `/proxy` for detailed sync status, write buffer contents, and error history. The page auto-refreshes every 10 seconds and renders a five-cell overview strip at the top — **Total services**, **Synced**, **With errors**, **Buffered operations**, and **Dead letters** — so the dead-letter count is now visible at a glance instead of buried inside each per-service card.
 
 Below the overview strip, each service card shows sync status, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending writes with **Cancel** (for buffered) and **Retry** / **Discard** (for dead letters). When a service's sync is failing, the card also shows how many consecutive failures it has seen and the last sync error — so a missing scope, an expired token, or a network problem surfaces directly on the card instead of leaving the service stuck on "Never / Unknown" with no explanation. All three actions go through a confirm modal.
 

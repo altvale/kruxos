@@ -12,6 +12,17 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
+- Community inference-model catalog — the appliance now merges a
+  contributor-maintained list of local GGUF models
+  (`https://docs.kruxos.com/inference/models.json`) into its built-in set, so
+  community models appear in the **Settings → Inference** picker. Every entry
+  is hash-verified before use, is additive-only (it can never modify or replace
+  a built-in model), and lands only via maintainer-reviewed pull request. New
+  **Inference Model Catalog** developer guide covers the file format, the
+  field-by-field rules, and how to obtain a real `sha256`/`size_bytes` from
+  Hugging Face LFS metadata without downloading the weights. Seeded with
+  TinyLlama 1.1B Chat (Q4_K_M, Apache-2.0).
+
 - Documented the **`network.credentialed_request`** capability: the gateway
   attaches an operator-provisioned, vault-stored credential at the network
   boundary; the agent references the secret by name and never sees the
@@ -33,7 +44,28 @@ Per-release notes with more narrative detail live under
   fingerprint-verifying an SSH key; documented there and in the security
   whitepaper.
 
+### Changed
+
+- GPU Drivers guide rewritten around the new **one-click Install Now** flow:
+  after an NVIDIA license attestation the appliance fetches the version-pinned
+  driver directly from NVIDIA and the KruxOS GPU kit from the signed GitHub
+  Release, then verifies the kit signature and hash-checks the driver against a
+  checksum signed into the kit (an auto-fetched mismatch blocks the install; a
+  manual-upload mismatch only warns). The manual two-upload flow stays available
+  as the air-gap path. Corrected the framing that KruxOS "never downloads" the
+  driver — it never *hosts or redistributes* NVIDIA's driver, which always comes
+  straight from NVIDIA.
+
 ### Fixed
+
+- Monitoring guide corrected against the shipped CLI: `kruxos alerts` takes no
+  `--last`/`--severity` flags (it lists live resource alerts plus agent-raised
+  alerts; use `--json` for machine-readable output); the `alerts.send` examples
+  (Monitoring guide and SDK guide) use the real `message`/`severity`/`context`
+  fields (there is no `title` field); and the Gmail sync-status section now
+  points at `kruxos connect status` for connection state and the dashboard
+  **Service Proxy** page for detailed sync / buffer / dead-letter status. The
+  proxy overview-strip label matches the UI (**Buffered operations**).
 
 - Security model page: documented the **enforced + audited** use-not-read
   secrets model (deny-by-default scope, a `secrets.use` audit entry per
