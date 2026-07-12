@@ -80,16 +80,34 @@ kruxos status
 Expected output:
 
 ```
-System Health: HEALTHY
-━━━━━━━━━━━━━━━━━━━━━━━
-  CPU:     12.5% (ok)
-  Memory:  256 MB / 2048 MB (ok)
-  Disk:    34.2% (ok)
-  Gateway: running
-  Vault:   unlocked
-  Proxy:   syncing (last: 2m ago)
-  Audit:   writing (chain: verified)
+KruxOS Status
+
+  Gateway:             running (port 7700)
+  Health:              healthy
+
+Services
+  gateway              healthy      <1ms  listening on 7700
+  vault                healthy       2ms  unlocked
+  proxy                healthy       8ms  3 services connected
+  audit                healthy       1ms  chain intact
+
+Resources
+  CPU:                 12.3%
+  Memory:              7.5 GiB / 14.9 GiB (50.3%)
+  Disk:                111.8 GiB / 465.7 GiB (24.0%)
+
+Agents
+  Total:               0
+  Active:              0
+  Revoked:             0
+
+Approval Queue
+  Pending:             0
+  Approved today:      0
+  Rejected today:      0
 ```
+
+Each service line reads `healthy`, `degraded`, or `critical`, and the top **Health** line reflects the worst of them; on an interactive terminal the status words and the CPU / memory / disk percentages are colour-coded green / yellow / red (percentages turn yellow above 60% and red above 80%). When the gateway is unreachable the **Services** and **Resources** blocks are omitted and `kruxos status` reports just the gateway line, so an outage is obvious.
 
 ### Dashboard
 
