@@ -86,10 +86,8 @@ KruxOS Status
   Health:              healthy
 
 Services
-  gateway              healthy      <1ms  listening on 7700
-  vault                healthy       2ms  unlocked
-  proxy                healthy       8ms  3 services connected
-  audit                healthy       1ms  chain intact
+  sandbox-confinement  healthy      <1ms  Landlock enforced (kernel ABI v4)
+  inference-engine     healthy      <1ms  on-appliance inference not installed (not configured)
 
 Resources
   CPU:                 12.3%
@@ -107,7 +105,7 @@ Approval Queue
   Rejected today:      0
 ```
 
-Each service line reads `healthy`, `degraded`, or `critical`, and the top **Health** line reflects the worst of them; on an interactive terminal the status words and the CPU / memory / disk percentages are colour-coded green / yellow / red (percentages turn yellow above 60% and red above 80%). When the gateway is unreachable the **Services** and **Resources** blocks are omitted and `kruxos status` reports just the gateway line, so an outage is obvious.
+The **Services** list shows the gateway's registered health checks — currently **sandbox confinement** and the **on-appliance inference engine** (a not-installed inference engine is the expected opt-out default and still reports `healthy`). Each line reads `healthy`, `degraded`, or `critical`, and the top **Health** line reflects the worst of them; on an interactive terminal the status words and the CPU / memory / disk percentages are colour-coded green / yellow / red (percentages turn yellow at or above 60% and red at or above 80%). The **Services** and **Resources** blocks come from the health endpoint, so they are omitted when the gateway is unreachable — the **Gateway**, **Health**, **Agents**, and **Approval Queue** sections still render from local data.
 
 ### Dashboard
 
