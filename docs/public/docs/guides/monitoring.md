@@ -86,8 +86,8 @@ KruxOS Status
   Health:              healthy
 
 Services
-  sandbox-confinement  healthy      <1ms  Landlock enforced (kernel ABI v4)
-  inference-engine     healthy      <1ms  on-appliance inference not installed (not configured)
+  sandbox-confinement  healthy      <1ms  Landlock enforced (kernel ABI v4). The primary filesystem co…
+  inference-engine     healthy      <1ms  on-appliance inference not installed (not configured): this …
 
 Resources
   CPU:                 12.3%
@@ -105,7 +105,7 @@ Approval Queue
   Rejected today:      0
 ```
 
-The **Services** list shows the gateway's registered health checks — currently **sandbox confinement** and the **on-appliance inference engine** (a not-installed inference engine is the expected opt-out default and still reports `healthy`). Each line reads `healthy`, `degraded`, or `critical`, and the top **Health** line reflects the worst of them; on an interactive terminal the status words and the CPU / memory / disk percentages are colour-coded green / yellow / red (percentages turn yellow at or above 60% and red at or above 80%). The **Services** and **Resources** blocks come from the health endpoint, so they are omitted when the gateway is unreachable — the **Gateway**, **Health**, **Agents**, and **Approval Queue** sections still render from local data.
+The **Services** list shows the gateway's registered health checks — currently **sandbox confinement** and the **on-appliance inference engine** (a not-installed inference engine is the expected opt-out default and still reports `healthy`). In the terminal each service's details are truncated with a trailing ellipsis; the full text is available via `kruxos status --json`. Each line reads `healthy`, `degraded`, or `critical`, and the top **Health** line reflects the worst of them; on an interactive terminal the status words and the CPU / memory / disk percentages are colour-coded green / yellow / red (percentages turn yellow at or above 60% and red at or above 80%). The **Services** and **Resources** blocks come from the health endpoint, so they are omitted when the gateway is unreachable — the **Gateway**, **Health**, **Agents**, and **Approval Queue** sections still render from local data.
 
 ### Dashboard
 
