@@ -1,6 +1,6 @@
 # Python SDK Guide
 
-The KruxOS Python SDK (`kruxos`) provides a typed, async client for connecting agents to the KruxOS Gateway over the supervision WebSocket.
+The KruxOS Python SDK (`kruxos`) provides a typed, async client for connecting agents to the KruxOS Gateway over the Gateway's MCP WebSocket.
 
 ## Installation
 
@@ -17,20 +17,26 @@ import asyncio
 from kruxos import KruxOS
 
 async def main():
-    async with KruxOS.connect_async("localhost:7700", api_key="<64-char hex>") as agent:
+    async with await KruxOS.connect_async(
+        endpoint="ws://localhost:7700",
+        agent_name="my-agent",
+        api_key="aos_your_key_here",
+    ) as agent:
         # Discover capabilities
-        caps = await agent.capabilities.list()
+        caps = await agent.capabilities.list_async()
         print(f"Available: {len(caps)} capabilities")
 
         # Read a file
-        result = await agent.capabilities.invoke(
+        result = await agent.call_async(
             "filesystem.read",
-            path="/workspace/README.md"
+            path="/workspace/README.md",
         )
         print(result.data["content"])
 
 asyncio.run(main())
 ```
+
+`connect_async()` returns a connected client, and the client is itself an async context manager — hence `async with await KruxOS.connect_async(...)`, which closes the connection automatically on exit. Capabilities are invoked with `agent.call_async(name, **inputs)` (async) or `agent.call(name, **inputs)` (sync).
 
 ## Connection
 
@@ -39,13 +45,28 @@ asyncio.run(main())
 ```python
 from kruxos import KruxOS
 
-async with KruxOS.connect_async(
-    host="localhost:7700",
-    api_key="7f3a8c1d2e9b5a4f8e6c1d3b7a9f2e5c8d1b4a7f3c9e6d8b1a4c7f2e5d9b8a3c",
+async with await KruxOS.connect_async(
+    endpoint="ws://localhost:7700",
+    agent_name="my-agent",
+    api_key="aos_your_key_here",
 ) as agent:
     # agent is connected and authenticated
     pass
 # Connection closed automatically
+```
+
+Prefer to manage the connection yourself? Await the factory and close explicitly:
+
+```python
+agent = await KruxOS.connect_async(
+    endpoint="ws://localhost:7700",
+    agent_name="my-agent",
+    api_key="aos_your_key_here",
+)
+try:
+    ...
+finally:
+    await agent.close_async()
 ```
 
 ### Sync connection
@@ -53,51 +74,67 @@ async with KruxOS.connect_async(
 ```python
 from kruxos import KruxOS
 
-agent = KruxOS.connect("localhost:7700", api_key="<64-char hex>")
-result = agent.capabilities.invoke("filesystem.list", path="/workspace")
-agent.disconnect()
+agent = KruxOS.connect(
+    endpoint="ws://localhost:7700",
+    agent_name="my-agent",
+    api_key="aos_your_key_here",
+)
+result = agent.call("filesystem.list", path="/workspace")
+agent.close()
 ```
 
-### Connection from environment
+### Connection details from the environment
+
+The SDK does not read connection settings implicitly — pass them in yourself. A common pattern is to source them from the environment:
 
 ```python
+import os
 from kruxos import KruxOS
 
-# Reads KRUXOS_HOST and KRUXOS_API_KEY from environment
-async with KruxOS.connect_async() as agent:
-    pass
+agent = await KruxOS.connect_async(
+    endpoint=os.environ.get("KRUXOS_ENDPOINT", "ws://localhost:7700"),
+    agent_name=os.environ["KRUXOS_AGENT_NAME"],
+    api_key=os.environ["KRUXOS_API_KEY"],
+)
 ```
+
+These are the same variable names the bundled Claude bridge reads (`KRUXOS_ENDPOINT`, `KRUXOS_AGENT_NAME`, `KRUXOS_API_KEY`).
 
 ## Capability discovery
 
 ### List all capabilities
 
 ```python
-caps = await agent.capabilities.list()
+caps = await agent.capabilities.list_async()
 for cap in caps:
-    print(f"{cap.name} ({cap.permission_tier})")
+    print(f"{cap.name}: {cap.description}")
 ```
 
 ### Filter by category
 
 ```python
-fs_caps = await agent.capabilities.list(category="filesystem")
+fs_caps = await agent.capabilities.list_async(category="filesystem")
 ```
 
 ### Describe a capability
 
 ```python
-cap = await agent.capabilities.describe("filesystem.read")
-print(cap.purpose)
-print(cap.when_to_use)
-for inp in cap.inputs:
-    print(f"  {inp.name}: {inp.type} {'(required)' if inp.required else '(optional)'}")
+cap = await agent.capabilities.describe_async("filesystem.read")
+print(cap.description)
+
+# input_schema is a JSON Schema object describing the capability's inputs
+properties = cap.input_schema.get("properties", {})
+required = set(cap.input_schema.get("required", []))
+for name, spec in properties.items():
+    kind = spec.get("type", "any")
+    flag = "(required)" if name in required else "(optional)"
+    print(f"  {name}: {kind} {flag}")
 ```
 
-### Search by tag
+### Search by name
 
 ```python
-safe_caps = await agent.capabilities.list(tag="safe")
+read_caps = await agent.capabilities.list_async(name_contains="read")
 ```
 
 ## Invocation
@@ -105,194 +142,204 @@ safe_caps = await agent.capabilities.list(tag="safe")
 ### Basic invocation
 
 ```python
-result = await agent.capabilities.invoke(
+from kruxos import ResponseStatus
+
+result = await agent.call_async(
     "filesystem.read",
-    path="/workspace/data.csv"
+    path="/workspace/data.csv",
 )
 
-if result.success:
+if result.status == ResponseStatus.SUCCESS:
     print(result.data["content"])
-else:
-    print(f"Error: {result.error.type} — {result.error.message}")
+elif result.error:
+    print(f"Error: {result.error.error_type} — {result.error.description}")
 ```
 
 ### With error handling
 
+Denials, missing approvals, and other failures are raised as typed exceptions — catch the specific subclass you care about, falling back to `CapabilityError`:
+
 ```python
-from kruxos.errors import CapabilityError, PolicyDenied, ApprovalRequired
+from kruxos.errors import CapabilityError, PolicyDeniedError, ApprovalRequiredError
 
 try:
-    result = await agent.capabilities.invoke(
+    result = await agent.call_async(
         "process.run",
-        command="ls -la /workspace"
+        command="ls -la /workspace",
     )
     print(result.data["stdout"])
-except PolicyDenied as e:
-    print(f"Policy blocked: {e.message}")
-    print(f"Rule: {e.rule}")
-except ApprovalRequired as e:
-    print(f"Waiting for approval: {e.approval_id}")
-    # Wait for approval (see Approval section below)
-    result = await agent.approvals.wait(e.approval_id, timeout=300)
+except PolicyDeniedError as e:
+    print(f"Policy blocked: {e}")
+except ApprovalRequiredError as e:
+    print(f"Waiting for approval: {e.request_id}")
+    # Wait for approval (see Approvals section below)
+    result = await agent.wait_for_approval_async(e.request_id, timeout=300)
 except CapabilityError as e:
-    print(f"Error: {e.type}")
-    for recovery in e.recovery:
-        print(f"  Try: {recovery.action} — {recovery.description}")
+    print(f"Error: {e.error_type}")
+    if e.structured:
+        for recovery in e.structured.recovery_actions:
+            print(f"  Try: {recovery.action} — {recovery.description}")
 ```
 
 ## Approvals
 
+When a call needs human approval, `call_async` raises `ApprovalRequiredError`
+carrying the `request_id`. Resolve it with `wait_for_approval_async`.
+
 ### Blocking wait
 
 ```python
-from kruxos.errors import ApprovalRequired
+from kruxos import ResponseStatus
+from kruxos.errors import ApprovalRequiredError
 
 try:
-    result = await agent.capabilities.invoke(
+    result = await agent.call_async(
         "process.run",
-        command="kubectl apply -f deploy.yaml"
+        command="kubectl apply -f deploy.yaml",
     )
-except ApprovalRequired as e:
-    print(f"Approval needed: {e.approval_id}")
+except ApprovalRequiredError as e:
+    print(f"Approval needed: {e.request_id}")
     # Blocks until approved/rejected (or timeout)
-    result = await agent.approvals.wait(e.approval_id, timeout=600)
-    if result.approved:
+    result = await agent.wait_for_approval_async(e.request_id, timeout=600)
+    if result.status == ResponseStatus.SUCCESS:
         print(f"Approved! Result: {result.data}")
     else:
-        print(f"Rejected: {result.reason}")
+        reason = result.error.description if result.error else "unknown"
+        print(f"Rejected: {reason}")
 ```
 
 ### Non-blocking (poll)
 
 ```python
-from kruxos.errors import ApprovalRequired
 import asyncio
+from kruxos.errors import ApprovalRequiredError
 
 try:
-    result = await agent.capabilities.invoke("process.run", command="deploy.sh")
-except ApprovalRequired as e:
-    approval_id = e.approval_id
-    # Do other work while waiting
-    while True:
-        status = await agent.approvals.check(approval_id)
-        if status.resolved:
-            break
+    result = await agent.call_async("process.run", command="deploy.sh")
+except ApprovalRequiredError as e:
+    # Resolve the approval in the background while doing other work
+    approval = asyncio.create_task(
+        agent.wait_for_approval_async(e.request_id, timeout=600)
+    )
+    while not approval.done():
+        # ... do other work ...
         await asyncio.sleep(5)
+    result = await approval
 ```
 
 ## State management
+
+The `agent.state` API stores values across three tiers — `session` (in-memory,
+current session only), `persistent` (per-agent, survives sessions), and `shared`
+(cross-agent). The tier is a parameter; `persistent` is the default.
 
 ### Session state (in-memory, current session only)
 
 ```python
 # Store
-await agent.state.session.set("task.current", {"step": 3, "total": 10})
+await agent.state.set_async("task.current", {"step": 3, "total": 10}, tier="session")
 
-# Read
-result = await agent.state.session.get("task.current")
-if result.found:
-    print(result.value)  # {"step": 3, "total": 10}
+# Read (returns the stored value, or None if not set)
+value = await agent.state.get_async("task.current", tier="session")
+if value is not None:
+    print(value)  # {"step": 3, "total": 10}
 
 # List keys
-keys = await agent.state.session.list(prefix="task.")
+keys = await agent.state.list_async(tier="session", prefix="task.")
 
 # Clean up
-await agent.state.session.delete("task.current")
+await agent.state.delete_async("task.current", tier="session")
 ```
 
 ### Persistent state (survives across sessions)
 
 ```python
-# Store (versioned — each write creates a new version)
-await agent.state.persistent.set("config.threshold", 0.85)
+# Store (persistent is the default tier)
+await agent.state.set_async("config.threshold", 0.85)
 
 # Read
-result = await agent.state.persistent.get("config.threshold")
-print(f"Value: {result.value}, version: {result.version}")
+value = await agent.state.get_async("config.threshold")
+print(f"Value: {value}")
 
-# Read specific version
-old = await agent.state.persistent.get("config.threshold", version=1)
-
-# Version history
-history = await agent.state.persistent.history("config.threshold", limit=5)
-for entry in history.versions:
-    print(f"v{entry.version}: {entry.value} ({entry.updated_at})")
+# List keys under a prefix
+keys = await agent.state.list_async(prefix="config.")
 ```
 
-### Shared state (cross-agent, optimistic locking)
+### Shared state (cross-agent)
 
 ```python
-# Read (returns version for optimistic locking)
-entry = await agent.state.shared.get("counter")
+from kruxos.errors import ConflictError
 
-# Write (must pass expected_version)
+# Read a value visible to all agents
+value = await agent.state.get_async("counter", tier="shared")
+
+# Update it — concurrent writers may raise ConflictError
 try:
-    await agent.state.shared.set(
-        "counter",
-        entry.value + 1,
-        expected_version=entry.version
-    )
-except VersionConflict:
-    # Another agent updated — re-read and retry
+    await agent.state.set_async("counter", (value or 0) + 1, tier="shared")
+except ConflictError:
+    # Another agent updated concurrently — re-read and retry
     pass
-
-# Watch for changes
-await agent.state.shared.watch(prefix="config.", callback=on_config_change)
 ```
 
 ## Transactions
 
 ```python
-from kruxos import transaction
-
-async with transaction(agent) as tx:
-    await tx.invoke("filesystem.write", path="/workspace/a.txt", content="hello")
-    await tx.invoke("filesystem.write", path="/workspace/b.txt", content="world")
-    # If any invocation fails, all are rolled back
+async with agent.transaction() as tx:
+    await tx.call_async("filesystem.write", path="/workspace/a.txt", content="hello")
+    await tx.call_async("filesystem.write", path="/workspace/b.txt", content="world")
+    # Commits on clean exit; if any call raises, all are rolled back
 ```
 
 ## Context briefings
 
 ```python
-# Get a summary of what changed since last session
-briefing = await agent.capabilities.invoke("state.briefing.generate")
-print(briefing.data["briefing"]["summary"])
+# Get a structured summary of what changed since the last connection
+briefing = await agent.briefing_async()
+print(f"Filesystem changes: {len(briefing.filesystem_changes)}")
+print(f"Pending approvals:  {len(briefing.pending_approvals)}")
+print(f"State changes:      {len(briefing.state_changes)}")
 ```
 
 ## Service Proxy (email example)
 
 ```python
 # Search emails (reads from local replica — no API calls)
-result = await agent.capabilities.invoke(
+result = await agent.call_async(
     "email.search",
     query="invoice",
-    is_read=False
+    is_read=False,
 )
 
 for msg in result.data["messages"]:
     print(f"{msg['from']}: {msg['subject']}")
 
 # Send email (buffered — 5 min cancellation window)
-result = await agent.capabilities.invoke(
+result = await agent.call_async(
     "email.send",
     to="alice@example.com",
     subject="Report",
-    body="Please find the report attached."
+    body="Please find the report attached.",
 )
 write_id = result.data["write_id"]
 print(f"Buffered until {result.data['buffer_until']}")
 
 # Cancel if needed
-await agent.capabilities.invoke("proxy.cancel_write", write_id=write_id)
+await agent.call_async("proxy.cancel_write", write_id=write_id)
 ```
 
 ## MCP configuration (for Claude)
 
-```python
-from kruxos import KruxOS
+Claude Desktop connects to KruxOS through a small stdio bridge. Generate the
+config entry with `generate_claude_desktop_config`:
 
-agent = KruxOS.connect("localhost:7700", api_key="7f3a8c1d2e9b5a4f8e6c1d3b7a9f2e5c8d1b4a7f3c9e6d8b1a4c7f2e5d9b8a3c")
-config = agent.as_mcp_config()
+```python
+from kruxos.connectors import generate_claude_desktop_config
+
+config = generate_claude_desktop_config(
+    endpoint="ws://localhost:7700",
+    agent_name="my-agent",
+    api_key="aos_your_key_here",
+)
 print(config)
 ```
 
@@ -300,18 +347,21 @@ Output:
 
 ```json
 {
-  "mcpServers": {
-    "kruxos": {
-      "url": "ws://localhost:7700/mcp",
-      "headers": {
-        "Authorization": "Bearer 7f3a8c1d2e9b5a4f8e6c1d3b7a9f2e5c8d1b4a7f3c9e6d8b1a4c7f2e5d9b8a3c"
-      }
+  "kruxos": {
+    "command": "python3",
+    "args": ["-m", "kruxos.connectors.claude_bridge"],
+    "env": {
+      "KRUXOS_ENDPOINT": "ws://localhost:7700",
+      "KRUXOS_AGENT_NAME": "my-agent",
+      "KRUXOS_API_KEY": "aos_your_key_here"
     }
   }
 }
 ```
 
-Add this to Claude Desktop's `claude_desktop_config.json` or pass it programmatically.
+Merge this under `mcpServers` in Claude Desktop's `claude_desktop_config.json`, then restart Claude Desktop.
+
+For a connected client, `as_mcp_config(agent)` from `kruxos.connectors` returns the equivalent transport/auth descriptor programmatically.
 
 ## Pydantic models
 
@@ -319,12 +369,12 @@ All SDK responses are typed Pydantic models:
 
 ```python
 from kruxos.models import (
-    CapabilityDefinition,
-    InvocationResult,
-    ErrorResponse,
+    CapabilityDef,
+    CapabilityResponse,
+    StructuredError,
     RecoveryAction,
-    StateEntry,
-    ApprovalStatus,
+    ContextBriefing,
+    ResponseStatus,
 )
 ```
 
@@ -345,51 +395,56 @@ from kruxos import KruxOS
 from kruxos.errors import CapabilityError
 
 async def research_agent():
-    async with KruxOS.connect_async() as agent:
+    async with await KruxOS.connect_async(
+        endpoint="ws://localhost:7700",
+        agent_name="research-agent",
+        api_key="aos_your_key_here",
+    ) as agent:
         # Check what happened while we were offline
-        briefing = await agent.capabilities.invoke("state.briefing.generate")
-        print(briefing.data["briefing"]["summary"])
+        briefing = await agent.briefing_async()
+        print(f"{len(briefing.state_changes)} state changes since last run")
 
         # Resume from checkpoint
-        checkpoint = await agent.state.persistent.get("research.checkpoint")
-        start_from = checkpoint.value["page"] if checkpoint.found else 0
+        checkpoint = await agent.state.get_async("research.checkpoint")
+        start_from = checkpoint["page"] if checkpoint else 0
 
         # Do work
+        page = start_from
         for page in range(start_from, 100):
             try:
-                result = await agent.capabilities.invoke(
+                result = await agent.call_async(
                     "network.http_request",
                     url=f"https://api.example.com/data?page={page}",
-                    method="GET"
+                    method="GET",
                 )
                 data = result.data["body"]
 
                 # Save to workspace
-                await agent.capabilities.invoke(
+                await agent.call_async(
                     "filesystem.write",
                     path=f"/workspace/data/page_{page}.json",
-                    content=data
+                    content=data,
                 )
 
                 # Checkpoint progress
-                await agent.state.persistent.set(
+                await agent.state.set_async(
                     "research.checkpoint",
-                    {"page": page + 1, "status": "in_progress"}
+                    {"page": page + 1, "status": "in_progress"},
                 )
             except CapabilityError as e:
                 # Send alert to supervisor
-                await agent.capabilities.invoke(
+                await agent.call_async(
                     "alerts.send",
                     severity="warning",
                     message=f"Research failed on page {page}: {e}",
-                    context={"page": page}
+                    context={"page": page},
                 )
                 break
 
         # Final status
-        await agent.state.persistent.set(
+        await agent.state.set_async(
             "research.checkpoint",
-            {"page": page, "status": "completed"}
+            {"page": page, "status": "completed"},
         )
 
 asyncio.run(research_agent())

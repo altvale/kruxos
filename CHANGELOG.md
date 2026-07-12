@@ -58,6 +58,20 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Python SDK guide corrected against the shipped `kruxos` client API. Capability
+  invocation is `agent.call_async(name, **inputs)` (async) / `agent.call(...)`
+  (sync) — there is no `capabilities.invoke`. Connections take an `agent_name`
+  and a `ws://` endpoint and close via `close_async()` / `close()` (not
+  `disconnect()`); discovery uses `list_async` / `describe_async`; state is
+  `state.get_async` / `set_async` / `list_async` / `delete_async` with a `tier=`
+  argument (not `state.session` / `persistent` / `shared` sub-objects); approvals
+  resolve through `wait_for_approval_async(request_id, ...)`; transactions open
+  via `agent.transaction()` with `tx.call_async(...)`; context briefings use
+  `briefing_async()`; and the Claude Desktop MCP config is produced by
+  `generate_claude_desktop_config(...)`. The Pydantic-model and error-class
+  names in the examples now match the package, and every code sample was
+  syntax-checked.
+
 - Monitoring guide corrected against the shipped CLI: `kruxos alerts` takes no
   `--last`/`--severity` flags (it lists live resource alerts plus agent-raised
   alerts; use `--json` for machine-readable output); the `alerts.send` examples
