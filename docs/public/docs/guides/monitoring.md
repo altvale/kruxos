@@ -80,16 +80,32 @@ kruxos status
 Expected output:
 
 ```
-System Health: HEALTHY
-━━━━━━━━━━━━━━━━━━━━━━━
-  CPU:     12.5% (ok)
-  Memory:  256 MB / 2048 MB (ok)
-  Disk:    34.2% (ok)
-  Gateway: running
-  Vault:   unlocked
-  Proxy:   syncing (last: 2m ago)
-  Audit:   writing (chain: verified)
+KruxOS Status
+
+  Gateway:             running (port 7700)
+  Health:              healthy
+
+Services
+  sandbox-confinement  healthy      <1ms  Landlock enforced (kernel ABI v4). The primary filesystem co…
+  inference-engine     healthy      <1ms  on-appliance inference not installed (not configured): this …
+
+Resources
+  CPU:                 12.3%
+  Memory:              7.5 GiB / 14.9 GiB (50.3%)
+  Disk:                111.8 GiB / 465.7 GiB (24.0%)
+
+Agents
+  Total:               0
+  Active:              0
+  Revoked:             0
+
+Approval Queue
+  Pending:             0
+  Approved today:      0
+  Rejected today:      0
 ```
+
+The **Services** list shows the gateway's registered health checks — currently **sandbox confinement** and the **on-appliance inference engine** (a not-installed inference engine is the expected opt-out default and still reports `healthy`). In the terminal each service's details are truncated with a trailing ellipsis; the full text is available via `kruxos status --json`. Each line reads `healthy`, `degraded`, or `critical`, and the top **Health** line reflects the worst of them; on an interactive terminal the status words and the CPU / memory / disk percentages are colour-coded green / yellow / red (percentages turn yellow at or above 60% and red at or above 80%). The **Services** and **Resources** blocks come from the health endpoint, so they are omitted when the gateway is unreachable — the **Gateway**, **Health**, **Agents**, and **Approval Queue** sections still render from local data.
 
 ### Dashboard
 
