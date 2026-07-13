@@ -22,11 +22,11 @@ The generator wires Codex through `mcp-bridge` + `cli-hook` so every tool call r
 - A running KruxOS instance ([Install](install.md))
 - An agent token (64-char hex) from `kruxos agent create` or the wizard
 - An OpenAI API key
-- The bundled Python SDK at `/opt/kruxos/sdk/python/` (auto-importable on the appliance). The external `pip install kruxos` distribution ships in **v0.0.3**.
+- The bundled Python SDK at `/opt/kruxos/sdk/python/` (auto-importable on the appliance). A published `pip install kruxos` distribution to PyPI is planned for a later release, not v0.0.3.
 
 ## Connect and use capabilities
 
-The example below runs **on the appliance** so the bundled SDK is on `sys.path`. For host-side code, copy `/opt/kruxos/sdk/python/` off the appliance until the PyPI distribution lands in v0.0.3.
+The example below runs **on the appliance** so the bundled SDK is on `sys.path`. For host-side code, copy `/opt/kruxos/sdk/python/` off the appliance — a published PyPI distribution is planned for a later release, not v0.0.3.
 
 ```python
 import asyncio

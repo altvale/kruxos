@@ -12,6 +12,20 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Docs accuracy — corrected the Python SDK install timing across the
+  getting-started, quickstart (local / Claude / Gemini / OpenAI), Hermes, and
+  pack-testing pages. The SDK ships bundled inside the appliance today; a
+  published `pip install kruxos` distribution to PyPI is planned for a later
+  release, **not** v0.0.3 (the previous text incorrectly stated PyPI ships
+  with v0.0.3).
+- Developer docs — corrected the *Agent Experience: Linux vs KruxOS* guide to
+  use the real Python SDK client API. Capability calls now show
+  `await agent.call_async(name, **inputs)` and the typed-exception error model
+  (a failed call raises `FileNotFoundError`, `PermissionDeniedError`,
+  `CapabilityError`, …) instead of the never-shipped
+  `agent.capabilities.invoke(...)` / `result.success` / `result.error.type`
+  shapes; discovery now uses `capabilities.list_async()` /
+  `describe_async()`. Every snippet was syntax-checked against the shipped SDK.
 - Documentation site dark mode: restored the code-block padding that was
   missing in the dark (slate) theme, so code samples no longer sit flush
   against their border. Light mode was unaffected.
