@@ -9,7 +9,7 @@ KruxOS v0.0.1 ships local-provider support via the same OpenAI-compatible functi
 - A running KruxOS instance ([Install](install.md))
 - An agent token (64-char hex) from `kruxos agent create` or the wizard
 - One of: [Ollama](https://ollama.ai), [vLLM](https://docs.vllm.ai), LM Studio, or llama.cpp's `server` running and reachable from the appliance
-- The bundled Python SDK at `/opt/kruxos/sdk/python/` (auto-importable on the appliance). The external `pip install kruxos` distribution ships in **v0.0.3**.
+- The bundled Python SDK at `/opt/kruxos/sdk/python/` (auto-importable on the appliance). A published `pip install kruxos` distribution to PyPI is planned for a later release, not v0.0.3.
 
 ## Pull a model
 

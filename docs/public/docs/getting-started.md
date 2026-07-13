@@ -76,7 +76,7 @@ Restart Claude Code. Ask: *"What tools do you have from KruxOS?"* — Claude sho
 
 ### Python SDK (programmatic access)
 
-The Python SDK ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/` (auto-importable via `/etc/profile.d/kruxos-sdk.sh`). The external `pip install kruxos` distribution to PyPI ships in **v0.0.3**.
+The Python SDK ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/` (auto-importable via `/etc/profile.d/kruxos-sdk.sh`). A published `pip install kruxos` distribution to PyPI is planned for a later release — it is **not** part of v0.0.3.
 
 ```python
 import asyncio

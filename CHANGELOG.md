@@ -12,6 +12,12 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- Docs accuracy — corrected the Python SDK install timing across the
+  getting-started, quickstart (local / Claude / Gemini / OpenAI), Hermes, and
+  pack-testing pages. The SDK ships bundled inside the appliance today; a
+  published `pip install kruxos` distribution to PyPI is planned for a later
+  release, **not** v0.0.3 (the previous text incorrectly stated PyPI ships
+  with v0.0.3).
 - Developer docs — corrected the *Agent Experience: Linux vs KruxOS* guide to
   use the real Python SDK client API. Capability calls now show
   `await agent.call_async(name, **inputs)` and the typed-exception error model

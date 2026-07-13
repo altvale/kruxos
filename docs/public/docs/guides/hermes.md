@@ -56,7 +56,7 @@ Hermes-specific adapter because MCP stdio is a standard transport.
   an environment variable.
 - **The bundled `mcp-bridge`** at `/opt/kruxos/bin/mcp-bridge` on the appliance,
   or a host-side copy of the in-appliance Python SDK at `/opt/kruxos/sdk/python/`
-  (until the PyPI distribution lands in v0.0.3).
+  (a published PyPI distribution is planned for a later release, not v0.0.3).
 - **Hermes Agent v0.7.0 or newer** installed via the project's install script
   (see the Hermes README for current instructions).
 
