@@ -64,13 +64,25 @@ Per-release notes with more narrative detail live under
   and a `ws://` endpoint and close via `close_async()` / `close()` (not
   `disconnect()`); discovery uses `list_async` / `describe_async`; state is
   `state.get_async` / `set_async` / `list_async` / `delete_async` with a `tier=`
-  argument (not `state.session` / `persistent` / `shared` sub-objects); approvals
-  resolve through `wait_for_approval_async(request_id, ...)`; transactions open
-  via `agent.transaction()` with `tx.call_async(...)`; context briefings use
-  `briefing_async()`; and the Claude Desktop MCP config is produced by
-  `generate_claude_desktop_config(...)`. The Pydantic-model and error-class
-  names in the examples now match the package, and every code sample was
-  syntax-checked.
+  argument (not `state.session` / `persistent` / `shared` sub-objects). Shared-tier
+  writes now use optimistic locking — read the version with `get_entry_async` and
+  pass it as `expected_version` to `set_async`, catching `ConflictError` on a
+  stale version. Capability failures raise the typed error taxonomy on both
+  transports (`result.error` is not populated on the default MCP protocol).
+  Approval-gated calls are held server-side: `wait_for_approval_async(request_id)`
+  returns a terminal status string (`approved` / `rejected` / `expired` /
+  `timed_out`) and does **not** re-execute the capability, while a larger
+  `request_timeout=` on the call lets a caller wait through the hold (the SDK's
+  per-request timeout was renamed to `request_timeout` so it no longer shadows a
+  capability's own `timeout` input). The removed transactions API is no longer
+  documented; context briefings use `briefing_async()` (integer
+  `pending_approvals` / `unread_messages` counts and a `summary` string); the sync
+  wrappers raise a clear error when called from a running event loop; and the
+  Claude Desktop MCP config is produced by `generate_claude_desktop_config(...)`.
+  The `pip install kruxos` PyPI package is documented as planned for a future
+  release, not the current install path. The approval-workflow guide's example
+  was corrected to match. The Pydantic-model and error-class names in the
+  examples match the package, and every code sample was syntax-checked.
 
 - Monitoring guide corrected against the shipped CLI: `kruxos alerts` takes no
   `--last`/`--severity` flags (it lists live resource alerts plus agent-raised

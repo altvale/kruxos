@@ -4,9 +4,9 @@ The KruxOS Python SDK (`kruxos`) provides a typed, async client for connecting a
 
 ## Installation
 
-In v0.0.1 the SDK ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/`, importable from interactive shells via `/etc/profile.d/kruxos-sdk.sh`. From an autonomous agent task or an in-appliance Python shell, `import kruxos` just works.
+The SDK (`kruxos`, version `0.0.2`) ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/`, importable from interactive shells via `/etc/profile.d/kruxos-sdk.sh`. From an autonomous agent task or an in-appliance Python shell, `import kruxos` just works.
 
-For host-side use, copy `/opt/kruxos/sdk/python/` off the appliance into your project — the external `pip install kruxos` distribution to PyPI lands in **v0.0.3** alongside the license-server cycle.
+For host-side use, copy `/opt/kruxos/sdk/python/` off the appliance into your project. A published `pip install kruxos` package on PyPI is planned for a future release — it is **not** the install path today.
 
 Requires Python 3.11+.
 
@@ -83,6 +83,13 @@ result = agent.call("filesystem.list", path="/workspace")
 agent.close()
 ```
 
+The sync wrappers (`connect`, `call`, `state.get`, `briefing`, …) each run on
+their own short-lived event loop, so a sync client re-authenticates per call and
+**cannot** be used from inside a running event loop (a Jupyter kernel, an async
+web framework, an MCP-bridge process). Called from a running loop, they raise a
+`RuntimeError` that points you at the async API. In any async host, use
+`connect_async` and the `*_async` methods directly.
+
 ### Connection details from the environment
 
 The SDK does not read connection settings implicitly — pass them in yourself. A common pattern is to source them from the environment:
@@ -142,30 +149,56 @@ read_caps = await agent.capabilities.list_async(name_contains="read")
 ### Basic invocation
 
 ```python
-from kruxos import ResponseStatus
-
 result = await agent.call_async(
     "filesystem.read",
     path="/workspace/data.csv",
 )
 
-if result.status == ResponseStatus.SUCCESS:
-    print(result.data["content"])
-else:
-    # On the default MCP protocol a failure comes back as a non-SUCCESS status
-    # with the message in result.data; structured `result.error` objects are not
-    # populated here. Most failures instead raise a typed exception — see
-    # "With error handling" below.
-    message = result.data.get("text") if result.data else None
-    print(f"Failed: {message or 'unknown error'}")
+# A failed call raises a typed exception (see "With error handling" below), so a
+# returned response is always a success: `result.status` is
+# `ResponseStatus.SUCCESS` and the payload is in `result.data`. On the default
+# MCP protocol `result.error` is not populated — never branch on it.
+print(result.data["content"])
 ```
+
+A capability that returns a plain-text (non-JSON) body surfaces it at
+`result.data["text"]`; structured capabilities return their fields directly in
+`result.data`.
+
+### Timeouts
+
+Two independent timeouts apply to a call, and they are deliberately separate:
+
+- A capability's **own** `timeout` input — capabilities such as `process.run`
+  and the `network.*` family accept a `timeout`. Pass it like any other input:
+
+  ```python
+  await agent.call_async("process.run", command="sleep 5", timeout=30)
+  ```
+
+- The SDK's **per-request** timeout, `request_timeout` (keyword-only) — how long
+  the client waits for the Gateway to respond before giving up. It defaults to
+  30 seconds. Raise it to wait through a server-side approval hold (see
+  [Approvals](#approvals)):
+
+  ```python
+  await agent.call_async("process.run", command="deploy.sh", request_timeout=3600)
+  ```
+
+`request_timeout` is named distinctly so it never shadows a capability's own
+`timeout` input.
 
 ### With error handling
 
-Denials, missing approvals, and other failures are raised as typed exceptions — catch the specific subclass you care about, falling back to `CapabilityError`:
+Denials, missing approvals, and other failures are raised as typed exceptions on both the MCP and JSON-RPC transports — catch the specific subclass you care about, falling back to `CapabilityError`:
 
 ```python
-from kruxos.errors import CapabilityError, PolicyDeniedError, ApprovalRequiredError
+from kruxos.errors import (
+    CapabilityError,
+    PolicyDeniedError,
+    ApprovalRequiredError,
+    ConflictError,
+)
 
 try:
     result = await agent.call_async(
@@ -174,13 +207,17 @@ try:
     )
     print(result.data["stdout"])
 except PolicyDeniedError as e:
-    print(f"Policy blocked: {e}")
+    # Blocked by policy — e.reason / e.rule_reference carry the policy detail
+    print(f"Policy blocked: {e.reason or e}")
 except ApprovalRequiredError as e:
+    # Needs human approval — resolve it (see Approvals below)
     print(f"Waiting for approval: {e.request_id}")
-    # Wait for approval (see Approvals section below)
-    result = await agent.wait_for_approval_async(e.request_id, timeout=300)
+except ConflictError as e:
+    # Optimistic-lock failure on a shared-state write — re-read and retry
+    print(f"Conflict: {e}")
 except CapabilityError as e:
-    print(f"Error: {e.error_type}")
+    # Base class for every capability failure; e.error_type is the wire type
+    print(f"Error ({e.error_type}): {e}")
     if e.structured:
         for recovery in e.structured.recovery_actions:
             print(f"  Try: {recovery.action} — {recovery.description}")
@@ -188,33 +225,63 @@ except CapabilityError as e:
 
 ## Approvals
 
-When a call needs human approval, `call_async` raises `ApprovalRequiredError`
-carrying the `request_id`. Resolve it with `wait_for_approval_async`.
+Approval-gated capabilities are **held server-side** by the Gateway until the
+operator decides — up to 24 hours. The dashboard queue is the approval surface;
+the SDK never prompts. There are two ways to handle an approval-gated call.
 
-### Blocking wait
+### Ride the hold (recommended)
+
+Pass a generous `request_timeout` so the client waits through the operator's
+decision. When approved, the call returns its result directly — the same
+`CapabilityResponse` a non-gated call would return. A rejection or an expired
+hold raises a typed exception:
 
 ```python
-from kruxos import ResponseStatus
-from kruxos.errors import ApprovalRequiredError
+from kruxos.errors import ApprovalRejectedError, ApprovalRequiredError
 
 try:
+    # Wait up to an hour for the operator to decide in the dashboard queue.
     result = await agent.call_async(
         "process.run",
         command="kubectl apply -f deploy.yaml",
+        request_timeout=3600,   # client-side wait; NOT a capability `timeout` input
     )
+    print(f"Approved and executed: {result.data}")
+except ApprovalRejectedError as e:
+    print(f"Rejected: {e.request_id}")
 except ApprovalRequiredError as e:
-    print(f"Approval needed: {e.request_id}")
-    # Blocks until approved/rejected (or timeout)
-    result = await agent.wait_for_approval_async(e.request_id, timeout=600)
-    if result.status == ResponseStatus.SUCCESS:
-        print(f"Approved! Result: {result.data}")
-    else:
-        # Rejected/failed: on the default MCP protocol the reason is in result.data
-        detail = result.data.get("text") if result.data else None
-        print(f"Rejected: {detail or 'no reason given'}")
+    print(f"Still pending after the hold: {e.request_id}")
 ```
 
-### Non-blocking (poll)
+### Catch and poll for status
+
+If you would rather not hold the call, catch `ApprovalRequiredError` and poll
+`wait_for_approval_async`. It returns a terminal **status string** — one of
+`"approved"`, `"rejected"`, `"expired"`, `"timed_out"` — and does **not**
+re-execute the capability. On `"approved"`, re-invoke the capability yourself;
+the caller decides what to run:
+
+```python
+from kruxos.errors import ApprovalRequiredError
+
+try:
+    result = await agent.call_async("process.run", command="deploy.sh")
+    print(result.data)
+except ApprovalRequiredError as e:
+    # Polls kruxos/checkApproval until a terminal status (MCP transport only).
+    status = await agent.wait_for_approval_async(e.request_id, timeout=600)
+    if status == "approved":
+        # The SDK does not auto-re-execute — run the capability again yourself.
+        result = await agent.call_async("process.run", command="deploy.sh")
+        print(result.data)
+    else:
+        print(f"Not approved: {status}")
+```
+
+`wait_for_approval_async` raises `TimeoutError` if no terminal status is reached
+within its own `timeout`; the request stays in the queue, so a supervisor can
+still act and you can poll again with the same `request_id`. You can also run the
+poll as a background task while doing unrelated work:
 
 ```python
 import asyncio
@@ -223,21 +290,25 @@ from kruxos.errors import ApprovalRequiredError
 try:
     result = await agent.call_async("process.run", command="deploy.sh")
 except ApprovalRequiredError as e:
-    # Resolve the approval in the background while doing other work
     approval = asyncio.create_task(
         agent.wait_for_approval_async(e.request_id, timeout=600)
     )
     while not approval.done():
-        # ... do other work ...
+        # ... do other, unrelated work ...
         await asyncio.sleep(5)
-    result = await approval
+    status = await approval          # a status string, e.g. "approved"
 ```
+
+A call held for approval occupies the connection until it resolves; the SDK does
+not run a second capability in parallel with a held call.
 
 ## State management
 
 The `agent.state` API stores values across three tiers — `session` (in-memory,
 current session only), `persistent` (per-agent, survives sessions), and `shared`
-(cross-agent). The tier is a parameter; `persistent` is the default.
+(cross-agent, optimistic-locked). The tier is a parameter; `persistent` is the
+default. `get_async` returns a value (or `None`); `set_async` returns nothing;
+`delete_async` returns a bool; `list_async` returns a list of key names.
 
 ### Session state (in-memory, current session only)
 
@@ -271,41 +342,57 @@ print(f"Value: {value}")
 keys = await agent.state.list_async(prefix="config.")
 ```
 
-### Shared state (cross-agent)
+### Shared state (cross-agent, optimistic locking)
+
+Shared-tier writes are guarded by **optimistic locking**: `set_async` requires an
+`expected_version`, and the write fails with `ConflictError` if another agent has
+written the key since you read it. Read the current version with
+`get_entry_async` (a plain `get_async` returns the value only and discards the
+version), then thread that version into the write. Use `expected_version=0` to
+create a brand-new key. Omitting `expected_version` on the shared tier raises
+`ValueError` before anything is sent.
 
 ```python
-from kruxos.errors import KruxOSError
+from kruxos.errors import ConflictError
 
-# Read a value visible to all agents
-value = await agent.state.get_async("counter", tier="shared")
+# Read the entry WITH its optimistic-locking version.
+entry = await agent.state.get_entry_async("counter", tier="shared")
+# entry.found / entry.value / entry.version / entry.owner_agent
+current = entry.value or 0
 
-# Update it. Shared writes are last-write-wins through the SDK — there is no
-# expected-version / optimistic-locking argument, so concurrent writers do not
-# raise a conflict; the most recent write simply prevails.
+# Write back under the version we read (0 when the key does not exist yet).
 try:
-    await agent.state.set_async("counter", (value or 0) + 1, tier="shared")
-except KruxOSError:
-    # Surfaces transport or gateway errors (base class for all SDK errors)
-    pass
-```
-
-## Transactions
-
-```python
-async with agent.transaction() as tx:
-    await tx.call_async("filesystem.write", path="/workspace/a.txt", content="hello")
-    await tx.call_async("filesystem.write", path="/workspace/b.txt", content="world")
-    # Commits on clean exit; if any call raises, all are rolled back
+    await agent.state.set_async(
+        "counter",
+        current + 1,
+        tier="shared",
+        expected_version=entry.version or 0,
+    )
+except ConflictError:
+    # Another agent wrote between our read and write — re-read and retry.
+    ...
 ```
 
 ## Context briefings
 
+`briefing_async()` returns a `ContextBriefing` summarising what changed since the
+agent's last activity. The counts (`pending_approvals`, `unread_messages`) are
+**integers**; `summary` is a ready-to-read template string; and the subsystem
+reports (`filesystem_changes`, `process_events`, `alerts`, `health`) are dicts.
+
 ```python
-# Get a structured summary of what changed since the last connection
 briefing = await agent.briefing_async()
-print(f"Filesystem changes: {len(briefing.filesystem_changes)}")
-print(f"Pending approvals:  {len(briefing.pending_approvals)}")
-print(f"State changes:      {len(briefing.state_changes)}")
+
+# `summary` is a human/LLM-readable string; the counts are plain integers.
+print(briefing.summary)
+print(f"Pending approvals: {briefing.pending_approvals}")
+print(f"Unread messages:   {briefing.unread_messages}")
+
+# The subsystem reports are dicts — inspect the fields you need.
+print(f"Filesystem report keys: {list(briefing.filesystem_changes)}")
+
+# Ask for more detail (default detail_level is "summary").
+detailed = await agent.briefing_async(detail_level="detailed")
 ```
 
 ## Service Proxy (email example)
@@ -383,6 +470,7 @@ All SDK responses are typed Pydantic models:
 from kruxos.models import (
     CapabilityDef,
     CapabilityResponse,
+    StateEntry,
     StructuredError,
     RecoveryAction,
     ContextBriefing,
@@ -414,7 +502,7 @@ async def research_agent():
     ) as agent:
         # Check what happened while we were offline
         briefing = await agent.briefing_async()
-        print(f"{len(briefing.state_changes)} state changes since last run")
+        print(briefing.summary)
 
         # Resume from checkpoint
         checkpoint = await agent.state.get_async("research.checkpoint")
