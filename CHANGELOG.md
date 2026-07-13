@@ -102,6 +102,15 @@ Per-release notes with more narrative detail live under
   (7704) ports, clarified that the agent gateway binds `0.0.0.0` (per-Agent
   bearer is the boundary), and added a **TLS reverse-proxy** note.
 
+- Architecture page: retired the supervision port (7701) from the system
+  diagram and port map — supervision now rides the root-only local control
+  socket (`/run/kruxos/control.sock`). Corrected the port map (User API 7703
+  is loopback **HTTP**, added the loopback health endpoint 7704, the agent
+  gateway 7700 binds `0.0.0.0` with per-Agent bearer auth) and the firewall
+  line (the shipped appliance opens **TCP 7700 + 7800 only**; SSH is opt-in,
+  7702 is loopback UDP). Added a network-posture summary and a
+  remote-agent **TLS reverse-proxy** (`wss://`) note.
+
 - Backup & Restore guide: corrected the encryption description — state
   backups are AES-256-GCM with a key derived from the **vault passphrase
   via Argon2id** (with a per-file salt), and older backups still restore

@@ -51,7 +51,7 @@ graph TB
     subgraph "Supervision"
         Dashboard[Web Dashboard<br/>Next.js + React<br/>Port 7800]
         CLI[kruxos CLI<br/>Rust / clap]
-        SupWS[Supervision WebSocket<br/>Port 7701]
+        Control[Control socket<br/>/run/kruxos/control.sock<br/>root-only · no TCP port]
     end
 
     subgraph "External Services"
@@ -71,7 +71,7 @@ graph TB
     GW --> Audit
     GW --> Health
     GW --> Comms
-    Dashboard & CLI --> SupWS --> GW
+    Dashboard & CLI --> Control --> GW
 ```
 
 ## Request lifecycle
@@ -196,12 +196,24 @@ Multi-node clustering with PostgreSQL, distributed audit collection, and central
 
 ## Port map
 
-| Port | Protocol | Service | Access |
-|------|----------|---------|--------|
-| 7700 | WebSocket (MCP + JSON-RPC) | Agent Gateway | Agent tokens (64-char hex) |
-| 7701 | WebSocket | Supervision (live activity, audit events) | User tokens (`krx_user_*`) |
-| 7702 | UDP | Loopback trigger-wake (`127.0.0.1`) | Loopback only |
-| 7703 | HTTPS | User API (bearer-auth, loopback) | User tokens (`krx_user_*`) |
-| 7800 | HTTPS | Web Dashboard | Operator session / User tokens |
+| Port | Protocol | Bind | Service | Access |
+|------|----------|------|---------|--------|
+| 7700 | WebSocket (MCP + JSON-RPC) | `0.0.0.0` | Agent Gateway | Per-Agent bearer token (64-char hex API key) |
+| 7702 | UDP | `127.0.0.1` | Trigger-wake | Loopback only |
+| 7703 | HTTP | `127.0.0.1` | User API (bearer-auth) | User tokens (`krx_user_*`) |
+| 7704 | HTTP | `127.0.0.1` | Health endpoint (`/health`, `/health/ready`) | Loopback only |
+| 7800 | HTTPS | `0.0.0.0` | Web Dashboard | Operator passphrase / User tokens |
 
-The default appliance firewall accepts TCP 22 / 7700 / 7701 / 7702 / 7800.
+**Supervision has no TCP port.** Live activity, chat, and vault control ride a root-only local control socket (`/run/kruxos/control.sock`, mode `0600 root:root`, gated on peer-credential uid 0) that the dashboard and CLI reach on-box — an agent cannot connect to it. The former supervision WebSocket (port 7701) is retired.
+
+### Network posture
+
+- **The agent gateway (7700) binds `0.0.0.0` by default** so an agent on another host can connect — a supported topology. The bind address is not the security boundary: every connection is authenticated by a per-Agent bearer token. On a single-box deployment where all agents are local, restrict it with `server.host: "127.0.0.1"`.
+- **The User API (7703) and health endpoint (7704) bind loopback (`127.0.0.1`)** and are never network-exposed — the dashboard proxies the User API on-box.
+- **The shipped appliance firewall opens only TCP 7700 (agent gateway) and TCP 7800 (dashboard).** SSH (TCP 22) is opt-in and disabled by default; the trigger-wake port (7702) is loopback UDP with no firewall rule; there is no supervision port.
+
+### Reaching the gateway from a remote agent
+
+Port 7700 speaks plain WebSocket (`ws://`) by default. To connect an agent from another host safely, front 7700 with a **TLS-terminating reverse proxy** (e.g. Caddy or nginx) that serves `wss://` and forwards to the local gateway — the per-Agent bearer token still authenticates every connection. Keep the gateway on loopback (`server.host: "127.0.0.1"`) for single-box deployments where no remote agent connects. Built-in TLS for the gateway is planned for a later release.
+
+For the full network security posture, TLS defaults, and threat model, see the [Security Model](security-model.md).
