@@ -54,13 +54,25 @@ try:
     )
 except ApprovalRequiredError as e:
     print(f"Waiting for approval: {e.request_id}")
-    # Block until approved (or timeout)
-    result = await os.wait_for_approval_async(
+    # Poll for the terminal status: "approved" / "rejected" / "expired" /
+    # "timed_out". This does NOT re-execute the capability.
+    status = await os.wait_for_approval_async(
         e.request_id,
         timeout=300,  # 5 minutes
     )
-    print(f"Approved! Result: {result.data}")
+    if status == "approved":
+        # The SDK does not auto-re-execute — run the capability again yourself.
+        result = await os.call_async(
+            "process.run", command="systemctl", args=["restart", "myapp"]
+        )
+        print(f"Approved! Result: {result.data}")
+    else:
+        print(f"Not approved: {status}")
 ```
+
+Alternatively, pass a large `request_timeout` to the original `call_async` to
+wait through the Gateway's server-side approval hold — when approved, the call
+returns its result directly and there is no separate poll.
 
 ### Non-blocking approval
 
