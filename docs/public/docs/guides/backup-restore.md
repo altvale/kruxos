@@ -16,8 +16,16 @@ The backup CLI surface is `kruxos state backup / restore / backups` — there is
 | Vault (encrypted secrets) | `/data/kruxos/vault.db` | Yes |
 | Policy files | `/data/kruxos/policies/{system,org,agents/<name>}.yaml` | Yes |
 | Configuration | `/data/kruxos/config.yaml` | Yes |
+| Installed packs | `/data/kruxos/packs/` | Yes |
+| Model registry & provider config | `/data/kruxos/models.yaml` | Yes |
+| Model weights (GGUF) | `/data/kruxos/models/` | No (re-pull after restore) |
 | Gmail read-replica | `/data/kruxos/proxy/gmail/sync.db` | No (re-syncs) |
 | Session state | In-memory | No (ephemeral) |
+
+Model **weights** are deliberately excluded — they can be several GB each and are
+re-fetchable from their source. The registry config (`models.yaml`) *is* captured, so after a restore you
+re-pull the weights for the models it already lists (see
+[After a restore](#after-a-restore-re-pull-model-weights)).
 
 ## Create a backup
 
@@ -71,12 +79,17 @@ rclone copy /data/kruxos/backups/backup-2026-03-29T14-30-00.tar.gz.enc remote:kr
 
 ### Docker volume backup
 
-For Docker installations, back up the entire data volume:
+For Docker installations, back up the data volume. The `--exclude='*/models/*'`
+keeps re-pullable model weights out of the archive (they can be several GB);
+`models.yaml` and the rest of `/data/kruxos` are still captured:
 
 ```bash
 docker run --rm -v kruxos-data:/data/kruxos -v $(pwd):/backup alpine \
-  tar czf /backup/kruxos-data-backup.tar.gz /data/kruxos
+  tar czf /backup/kruxos-data-backup.tar.gz --exclude='*/models/*' /data/kruxos
 ```
+
+Drop the `--exclude` if you specifically want a self-contained archive that
+includes the downloaded weights.
 
 ## Restore from backup
 
@@ -112,6 +125,25 @@ Restoring from backup-2026-03-29T14-30-00.tar.gz.enc...
 Restore complete. Restart services to apply:
   systemctl restart kruxos-gateway
 ```
+
+### After a restore: re-pull model weights
+
+Backups (and `kruxos migrate` exports) capture `models.yaml`, but **not** the
+model weight files under `/data/kruxos/models/` — those are excluded because they
+are large and re-fetchable. After restoring onto a fresh appliance, re-pull the weights for
+the models the registry already lists:
+
+```bash
+# See the model catalog (the restored registry lists what was installed)
+kruxos inference catalog
+
+# Re-download the weights for a model by its catalog id
+kruxos inference pull <id>
+```
+
+You can also re-pull from the dashboard's **Settings › Local Models** page. Local inference for a
+given model stays unavailable until its weights are back on disk; provider-backed
+(API) models are unaffected.
 
 ### Verify after restore
 
