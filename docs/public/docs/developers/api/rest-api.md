@@ -7,7 +7,6 @@ The Gateway's machine-facing surfaces are:
 | Port | Surface | Auth |
 |------|---------|------|
 | 7700 | Gateway — MCP-native (`tools/list` / `tools/call`) with JSON-RPC fallback | Agent token (64-char hex) |
-| 7701 | Supervision WebSocket — live activity stream consumed by the dashboard | Operator session / User token |
 | 7702 | UDP trigger-wake on `127.0.0.1` — loopback only | None (loopback) |
 | 7703 | User API — bearer-auth loopback for CLI / mcp-bridge / cli-hook | User token (`krx_user_*`) |
 | 7800 | Dashboard — HTTPS-by-default, serves the REST endpoints documented below | Operator session |

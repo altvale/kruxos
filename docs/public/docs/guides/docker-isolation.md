@@ -94,7 +94,7 @@ docker exec kruxos-agent-1 bash -c 'timeout 2 bash -c "cat < /dev/null > /dev/tc
 ┌───────────────────────────────────────────────┐
 │              Docker Host                      │
 │                                               │
-│  ┌─────────────┐      ports 7700/7701/7800    │
+│  ┌─────────────┐      ports 7700/7800         │
 │  │   KruxOS    │◄──── host network           │
 │  │  (gateway +  │                             │
 │  │  dashboard)  │                             │

@@ -64,7 +64,7 @@ graph TB
     SP --> Gmail & Other
     GW --> ST
     GW --> CM
-    DB & CLI -->|Supervision :7701| GW
+    DB & CLI -->|Supervision control socket| GW
 ```
 
 ## Key differentiators

@@ -184,7 +184,7 @@ docker stop kruxos && docker rm kruxos
 # Start with the new image (data volume preserved)
 docker run -d --name kruxos --privileged \
   -e KRUXOS_VAULT_PASSPHRASE='your-vault-passphrase' \
-  -p 7800:7800 -p 7700:7700 -p 7701:7701 \
+  -p 7800:7800 -p 7700:7700 \
   -v kruxos-data:/data/kruxos \
   altvale/kruxos:latest
 ```

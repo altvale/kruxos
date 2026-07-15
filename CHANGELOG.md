@@ -103,6 +103,7 @@ Per-release notes with more narrative detail live under
 ### Fixed
 
 - **Backup & Restore guide now documents that large model weights are excluded from backups (and how to re-pull them after a restore).**
+- **Docs: removed stale references to the retired supervision port 7701 (Docker port maps, diagrams, firewall guidance) and corrected the health-check example to the real loopback health port (7704).**
 - **One-click GPU driver install completes the Staging step.**
 - **Grok (Subscription) chat works again.**
 - **One-click GPU driver install no longer fails at the "Staging files" step.**
