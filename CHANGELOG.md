@@ -102,6 +102,7 @@ Per-release notes with more narrative detail live under
 
 ### Fixed
 
+- **Backup & Restore guide now documents that large model weights are excluded from backups (and how to re-pull them after a restore).**
 - **One-click GPU driver install completes the Staging step.**
 - **Grok (Subscription) chat works again.**
 - **One-click GPU driver install no longer fails at the "Staging files" step.**
