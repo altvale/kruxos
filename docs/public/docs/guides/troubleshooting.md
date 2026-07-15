@@ -273,7 +273,7 @@ Structured exit codes (10 = auth, 11 = network) point at the cause. If the bridg
 
 **Solutions:**
 
-- **Check the Gateway is running:** `curl -s http://localhost:7800` or `docker logs <container>`
+- **Check the Gateway is running:** `curl -skL https://localhost:7800` or `docker logs <container>`. The dashboard serves HTTPS by default, so a plain `curl http://localhost:7800` now returns a `308` permanent redirect to `https://localhost:7800` — pass `-L` to follow the redirect and `-k` to accept the auto-generated self-signed certificate.
 - **Check the API key:** `kruxos agent list` — agent should show `active`
 - **Workspace path:** Filesystem operations need full workspace paths (e.g., `/data/kruxos/workspace/{agent-name}/file.txt`), not relative paths
 - **Policy blocking:** Check if the capability's policy tier allows the agent to call it
