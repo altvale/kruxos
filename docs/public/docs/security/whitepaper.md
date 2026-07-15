@@ -1,11 +1,11 @@
 # KruxOS Security Whitepaper
 
-**Version:** 0.0.2
-**Date:** June 2026
+**Version:** 0.0.3
+**Date:** July 2026
 **Classification:** Public
 **Authors:** KruxOS Security Team
 
-> **Status:** KruxOS v0.0.2 is the current public release — early beta, not yet recommended for production. The architecture and controls described below are the target architecture; what's active *today* vs. *planned* is summarised below and called out inline.
+> **Status:** KruxOS v0.0.3 is the current public release — early beta, not yet recommended for production. The architecture and controls described below are the target architecture; what's active *today* vs. *planned* is summarised below and called out inline.
 
 > **What's active today:** Linux user/network namespaces, cgroup v2 resource limits, seccomp-bpf syscall filtering, nftables network policy, AES-256-GCM secrets vault, hash-chained audit log, deterministic policy engine, two-principal (User / Agent) identity model, mass-destruction command blocks, ws-proxy Origin pinning on code-session upgrades, cosign-signed release artefacts (per-artefact `.sig`, long-term keypair, public key at `https://kruxos.com/keys/cosign.pub` — see SECURITY.md for the full verification flow).
 >
@@ -845,4 +845,4 @@ This appendix maps KruxOS security controls to common compliance frameworks. **T
 
 ---
 
-*This document reflects the security architecture of KruxOS v0.0.2. It will be updated as the platform evolves. For the latest version, see https://docs.kruxos.com/security/.*
+*This document reflects the security architecture of KruxOS v0.0.3. It will be updated as the platform evolves. For the latest version, see https://docs.kruxos.com/security/.*
