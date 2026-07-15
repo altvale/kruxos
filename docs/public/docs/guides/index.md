@@ -26,6 +26,7 @@ Day-to-day operations for running KruxOS.
 | Guide | What you'll learn |
 |-------|------------------|
 | [Model Providers](model-providers.md) | Configure Claude, OpenAI, Gemini, and local models |
+| [Local Models (Hugging Face)](local-models.md) | Pull, enable, and manage GGUF models on the on-box engine |
 | [On-Appliance Inference](on-appliance-inference.md) | Run local GGUF models on the appliance |
 | [GPU Drivers](gpu-drivers.md) | Install NVIDIA drivers for GPU-accelerated inference |
 
@@ -34,6 +35,7 @@ Day-to-day operations for running KruxOS.
 | Guide | What you'll learn |
 |-------|------------------|
 | [Connecting Services](connecting-services.md) | Connect Gmail & Slack to the Service Proxy |
+| [Secrets (Vault)](secrets.md) | Store scoped, host-bound third-party API keys agents can use without seeing them |
 | [Slack Integration](slack-integration.md) | Connect Slack for agent messaging and search |
 | [Docker Agent Isolation](docker-isolation.md) | Single-container vs multi-container deployment patterns |
 | [Migration from OpenClaw](migration-from-openclaw.md) | Step-by-step guide for OpenClaw users |
