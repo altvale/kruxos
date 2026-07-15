@@ -104,7 +104,7 @@ Search and filter the hash-chained audit log:
 
 ### Chat
 
-Four-column desktop layout — Agents · Conversations · Messages · Knowledge — plus a `⌘K` / `Ctrl+K` Search overlay. Multi-model with per-message Model + Thinking overrides above the composer, persisted sessions, tool-call cards with policy-tier colouring, and an inline approval flow. Collapses to a 3-state mobile navigation under 768 px.
+Four-column desktop layout — Agents · Conversations · Messages · Knowledge — plus a `⌘K` / `Ctrl+K` Search overlay. Multi-model with per-message Model + Thinking overrides above the composer, persisted sessions, tool-call cards with policy-tier colouring, and an inline approval flow. Collapses to a 3-state mobile navigation on screens 820 px and narrower — the same breakpoint at which the sidebar auto-collapses to its icon rail (expanding it overlays the page instead of pushing it).
 
 ### Code Sessions (`/code`)
 
