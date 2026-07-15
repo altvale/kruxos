@@ -1,13 +1,13 @@
 # KruxOS Security Whitepaper
 
-**Version:** 0.0.1
-**Date:** May 2026
+**Version:** 0.0.2
+**Date:** June 2026
 **Classification:** Public
 **Authors:** KruxOS Security Team
 
-> **Status:** v0.0.1 is the first public release of KruxOS — early beta, not yet recommended for production. The architecture and controls described below are the target architecture; what's active *today* vs. *planned* is summarised below and called out inline.
+> **Status:** KruxOS v0.0.2 is the current public release — early beta, not yet recommended for production. The architecture and controls described below are the target architecture; what's active *today* vs. *planned* is summarised below and called out inline.
 
-> **What's active in v0.0.1:** Linux user/network namespaces, cgroup v2 resource limits, seccomp-bpf syscall filtering, nftables network policy, AES-256-GCM secrets vault, hash-chained audit log, deterministic policy engine, two-principal (User / Agent) identity model, mass-destruction command blocks, ws-proxy Origin pinning on code-session upgrades, cosign-signed release artefacts (per-artefact `.sig`, long-term keypair, public key at `https://kruxos.com/keys/cosign.pub` — see SECURITY.md for the full verification flow).
+> **What's active today:** Linux user/network namespaces, cgroup v2 resource limits, seccomp-bpf syscall filtering, nftables network policy, AES-256-GCM secrets vault, hash-chained audit log, deterministic policy engine, two-principal (User / Agent) identity model, mass-destruction command blocks, ws-proxy Origin pinning on code-session upgrades, cosign-signed release artefacts (per-artefact `.sig`, long-term keypair, public key at `https://kruxos.com/keys/cosign.pub` — see SECURITY.md for the full verification flow).
 >
 > **Active but with caveats:** the **per-call fork sandbox model** is applied to capability handlers; **stateless capabilities** (`system.time`, `system.info`, `system.health`, `agent.whoami`) execute in-process for latency. Per-agent host mounts are enforced under `/mnt/<label>` with path-escape detection in the gateway. The kernel ships built without `CRYPTO_USER_API_*` / `ALGIF_AEAD`, making CVE-2026-31431 structurally unreachable.
 >
@@ -35,12 +35,12 @@
 
 KruxOS is a purpose-built Linux-based operating system designed for AI agent deployment, execution, and governance. As organizations increasingly deploy autonomous AI agents — software entities that read files, execute code, make network requests, and interact with external services — the attack surface expands beyond what traditional operating systems were designed to contain. An AI agent with unrestricted system access can exfiltrate data, modify critical files, exhaust resources, or interfere with other agents, whether through malicious intent, a compromised underlying model, or simple programming error.
 
-KruxOS addresses this by making **isolation the default, not an afterthought**. Every agent runs inside a kernel sandbox combining Linux namespaces, cgroup v2 resource controls, seccomp-bpf syscall filtering, and nftables network policy in v0.0.1; Landlock mandatory access control adds a fifth layer in the **v0.0.3** security architecture rework. All agent interactions pass through a typed capability API — agents never have direct shell access. A deterministic policy engine governs what each agent can do, with four permission tiers from fully autonomous to completely blocked. An encrypted secrets vault ensures agents can *use* credentials without ever *seeing* them. A hash-chained, append-only audit log records every action for forensic review.
+KruxOS addresses this by making **isolation the default, not an afterthought**. Every agent runs inside a kernel sandbox combining Linux namespaces, cgroup v2 resource controls, seccomp-bpf syscall filtering, and nftables network policy; Landlock mandatory access control adds a fifth layer in the **v0.0.3** security architecture rework. All agent interactions pass through a typed capability API — agents never have direct shell access. A deterministic policy engine governs what each agent can do, with four permission tiers from fully autonomous to completely blocked. An encrypted secrets vault ensures agents can *use* credentials without ever *seeing* them. A hash-chained, append-only audit log records every action for forensic review.
 
 ### Key Security Properties
 
 - **Process isolation**: Each agent runs in its own PID, mount, network, user, and UTS namespace. Agents cannot see or signal each other's processes.
-- **Filesystem confinement (v0.0.1)**: Mount namespace isolation + per-agent host mounts under `/mnt/<label>` with gateway-side path-escape detection. **Landlock MAC adds kernel-enforced filesystem confinement in v0.0.3** — until then, the seccomp filter blocks the syscalls that would let an agent break out (`mount`, `umount2`, `pivot_root`, `unshare`, `setns`).
+- **Filesystem confinement**: Mount namespace isolation + per-agent host mounts under `/mnt/<label>` with gateway-side path-escape detection. **Landlock MAC adds kernel-enforced filesystem confinement in v0.0.3** — until then, the seccomp filter blocks the syscalls that would let an agent break out (`mount`, `umount2`, `pivot_root`, `unshare`, `setns`).
 - **Resource containment**: cgroup v2 enforces per-agent limits on CPU, memory, I/O bandwidth, and process count. A runaway agent cannot starve the system.
 - **Syscall restriction**: seccomp-bpf filters block dangerous syscalls (module loading, namespace escape, tracing, rebooting) at the kernel level. The filter is irrevocable once applied.
 - **Network control**: Default-deny egress policy with per-agent domain allowlists. Agents cannot reach internal services or other agents' network stacks.
@@ -82,15 +82,15 @@ KruxOS considers four attacker categories, ordered by assumed capability:
 
 ### 2.3 What KruxOS Does NOT Protect Against
 
-Honest disclosure of known boundaries is essential for security evaluation. The following threats are **outside the scope** of KruxOS v0.0.1:
+Honest disclosure of known boundaries is essential for security evaluation. The following threats are **outside the scope** of the current KruxOS release:
 
 **Compromised host kernel.** All five isolation layers (namespaces, cgroups, seccomp, Landlock, nftables) are kernel features. A kernel vulnerability that allows privilege escalation from within a namespace (e.g., CVE-2022-0185, CVE-2022-25636) would bypass all containment. **Mitigation:** KruxOS ships kernel 6.6 LTS with security patches. The seccomp filter reduces the attack surface by blocking ~85% of the syscall table, limiting the kernel surface available for exploitation.
 
 **Physical access attacks.** An attacker with physical access to the machine can read the data partition, extract the vault database, and attempt offline passphrase cracking. **Mitigation:** Argon2id with 64 MiB memory cost makes brute-force expensive. Full-disk encryption (LUKS) is recommended for physical deployments but not enabled by default.
 
-**Side-channel attacks between sandboxes.** Agents sharing the same physical CPU may be able to observe timing differences through shared microarchitectural state (cache, branch predictor, TLB). KruxOS does not implement side-channel mitigations such as core pinning or cache partitioning. **Mitigation:** Not addressed in v0.0.1. For high-security deployments requiring cross-agent confidentiality, run agents on separate physical machines or use VM-level isolation.
+**Side-channel attacks between sandboxes.** Agents sharing the same physical CPU may be able to observe timing differences through shared microarchitectural state (cache, branch predictor, TLB). KruxOS does not implement side-channel mitigations such as core pinning or cache partitioning. **Mitigation:** Not yet addressed. For high-security deployments requiring cross-agent confidentiality, run agents on separate physical machines or use VM-level isolation.
 
-**Supply chain attacks in capability packs.** Community-contributed capability packs execute within the agent's sandbox, inheriting the agent's permissions. A malicious pack could exfiltrate data through allowed capability calls. **Mitigation:** Packs are sandboxed alongside the agent (same isolation layers apply). The pack registry requires cryptographic checksums. However, there is no static analysis or behavioral verification of pack code in v0.0.1.
+**Supply chain attacks in capability packs.** Community-contributed capability packs execute within the agent's sandbox, inheriting the agent's permissions. A malicious pack could exfiltrate data through allowed capability calls. **Mitigation:** Packs are sandboxed alongside the agent (same isolation layers apply). The pack registry requires cryptographic checksums. However, there is no static analysis or behavioral verification of pack code today.
 
 **Denial of service by a legitimate agent.** While cgroup limits prevent system-wide resource exhaustion, an agent can still consume its full allocated quota (512 MB memory, 50% CPU by default), impacting performance of collocated agents on resource-constrained hardware. **Mitigation:** Resource limits are configurable per deployment. Dedicated hardware or VM-per-agent deployment eliminates contention.
 
@@ -208,7 +208,7 @@ The strict profile is selected via `gateway.yaml` → `sandbox.default_seccomp_p
 ### 3.4 Layer 4: Landlock Filesystem Access Control (v0.0.3)
 
 !!! warning "Landlock is part of the v0.0.3 security architecture rework"
-    Landlock filesystem confinement, gateway/code-session privilege separation, and per-agent seccomp / resource policy YAML all land together in **v0.0.3**. In v0.0.1, filesystem boundaries are enforced through mount-namespace isolation, per-agent host mounts under `/mnt/<label>` with path-escape detection in the gateway, and the seccomp filter blocking filesystem-escape syscalls (`mount`, `pivot_root`, `unshare`, `setns`). The description below documents the target v0.0.3 design.
+    Landlock filesystem confinement, gateway/code-session privilege separation, and per-agent seccomp / resource policy YAML all land together in **v0.0.3**. Today, filesystem boundaries are enforced through mount-namespace isolation, per-agent host mounts under `/mnt/<label>` with path-escape detection in the gateway, and the seccomp filter blocking filesystem-escape syscalls (`mount`, `pivot_root`, `unshare`, `setns`). The description below documents the target v0.0.3 design.
 
 Landlock is a Linux security module (available since kernel 5.13) that provides unprivileged, stackable filesystem access control. Unlike traditional DAC (ownership/permissions), Landlock cannot be bypassed by processes running as root within a user namespace.
 
@@ -516,7 +516,7 @@ Policy rules can include rate limits that escalate the permission tier when exce
 - Counters are in-memory, per-agent, per-rule
 - Sliding 1-hour window
 - When exceeded, the tier escalates (only to a more restrictive tier)
-- Counters reset on gateway restart (acceptable for v0.0.1; persistent counters planned for enterprise)
+- Counters reset on gateway restart (acceptable for early beta; persistent counters planned for enterprise)
 
 ### 6.5 Approval Queue
 
@@ -540,7 +540,7 @@ KruxOS supports two deployment modes with different security characteristics:
 
 The KruxOS OS image is a minimal Linux distribution (Buildroot-based, kernel 6.6 LTS) purpose-built for agent execution.
 
-| Security Feature | Status (v0.0.1) | Implementation |
+| Security Feature | Status (current) | Implementation |
 |-----------------|-----------------|----------------|
 | PID namespace | **Active** | Kernel `CLONE_NEWPID` |
 | Mount namespace | **Active** | Kernel `CLONE_NEWNS` + `pivot_root` |
@@ -615,7 +615,7 @@ Three operator-facing surfaces deserve a security note because they handle inter
 
 ## 8. Known Limitations and Mitigations
 
-This section documents known security limitations in KruxOS v0.0.1 with complete transparency. Each limitation includes the planned mitigation milestone in the `v0.0.x` series, or "future" for items without a fixed slot yet. All planned items are tracked in the public issue tracker.
+This section documents known security limitations in KruxOS with complete transparency. Each limitation includes the planned mitigation milestone in the `v0.0.x` series, or "future" for items without a fixed slot yet. All planned items are tracked in the public issue tracker.
 
 ### 8.1 Vault Is In-Process
 
@@ -645,7 +645,7 @@ This section documents known security limitations in KruxOS v0.0.1 with complete
 
 **Limitation:** Agents sharing the same physical CPU can observe timing variations through shared microarchitectural state (L1/L2/L3 caches, branch predictor, TLB). This could theoretically leak information between agents via cache-timing attacks.
 
-**Mitigation:** Not addressed in v0.0.1. The practical impact is low for most deployments because: (a) agent workloads are I/O-bound (file operations, API calls), not compute-bound; (b) exploiting cache-timing attacks requires precise measurement that is difficult through the capability API abstraction.
+**Mitigation:** Not yet addressed. The practical impact is low for most deployments because: (a) agent workloads are I/O-bound (file operations, API calls), not compute-bound; (b) exploiting cache-timing attacks requires precise measurement that is difficult through the capability API abstraction.
 
 **Planned (future / v0.0.6+):** Optional core pinning (`cpuset` cgroup controller) and cache partitioning (Intel CAT/AMD L3QoS) for high-security deployments.
 
@@ -845,4 +845,4 @@ This appendix maps KruxOS security controls to common compliance frameworks. **T
 
 ---
 
-*This document reflects the security architecture of KruxOS v0.0.1. It will be updated as the platform evolves. For the latest version, see https://docs.kruxos.com/security/.*
+*This document reflects the security architecture of KruxOS v0.0.2. It will be updated as the platform evolves. For the latest version, see https://docs.kruxos.com/security/.*

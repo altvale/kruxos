@@ -1,0 +1,7 @@
+{
+  "resource": "https://docs.kruxos.com",
+  "authorization_servers": ["https://docs.kruxos.com"],
+  "scopes_supported": [],
+  "bearer_methods_supported": ["header"],
+  "resource_documentation": "https://docs.kruxos.com/developers/api/rest-api/"
+}

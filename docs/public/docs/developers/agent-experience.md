@@ -2,6 +2,20 @@
 
 The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing, guessing, and retry loops that consume tokens on traditional Linux.
 
+Every KruxOS example below assumes a connected client:
+
+```python
+from kruxos import KruxOS
+
+agent = await KruxOS.connect_async(
+    endpoint="ws://192.168.1.50:7700",
+    agent_name="my-agent",
+    api_key="aos_...",
+)
+```
+
+A capability is invoked with `await agent.call_async(name, **inputs)`. A **failed** call raises a typed exception from `kruxos.errors` (for example `FileNotFoundError`, `PermissionDeniedError`, `CapabilityError`) — there is no success flag to branch on, so the happy path reads straight from `result.data`.
+
 ## Reading a file
 
 === "Traditional Linux"
@@ -36,24 +50,24 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
 === "KruxOS"
 
     ```python
-    result = await agent.capabilities.invoke(
-        "filesystem.read",
-        path="/workspace/data.csv"
-    )
+    from kruxos import FileNotFoundError, PermissionDeniedError
 
-    if result.success:
+    try:
+        result = await agent.call_async(
+            "filesystem.read",
+            path="/workspace/data.csv",
+        )
+        # Happy path — read straight from the typed response
         content = result.data["content"]
         size = result.data["size_bytes"]
         modified = result.data["modified_at"]
-    else:
+    except FileNotFoundError:
         # Structured error with recovery suggestions
-        match result.error.type:
-            case "FileNotFound":
-                # Recovery: "Use filesystem.list to see available files"
-                pass
-            case "PermissionDenied":
-                # Recovery: "Use agent.policy to check path access"
-                pass
+        # Recovery: "Use filesystem.list to see available files"
+        pass
+    except PermissionDeniedError:
+        # Recovery: verify the path is inside the agent's workspace
+        pass
     ```
 
 **Token cost:** ~200 tokens (KruxOS) vs ~500 tokens (Linux). The Linux agent spends tokens on output parsing, error guessing, and retry attempts.
@@ -88,21 +102,24 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
 === "KruxOS"
 
     ```python
+    from kruxos import CapabilityError
+
     try:
-        result = await agent.capabilities.invoke(
+        result = await agent.call_async(
             "process.run",
-            command="python3 train.py"
+            command="python3 train.py",
         )
     except CapabilityError as e:
         # Structured error — no parsing needed
-        print(f"Error: {e.type}")       # "ProcessFailed"
-        print(f"Exit code: {e.data['exit_code']}")  # 1
-        print(f"Stderr: {e.data['stderr']}")  # Full stderr preserved
+        print(f"Error: {e.error_type}")            # "ProcessFailed"
+        if e.structured:
+            print(f"Details: {e.structured.description}")
+            print(f"Context: {e.structured.context}")  # e.g. exit_code, stderr
 
-        for recovery in e.recovery:
-            print(f"Try: {recovery.action}")
-            # "retry" — "Retry the command"
-            # "check_dependencies" — "Verify required modules are installed"
+            for recovery in e.structured.recovery_actions:
+                print(f"Try: {recovery.action} — {recovery.description}")
+                # "retry" — "Retry the command"
+                # "check_dependencies" — "Verify required modules are installed"
     ```
 
 **Token cost:** ~150 tokens (KruxOS) vs ~800 tokens (Linux). Error recovery on Linux burns tokens on pattern matching, wrong guesses, and retry loops.
@@ -134,15 +151,15 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
 
     ```python
     # Discover everything available, with schemas
-    caps = await agent.capabilities.list()
-    # Returns: 86 capabilities with purpose, inputs, outputs
+    caps = await agent.capabilities.list_async()
+    # Returns a list of CapabilityDef (name, description, input/output schema)
 
     # Get details for one capability
-    cap = await agent.capabilities.describe("git.log")
-    print(cap.purpose)       # "Returns the commit log..."
-    print(cap.when_to_use)   # "Use git.log to see recent commits..."
-    for inp in cap.inputs:
-        print(f"  {inp.name}: {inp.type}")  # Typed parameters
+    cap = await agent.capabilities.describe_async("git.log")
+    print(cap.name)          # "git.log"
+    print(cap.description)   # "Returns the commit log for a repository..."
+    for field, spec in cap.input_schema.get("properties", {}).items():
+        print(f"  {field}: {spec.get('type')}")  # Typed parameters
     ```
 
 **Token cost:** ~100 tokens (KruxOS) vs ~5000+ tokens (Linux). Man pages and `--help` output are massive. KruxOS provides exactly what the agent needs.
@@ -173,7 +190,7 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
 
     ```python
     # Agent never sees the secret — use-not-read model
-    result = await agent.capabilities.invoke(
+    result = await agent.call_async(
         "weather.current",
         location="London"
     )
@@ -181,7 +198,7 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
     # via the vault. The agent only gets the weather data back.
 
     # Even if the agent tries to read the secret directly:
-    result = await agent.capabilities.invoke(
+    result = await agent.call_async(
         "secrets.use", name="OPENWEATHER_API_KEY"
     )
     # Returns: {"injected": true, "capability": "weather.current"}
@@ -227,7 +244,7 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
 
     ```python
     # Step 1: Search for Python files
-    result = await agent.capabilities.invoke(
+    result = await agent.call_async(
         "filesystem.search",
         directory="/workspace",
         pattern="*.py"
@@ -237,14 +254,14 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
     # Step 2: Get file stats
     total_lines = 0
     for f in files:
-        stat = await agent.capabilities.invoke(
+        stat = await agent.call_async(
             "filesystem.stat", path=f["path"]
         )
         total_lines += stat.data["line_count"]
 
     # Step 3: Write report
     report = f"Found {len(files)} Python files, {total_lines} lines total\n"
-    await agent.capabilities.invoke(
+    await agent.call_async(
         "filesystem.write",
         path="/workspace/report.txt",
         content=report
@@ -280,7 +297,7 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
 === "KruxOS"
 
     ```python
-    result = await agent.capabilities.invoke(
+    result = await agent.call_async(
         "email.send",
         to="all-staff@company.com",
         subject="Q1 Report",
@@ -296,7 +313,7 @@ The same tasks, side by side. See how KruxOS's typed APIs eliminate the parsing,
     # Rollback point created automatically
 
     # If it was a mistake:
-    await agent.capabilities.invoke(
+    await agent.call_async(
         "proxy.cancel_write",
         write_id=result.data["write_id"]
     )

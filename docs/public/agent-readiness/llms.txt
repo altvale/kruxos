@@ -1,0 +1,92 @@
+# KruxOS Documentation
+
+> Technical documentation for KruxOS — the operating system for AI agents.
+
+Canonical docs site for install guides, API reference, capability catalog, policy model, and operator workflows.
+
+## Agent start here
+
+- [Getting Started](https://docs.kruxos.com/getting-started/)
+- [Install KruxOS](https://docs.kruxos.com/quickstart/install/)
+- [Web Dashboard & Wizard](https://docs.kruxos.com/quickstart/dashboard/)
+- [MCP Gateway](https://docs.kruxos.com/developers/api/gateway-mcp/)
+- [Capability Reference](https://docs.kruxos.com/developers/capabilities/) — 89 typed APIs
+- [CLI Guide](https://docs.kruxos.com/quickstart/cli/)
+- [Permission Model](https://docs.kruxos.com/concepts/permission-model/)
+- [Auth](https://docs.kruxos.com/auth.md)
+
+## Also on kruxos.com
+
+- [Agent guide](https://kruxos.com/agents/) — concise agent landing
+- [llms.txt](https://kruxos.com/llms.txt) — product site index
+- [Agent skills](https://kruxos.com/.well-known/agent-skills/index.json)
+
+## Ports (per KruxOS instance)
+
+| Port | Service | Auth |
+|------|---------|------|
+| 7800 | Dashboard (HTTPS) | Operator passphrase |
+| 7700 | MCP Gateway (WebSocket) | Agent API key (64-char hex) |
+| 7701 | Supervision WebSocket | `krx_user_*` or operator session |
+| 7702 | Trigger-wake (UDP) | Loopback only |
+| 7703 | User API (HTTP) | `krx_user_*` bearer |
+
+## Install paths
+
+| Path | Guide anchor |
+|------|--------------|
+| Docker | https://docs.kruxos.com/quickstart/install/#option-1-docker-recommended-for-trying-out |
+| VM image | https://docs.kruxos.com/quickstart/install/#option-2-vm-image-full-appliance--code-sessions--sandbox |
+| Bare metal | https://docs.kruxos.com/quickstart/install/#option-3-bare-metal |
+
+## Quick install (Docker)
+
+```bash
+docker run -d --name kruxos --privileged \
+  -e KRUXOS_VAULT_PASSPHRASE='choose-a-strong-passphrase' \
+  -p 7800:7800 -p 7700:7700 -p 7701:7701 \
+  -v kruxos-data:/data/kruxos \
+  altvale/kruxos:latest
+```
+
+Open https://localhost:7800 — complete the 8-step first-boot wizard.
+
+## Key doc sections
+
+### Quickstart
+- [Connect Claude](https://docs.kruxos.com/quickstart/connect-claude/)
+- [Connect Claude Code](https://docs.kruxos.com/quickstart/claude-code/)
+- [Connect OpenAI](https://docs.kruxos.com/quickstart/connect-openai/)
+- [Connect Gemini](https://docs.kruxos.com/quickstart/connect-gemini/)
+- [Connect Local Models](https://docs.kruxos.com/quickstart/connect-local/)
+
+### Guides
+- [Managing Agents](https://docs.kruxos.com/guides/managing-agents/)
+- [Policies](https://docs.kruxos.com/guides/policies/)
+- [Approval Workflow](https://docs.kruxos.com/guides/approval-workflow/)
+- [Monitoring](https://docs.kruxos.com/guides/monitoring/)
+
+### Developers
+- [REST API](https://docs.kruxos.com/developers/api/rest-api/)
+- [JSON-RPC Gateway](https://docs.kruxos.com/developers/api/gateway-jsonrpc/)
+- [Supervision Events](https://docs.kruxos.com/developers/api/supervision-events/)
+- [SDK Guide](https://docs.kruxos.com/developers/sdk-guide/)
+
+### Security & Enterprise
+- [Security Whitepaper](https://docs.kruxos.com/security/whitepaper/)
+- [Architecture](https://docs.kruxos.com/enterprise/architecture/)
+- [Deployment Guide](https://docs.kruxos.com/enterprise/deployment-guide/)
+
+## Discovery endpoints
+
+- [API catalog](https://docs.kruxos.com/.well-known/api-catalog)
+- [OpenAPI spec](https://docs.kruxos.com/.well-known/openapi.json)
+- [MCP server card](https://docs.kruxos.com/.well-known/mcp/server-card.json)
+- [Agent skills](https://docs.kruxos.com/.well-known/agent-skills/index.json)
+- [OAuth metadata](https://docs.kruxos.com/.well-known/oauth-authorization-server)
+
+## Contact
+
+- GitHub: https://github.com/altvale/kruxos
+- Security: security@altvale.com
+- Discord: https://discord.gg/VXvQKNv6Jn

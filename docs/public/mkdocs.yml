@@ -44,6 +44,9 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/webmcp.js
+
 plugins:
   - search
 
@@ -124,6 +127,11 @@ nav:
     - Slack Integration: guides/slack-integration.md
     - File Transfer: guides/file-transfer.md
     - First Conversation: guides/first-conversation.md
+    - Host CLI Integrations: guides/host-cli-integrations.md
+    - Managing Packs: guides/managing-packs.md
+    - User Identities & Tokens: guides/user-identities.md
+    - Code Sessions: guides/code-sessions.md
+    - Admin CLI Commands: guides/admin-cli.md
     - Dashboard Chat: guides/dashboard-chat.md
     - Troubleshooting: guides/troubleshooting.md
     - Error Reference: troubleshooting/errors.md
@@ -194,3 +202,7 @@ nav:
     - Agent Experience: developers/agent-experience.md
     - Inference Model Catalog: developers/inference-model-catalog.md
     - Contributing: developers/contributing.md
+
+  - Release Notes:
+    - v0.0.2: release-notes/v0.0.2.md
+    - v0.0.1: release-notes/v0.0.1.md

@@ -1,6 +1,6 @@
 # Scheduler Capabilities
 
-Create, list, and delete recurring cron-scheduled capability invocations, plus one-shot delayed invocations. **4 capabilities in v0.0.1.**
+Create, list, and delete recurring cron-scheduled capability invocations, plus one-shot delayed invocations. **4 built-in capabilities.**
 
 ## Overview
 

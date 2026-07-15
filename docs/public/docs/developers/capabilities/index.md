@@ -46,4 +46,4 @@ From the JSON-RPC fallback path:
 { "jsonrpc": "2.0", "id": 1, "method": "capabilities.list" }
 ```
 
-Each returned capability includes its `policy_tier` annotation. The v0.0.1 CLI does not ship a dedicated `kruxos cap` subcommand for listing — use `tools/list` / `capabilities.list` over the Gateway, or inspect the live registry from the dashboard `/agents` page where each agent's effective surface is rendered with its tier badges.
+Each returned capability includes its `policy_tier` annotation. The CLI does not ship a dedicated `kruxos cap` subcommand for listing — use `tools/list` / `capabilities.list` over the Gateway, or inspect the live registry from the dashboard `/agents` page where each agent's effective surface is rendered with its tier badges.

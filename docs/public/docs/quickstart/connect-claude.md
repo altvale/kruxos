@@ -10,8 +10,8 @@ Claude connects to KruxOS via **MCP (Model Context Protocol)** — the same prot
 - An agent token (64-char hex) issued by `kruxos agent create` or by the first-boot wizard
 - **The bundled mcp-bridge** at `/opt/kruxos/bin/mcp-bridge` (ships on the VM image) — or you can run the Python equivalent from the in-appliance SDK at `/opt/kruxos/sdk/python/`
 
-!!! note "About the Python SDK in v0.0.1"
-    The Python SDK ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/` (auto-importable from interactive shells via `/etc/profile.d/kruxos-sdk.sh`). The external `pip install kruxos` distribution to PyPI ships in **v0.0.3** alongside the license-server cycle. For host-CLI integrations (Claude Code, Codex), use the native `mcp-bridge` and `cli-hook` binaries under `/opt/kruxos/bin/`.
+!!! note "About the Python SDK"
+    The Python SDK ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/` (auto-importable from interactive shells via `/etc/profile.d/kruxos-sdk.sh`). A published `pip install kruxos` distribution to PyPI is planned for a later release — it is **not** part of v0.0.3. For host-CLI integrations (Claude Code, Codex), use the native `mcp-bridge` and `cli-hook` binaries under `/opt/kruxos/bin/`.
 
 ## Choose your Claude client
 
@@ -167,7 +167,7 @@ async def main():
 asyncio.run(main())
 ```
 
-For host-side Python code: copy `/opt/kruxos/sdk/python/` off the appliance into your project until the PyPI distribution ships in **v0.0.3**.
+For host-side Python code: copy `/opt/kruxos/sdk/python/` off the appliance into your project — a published PyPI distribution is planned for a later release, not v0.0.3.
 
 ## Verify the connection
 

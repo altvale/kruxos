@@ -10,7 +10,7 @@ This guide walks through the one-time setup — about five minutes if KruxOS is
 already running.
 
 !!! info "Full Hermes integration ships in v0.0.3"
-    v0.0.1 supports Hermes through the same generic `mcp-bridge` path documented
+    KruxOS supports Hermes through the same generic `mcp-bridge` path documented
     below — any client that speaks MCP stdio can use it. **Full Hermes
     integration** (a dedicated `kruxos cli-config` adapter for Hermes,
     on-appliance pip installation, ACP gating for web/browser/messaging tools)
@@ -56,7 +56,7 @@ Hermes-specific adapter because MCP stdio is a standard transport.
   an environment variable.
 - **The bundled `mcp-bridge`** at `/opt/kruxos/bin/mcp-bridge` on the appliance,
   or a host-side copy of the in-appliance Python SDK at `/opt/kruxos/sdk/python/`
-  (until the PyPI distribution lands in v0.0.3).
+  (a published PyPI distribution is planned for a later release, not v0.0.3).
 - **Hermes Agent v0.7.0 or newer** installed via the project's install script
   (see the Hermes README for current instructions).
 
@@ -177,7 +177,7 @@ per MCP server. You have two reasonable choices:
   and then again in the dashboard before the capability executes. More
   friction, but two independent stop-buttons.
 
-For v0.0.1 we recommend the first option: one approval path, one audit log,
+We recommend the first option: one approval path, one audit log,
 one place to change your mind.
 
 ## Tool filtering: KruxOS policy vs Hermes include/exclude
@@ -250,7 +250,7 @@ Common causes:
 
 The token the bridge is using does not match a registered agent. Re-create
 the agent (`kruxos agent create --name hermes`) and copy the token exactly —
-agent tokens are 64-char hex strings in v0.0.1. Set the `KRUXOS_BRIDGE_LOG_LEVEL=DEBUG`
+agent tokens are 64-char hex strings. Set the `KRUXOS_BRIDGE_LOG_LEVEL=DEBUG`
 env var for verbose output.
 
 ### Hermes sees tools but every call errors with "Session not initialized"

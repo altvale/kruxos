@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "docs-map",
+      "type": "skill-md",
+      "description": "Navigate docs.kruxos.com — install, MCP, capabilities, CLI, policy, and API reference.",
+      "url": "https://docs.kruxos.com/.well-known/agent-skills/docs-map/SKILL.md",
+      "digest": "sha256:d600ef0a4db8d981575d2d804e3b6ff6097fee9d7933fc8d259666b081b37b92"
+    },
+    {
+      "name": "kruxos-setup",
+      "type": "skill-md",
+      "description": "Install KruxOS and complete the first-boot wizard.",
+      "url": "https://kruxos.com/.well-known/agent-skills/kruxos-setup/SKILL.md",
+      "digest": "sha256:ce0b9f728b450f07396a9db655d10ac041b1d952dc89349382e6769491988991"
+    },
+    {
+      "name": "kruxos-capabilities",
+      "type": "skill-md",
+      "description": "Discover and invoke KruxOS typed capabilities via MCP.",
+      "url": "https://kruxos.com/.well-known/agent-skills/kruxos-capabilities/SKILL.md",
+      "digest": "sha256:416b7a6f54e793af8cd5aa592ba65e59400ed8c89b319988631e705624cf0c12"
+    },
+    {
+      "name": "kruxos-operator",
+      "type": "skill-md",
+      "description": "Operator supervision — dashboard, CLI, policy, tokens.",
+      "url": "https://kruxos.com/.well-known/agent-skills/kruxos-operator/SKILL.md",
+      "digest": "sha256:9d0246501eefebd89cfebc9a9644a88345f4b0426366705ada9c5efac67a93b6"
+    },
+    {
+      "name": "kruxos-auth",
+      "type": "skill-md",
+      "description": "KruxOS authentication — agent API keys and krx_user_* bearer tokens.",
+      "url": "https://kruxos.com/.well-known/agent-skills/kruxos-auth/SKILL.md",
+      "digest": "sha256:3929756a58857e8d1542f029b161a8913815ce510e6a49dcbabe7172f2daa991"
+    }
+  ]
+}

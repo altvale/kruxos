@@ -36,14 +36,21 @@ This page walks you from zero to a working KruxOS instance with a connected AI a
 
     Download the artefact for your hypervisor from <https://github.com/altvale/kruxos/releases>:
 
-    - `kruxos-x86_64.img.gz` / `kruxos-aarch64.img.gz` — raw disk image
     - `kruxos-x86_64.qcow2` — libvirt / KVM / QEMU
     - `kruxos-x86_64.vmdk` — VMware / VirtualBox
     - `kruxos-x86_64.box` — Vagrant (libvirt; x86_64 only)
 
     All artefacts are cosign-signed; per-artefact `.cosign.bundle` files include the Fulcio cert + Rekor inclusion proof for offline verification.
 
-    See [Install KruxOS — VM image](quickstart/install.md#option-2-vm-image-full-appliance-code-sessions-sandbox) for the boot walkthrough.
+    See [Install KruxOS — VM image](quickstart/install.md#option-2-vm-image-full-appliance--code-sessions--sandbox) for the boot walkthrough.
+
+=== "Bare metal"
+
+    Download the raw image from <https://github.com/altvale/kruxos/releases>:
+
+    - `kruxos-x86_64.img.gz` / `kruxos-aarch64.img.gz` — decompress and write to USB / SSD / NVMe
+
+    See [Install KruxOS — bare metal](quickstart/install.md#option-3-bare-metal) for `dd`, boot, and network guidance.
 
 ---
 
@@ -69,7 +76,7 @@ Restart Claude Code. Ask: *"What tools do you have from KruxOS?"* — Claude sho
 
 ### Python SDK (programmatic access)
 
-The Python SDK ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/` (auto-importable via `/etc/profile.d/kruxos-sdk.sh`). The external `pip install kruxos` distribution to PyPI ships in **v0.0.3**.
+The Python SDK ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/` (auto-importable via `/etc/profile.d/kruxos-sdk.sh`). A published `pip install kruxos` distribution to PyPI is planned for a later release — it is **not** part of v0.0.3.
 
 ```python
 import asyncio
@@ -109,7 +116,7 @@ Open <https://localhost:7800> in your browser (HTTPS-by-default with an auto-gen
 | **Approvals** | Pending / Approved / Rejected / Timed Out tabs; default 24-hour hold for User MCP calls |
 | **Audit** | Searchable hash-chained audit log with Principal-aware filtering |
 | **Chat** | Multi-model chat with persisted sessions, knowledge panel, inline approvals |
-| **Code Sessions** (`/code`) | xterm.js terminals through the sandbox — VM image only in v0.0.1 |
+| **Code Sessions** (`/code`) | xterm.js terminals through the sandbox — VM image only |
 | **Identities** | User-principal surface: bearer-token CRUD with one-time raw-token reveal, plus User policy (retention quick input + YAML editor) |
 | **Integrations** | Claude Code / Codex install + regenerate seed configs (cards show install/version status + View config) |
 | **Policies** | Visual + YAML editor, per-agent overrides |

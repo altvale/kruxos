@@ -1,0 +1,98 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "KruxOS APIs",
+    "version": "0.0.2",
+    "description": "KruxOS machine-facing surfaces: Dashboard REST API (operator), User API (loopback CLI), and MCP Gateway (agents). Full docs at https://docs.kruxos.com/developers/api/",
+    "contact": {
+      "name": "Altvale",
+      "url": "https://kruxos.com/contact/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{host}:7800/api",
+      "description": "Dashboard REST API (operator session or User token)",
+      "variables": {
+        "host": { "default": "localhost" }
+      }
+    },
+    {
+      "url": "http://127.0.0.1:7703",
+      "description": "User API (loopback, krx_user_* bearer)"
+    },
+    {
+      "url": "ws://{host}:7700/mcp",
+      "description": "MCP Agent Gateway (64-char hex agent API key)",
+      "variables": {
+        "host": { "default": "localhost" }
+      }
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "UserBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "krx_user_* opaque bearer token"
+      },
+      "AgentBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "64-char hex agent API key (MCP WebSocket upgrade)"
+      },
+      "OperatorSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session",
+        "description": "Dashboard operator session cookie"
+      }
+    }
+  },
+  "paths": {
+    "/status": {
+      "get": {
+        "summary": "System status summary",
+        "tags": ["Dashboard"],
+        "security": [{ "UserBearer": [] }, { "OperatorSession": [] }],
+        "responses": {
+          "200": { "description": "System-wide status" }
+        }
+      }
+    },
+    "/agents": {
+      "get": {
+        "summary": "List registered agents",
+        "tags": ["Dashboard"],
+        "security": [{ "UserBearer": [] }, { "OperatorSession": [] }],
+        "responses": {
+          "200": { "description": "Agent list" }
+        }
+      }
+    },
+    "/approvals": {
+      "get": {
+        "summary": "List pending approvals",
+        "tags": ["Dashboard"],
+        "security": [{ "UserBearer": [] }, { "OperatorSession": [] }],
+        "responses": {
+          "200": { "description": "Approval queue" }
+        }
+      }
+    },
+    "/audit": {
+      "get": {
+        "summary": "Query audit log",
+        "tags": ["Dashboard"],
+        "security": [{ "UserBearer": [] }, { "OperatorSession": [] }],
+        "responses": {
+          "200": { "description": "Audit entries" }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Full API reference",
+    "url": "https://docs.kruxos.com/developers/api/rest-api/"
+  }
+}

@@ -113,9 +113,9 @@ If a write fails after the buffer flushes (e.g., network error, API error):
 
 ## Connected services
 
-### Gmail (v0.0.1 adapter)
+### Gmail
 
-Full integration with read-replica, write buffer, batch protection, and rollback. The 7 `email.*` capabilities are wired in v0.0.1; the dashboard / CLI connection UX lands in v0.0.2.
+Full integration with read-replica, write buffer, batch protection, and rollback. The 7 `email.*` capabilities are wired; connect via the dashboard or `kruxos connect gmail`.
 
 Capabilities: `email.search`, `email.read`, `email.send`, `email.reply`, `email.forward`, `email.delete`, `email.label`
 
@@ -127,25 +127,24 @@ The Service Proxy is a framework. Adding a new service requires implementing thr
 - `WriteExecutor` — how to execute writes against the service
 - `RollbackCapable` — how to reverse operations
 
-v0.0.1 ships Gmail and Slack adapters; Calendar, GitHub, and Jira are on the roadmap.
+Gmail and Slack adapters ship today; Calendar, GitHub, and Jira are on the roadmap.
 
 ## Service lifecycle
 
-### Connect (v0.0.2)
+### Connect
 
 ```bash
 kruxos connect gmail --credentials /path/to/credentials.json
 ```
 
-In v0.0.2 this will:
+This:
 
-1. Start OAuth PKCE flow
-2. Store the token in the vault (encrypted, with auto-refresh)
-3. Run initial sync (full metadata download)
-4. Enable `email.*` capabilities
+1. Starts OAuth PKCE flow
+2. Stores the token in the vault (encrypted, with auto-refresh)
+3. Runs initial sync (full metadata download)
+4. Enables `email.*` capabilities
 
-!!! info "v0.0.1 state of the connect path"
-    The Gmail / Slack adapters, vault token storage with auto-refresh, sync engine, write buffer, and batch protection are all wired in v0.0.1. What's missing is the operator-facing UX — the `kruxos connect <service>` CLI subcommand and the dashboard OAuth flow. Both land in **v0.0.2**. Until then, seed the vault entry manually (the adapter picks up tokens from `service/<adapter>/oauth` automatically).
+You can also connect from the dashboard **Service Proxy** page. To seed tokens manually (e.g., for automation), write the vault entry directly — the adapter picks up tokens from `service/<adapter>/oauth` automatically.
 
 ### Monitor
 
@@ -155,17 +154,17 @@ kruxos status
 
 Shows sync status, last sync time, pending writes, and any errors.
 
-### Disconnect (v0.0.2)
+### Disconnect
 
 ```bash
 kruxos disconnect gmail
 ```
 
-In v0.0.2 this will:
+This:
 
-1. Cancel all buffered writes
-2. Revoke the OAuth token
-3. Delete the local read-replica
-4. Disable `email.*` capabilities
+1. Cancels all buffered writes
+2. Revokes the OAuth token
+3. Deletes the local read-replica
+4. Disables `email.*` capabilities
 
 Disconnection is a first-class operation — it cleanly removes all traces of the service connection.

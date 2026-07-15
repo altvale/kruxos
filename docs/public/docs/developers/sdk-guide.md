@@ -4,7 +4,7 @@ The KruxOS Python SDK (`kruxos`) provides a typed, async client for connecting a
 
 ## Installation
 
-The SDK (`kruxos`, version `0.0.2`) ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/`, importable from interactive shells via `/etc/profile.d/kruxos-sdk.sh`. From an autonomous agent task or an in-appliance Python shell, `import kruxos` just works.
+The SDK ships **bundled inside the appliance** at `/opt/kruxos/sdk/python/`, importable from interactive shells via `/etc/profile.d/kruxos-sdk.sh`. From an autonomous agent task or an in-appliance Python shell, `import kruxos` just works.
 
 For host-side use, copy `/opt/kruxos/sdk/python/` off the appliance into your project. A published `pip install kruxos` package on PyPI is planned for a future release — it is **not** the install path today.
 

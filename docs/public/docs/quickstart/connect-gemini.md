@@ -7,12 +7,12 @@ By the end of this page, a Google Gemini model will be connected to KruxOS via t
 - A running KruxOS instance ([Install](install.md))
 - An agent token (64-char hex) from `kruxos agent create` or the wizard
 - A Google AI API key
-- The bundled Python SDK at `/opt/kruxos/sdk/python/` (auto-importable on the appliance). The external `pip install kruxos` distribution ships in **v0.0.3**.
+- The bundled Python SDK at `/opt/kruxos/sdk/python/` (auto-importable on the appliance). A published `pip install kruxos` distribution to PyPI is planned for a later release, not v0.0.3.
 - The `google-generativeai` package — install on the appliance via `python3 -m pip install --user google-generativeai`
 
 ## Connect and use capabilities
 
-The example below runs **on the appliance** so the bundled SDK is on `sys.path`. For host-side code, copy `/opt/kruxos/sdk/python/` off the appliance until the PyPI distribution lands in v0.0.3.
+The example below runs **on the appliance** so the bundled SDK is on `sys.path`. For host-side code, copy `/opt/kruxos/sdk/python/` off the appliance — a published PyPI distribution is planned for a later release, not v0.0.3.
 
 ```python
 import asyncio

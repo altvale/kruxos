@@ -195,13 +195,13 @@ dependencies: []
 kruxos_version: ">=0.0.1"
 ```
 
-## Install locally (v0.0.1)
+## Install locally
 
 ```bash
 kruxos pack install ./my-weather-pack
 ```
 
-The capabilities are now available to all agents and appear in MCP `tools/list` / JSON-RPC `capabilities.list` for any agent whose policy admits them. (There is no `kruxos cap`/`kruxos capabilities list` CLI subcommand in v0.0.1 — discovery happens via the Gateway protocol surfaces.)
+The capabilities are now available to all agents and appear in MCP `tools/list` / JSON-RPC `capabilities.list` for any agent whose policy admits them. (There is no `kruxos cap`/`kruxos capabilities list` CLI subcommand — discovery happens via the Gateway protocol surfaces.)
 
 ## Next steps
 
