@@ -65,7 +65,7 @@ KruxOS exposes every OS operation as a **typed, documented API**:
 
 ### Key features
 
-- **89 typed capabilities across 13 categories** — filesystem, process, network, git, scheduler, system, agent, state, comms, secrets, email, Slack, alerts. MCP-native (`tools/list`) with JSON-RPC fallback (`capabilities.list`).
+- **92 typed capabilities across 13 categories** — filesystem, process, network, git, scheduler, system, agent, state, comms, secrets, email, Slack, alerts. MCP-native (`tools/list`) with JSON-RPC fallback (`capabilities.list`).
 - **Deterministic policy engine** — four-tier model (`autonomous` / `notify` / `approval_required` / `blocked`), hot-reloadable YAML at `/data/kruxos/policies/`, per-agent overrides, no LLM in the hot path.
 - **One approval surface** — Claude Code, OpenAI Codex, and any cli-config'd CLI route every gated tool call through the KruxOS queue. No in-CLI prompts; no governance bypass via native shell tools.
 - **Per-agent sandbox** — Linux user/network namespaces, cgroup v2 limits (512 MiB memory / 50% CPU / 100 PIDs / 50 MiB/s read / 25 MiB/s write defaults), seccomp BPF allowlist, nftables defense-in-depth.
@@ -107,7 +107,7 @@ graph TB
     Agent[AI Agent] -->|MCP / JSON-RPC| Gateway[Agent Gateway :7700]
     Gateway --> Registry[Capability Registry]
     Gateway --> Policy[Policy Engine]
-    Registry --> Capabilities[89 Capabilities]
+    Registry --> Capabilities[92 Capabilities]
     Registry --> Proxy[Service Proxy]
     Proxy --> Gmail[Gmail]
     Proxy --> Slack[Slack]

@@ -75,7 +75,7 @@ KruxOS Verify
   [PASS] Dashboard (HTTPS)           listening on 0.0.0.0:7800
   [PASS] Health endpoint             listening on 127.0.0.1:7704
   [PASS] Vault                       unlocked
-  [PASS] Capability definitions      91 capabilities across 13 categories
+  [PASS] Capability definitions      92 capabilities across 13 categories
 ```
 
 !!! tip "CLI commands inside Docker"
