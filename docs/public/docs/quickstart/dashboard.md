@@ -24,7 +24,7 @@ docker exec kruxos kruxos verify
 
 ### First-boot Wizard
 
-On a fresh install, the dashboard opens into an eight-step wizard:
+On a fresh install, the dashboard opens into a ten-step wizard:
 
 1. **Welcome** — orientation card explaining the four things the wizard sets up (secrets, identity, CLIs, policy).
 2. **Vault passphrase** — initialises or unlocks the encrypted vault. A live strength meter scores the passphrase before submit.
@@ -33,7 +33,9 @@ On a fresh install, the dashboard opens into an eight-step wizard:
 5. **Licence** — paste a JWT or skip. KruxOS is free for personal use.
 6. **User token** — generates a `krx_user_*` bearer token; shown **once** for CLI installs and the loopback User API. Acknowledge-and-continue is gated on a checkbox.
 7. **Install CLI Tools** — optional. Installs Claude Code and/or Codex CLI seed configs in-process. Both can be installed later from Dashboard → Integrations.
-8. **Done** — confirmation screen with a link into the main dashboard.
+8. **SSH key** — optional. Pre-seed a public key so the opt-in SSH console (Settings › System) is ready to turn on later. Skippable; keys can be managed from Settings at any time.
+9. **Remote access** — optional. Turn on Tailscale to reach the dashboard from your own devices anywhere; shows a one-time login link to open on your phone or laptop. Skippable; fully manageable later from Settings › System — see the [Remote Access guide](../guides/remote-access.md).
+10. **Done** — confirmation screen with a link into the main dashboard.
 
 The progress rail at the top of the wizard supports backward navigation by clicking any completed dot.
 

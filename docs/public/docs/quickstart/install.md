@@ -38,7 +38,7 @@ Only these two ports need publishing. The User API (7703) and health endpoint (7
 
 ### Finish setup in the browser
 
-Open <https://localhost:7800> — the first-boot wizard walks you through eight steps:
+Open <https://localhost:7800> — the first-boot wizard walks you through ten steps:
 
 1. **Welcome** — orientation card explaining what the wizard sets up.
 2. **Vault passphrase** — same value you passed via `KRUXOS_VAULT_PASSPHRASE`. Unlocks the vault, dashboard login, and console root login. A live strength meter scores the passphrase before submit.
@@ -47,7 +47,9 @@ Open <https://localhost:7800> — the first-boot wizard walks you through eight 
 5. **License activation** — paste a JWT or skip (skipping logs a warning but keeps serving).
 6. **User token** — generates a `krx_user_*` bearer token; shown **once** for the loopback User API and CLI installs.
 7. **Install CLI Tools** — optional. Installs Claude Code and/or Codex CLI seed configs in-process. Both can be installed later from Dashboard → Integrations.
-8. **Done** — confirmation screen.
+8. **SSH key** — optional. Pre-seed a public key so the opt-in SSH console is ready to turn on later from Settings › System.
+9. **Remote access** — optional. Turn on Tailscale so you can reach the dashboard from your own devices anywhere; shows a one-time login link. Can also be enabled later from Settings › System (see the [Remote Access guide](../guides/remote-access.md)).
+10. **Done** — confirmation screen.
 
 The dashboard auto-generates a self-signed TLS cert; browsers will prompt to accept it.
 
@@ -155,7 +157,7 @@ vagrant up
 
 ### First boot
 
-The default firewall accepts TCP 7700 (agent gateway) and 7800 (dashboard) only — SSH on 22 is opt-in and off by default, and port 7702 (trigger-wake) is UDP on loopback only, so it has no inbound firewall rule by design. Open `https://<vm-ip>:7800` in your browser and run through the same dashboard wizard described in Option 1 (welcome, vault passphrase, workspace, AdminAgent, license, User token, Install CLI Tools, done).
+The default firewall accepts TCP 7700 (agent gateway) and 7800 (dashboard) only — SSH on 22 is opt-in and off by default, and port 7702 (trigger-wake) is UDP on loopback only, so it has no inbound firewall rule by design. Open `https://<vm-ip>:7800` in your browser and run through the same dashboard wizard described in Option 1 (welcome, vault passphrase, workspace, AdminAgent, license, User token, Install CLI Tools, SSH key, Remote access, done).
 
 Daily state backups (02:00 UTC) and audit-log rotation (03:00 UTC, 90-day retention) run on systemd timers out of the box.
 

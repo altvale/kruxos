@@ -28,11 +28,27 @@ Per-release notes with more narrative detail live under
   boundary; the agent references the secret by name and never sees the
   value, and the secret must be scoped to the capability and host-bound.
 
-- Remote Access guide — recipes for reaching the dashboard from outside
-  the LAN with Tailscale, Cloudflare Tunnel, or Ngrok. Covers the
-  security trade-offs (expose only the dashboard port; keep the loopback
-  User API private; add a tunnel-level identity gate), cost, and
-  troubleshooting.
+- Remote access (Tailscale) built in — reach your dashboard from your
+  own devices anywhere. Turn it on from an optional first-boot wizard
+  step or from Settings › System › Remote access (Tailscale): the
+  appliance joins *your own* Tailscale tailnet (owner devices only,
+  bring-your-own free account) and publishes the dashboard at a
+  valid-HTTPS `https://<node>.<your-tailnet>.ts.net` address — nothing
+  is exposed to the public internet, and the feature is off by default.
+  Finish the one-time login by opening the link the dashboard shows on
+  your phone or laptop, or join with a pasted pre-auth key (used once,
+  never stored). A guided consent step covers enabling HTTPS
+  certificates (leave the optional Funnel checkbox unchecked), the card
+  warns with a one-click re-login when your node key nears expiry, and
+  a default-off toggle lets the opt-in SSH console ride the same
+  tailnet.
+- Remote Access guide — rewritten around the built-in Tailscale
+  feature: enabling from the wizard or Settings, the one-time login
+  link, the HTTPS-certificates consent page (and why Funnel stays
+  unchecked), pre-auth keys, key expiry, SSH over Tailscale, and
+  troubleshooting. The former DIY tunnel recipes (Cloudflare Tunnel,
+  ngrok, self-hosted Headscale) are condensed into an advanced,
+  unsupported appendix.
 
 - SSH access — the appliance now bundles an opt-in OpenSSH server, disabled
   by default and enabled from **Settings › System › SSH access**. Root,
@@ -45,6 +61,10 @@ Per-release notes with more narrative detail live under
   whitepaper.
 
 ### Changed
+
+- The SSH access card now points to the shipped Remote access
+  (Tailscale) card for out-of-network access instead of saying VPN
+  support is "coming in a future release".
 
 - GPU Drivers guide rewritten around the new **one-click Install Now** flow:
   after an NVIDIA license attestation the appliance fetches the version-pinned

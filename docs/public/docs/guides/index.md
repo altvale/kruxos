@@ -59,9 +59,9 @@ Day-to-day operations for running KruxOS.
 | [Configuration Overview](configuration.md) | Where config lives and what each file does |
 | [Admin CLI Commands](admin-cli.md) | user-token, mount, and cli-config reference |
 | [Monitoring](monitoring.md) | Health checks, metrics, and alerts |
+| [Remote Access](remote-access.md) | Reach the dashboard from your own devices anywhere with the built-in Tailscale remote access |
 | [Backup & Restore](backup-restore.md) | Protect and recover your data |
 | [Updating KruxOS](updating.md) | Apply updates with automatic rollback |
-| [Remote Access](remote-access.md) | Reach the dashboard from outside the LAN |
 | [SSH Access](ssh-access.md) | Enable SSH with public-key authentication |
 
 ## Help
