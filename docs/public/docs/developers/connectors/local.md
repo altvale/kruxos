@@ -13,7 +13,7 @@ from kruxos.connectors.local import LocalAdapter
 
 ollama = Client()
 agent = KruxOS.connect("localhost:7700", api_key="<64-char hex>")
-adapter = OllamaAdapter(agent)
+adapter = LocalAdapter(agent)
 ```
 
 ### Usage
