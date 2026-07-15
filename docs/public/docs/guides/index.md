@@ -45,6 +45,13 @@ Day-to-day operations for running KruxOS.
 | [Managing Packs](managing-packs.md) | Install, upgrade, and remove capability packs |
 | [File Transfer](file-transfer.md) | Get files onto the appliance for packs, certs, and drivers |
 
+## Account & licensing
+
+| Guide | What you'll learn |
+|-------|------------------|
+| [Signing In](signing-in.md) | Magic-link sign-in on kruxos.com, and what to do when a link doesn't arrive |
+| [Activating Your Appliance](activating.md) | Online pairing-code activation, offline paste, and the seat model |
+
 ## Operations
 
 | Guide | What you'll learn |

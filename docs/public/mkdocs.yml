@@ -96,6 +96,8 @@ nav:
   - Guides:
     - guides/index.md
     - First-Boot Wizard: guides/first-boot-wizard.md
+    - Signing In: guides/signing-in.md
+    - Activating Your Appliance: guides/activating.md
     - Host CLI Integrations: guides/host-cli-integrations.md
     - Model Providers: guides/model-providers.md
     - On-Appliance Inference: guides/on-appliance-inference.md

@@ -120,7 +120,7 @@ graph TB
 
 ## Licensing
 
-KruxOS is **free for personal use** — full appliance, no time limit. Business and revenue-generating use requires a Commercial licence. See [Pricing](enterprise/pricing.md) for tiers and the full FAQ. Governed by the [End User License Agreement](https://altvale.com/legal/kruxos-eula).
+KruxOS is **free for personal use** — full appliance, no time limit. Business and revenue-generating use requires an Enterprise licence ([contact sales](mailto:sales@altvale.com)). See [Pricing](enterprise/pricing.md) for tiers and the full FAQ. Governed by the [End User License Agreement](https://altvale.com/legal/kruxos-eula).
 
 The community-extensible directories — `packs/`, `plugins/`, `themes/`, and `docs/public/` — are licensed under [Apache 2.0](https://github.com/altvale/kruxos/blob/main/packs/LICENSE), so anyone can publish capability packs, plugins, themes, and docs contributions.
 
