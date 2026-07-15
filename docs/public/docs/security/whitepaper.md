@@ -77,7 +77,7 @@ KruxOS considers four attacker categories, ordered by assumed capability:
 | Agent tampers with audit log | Append-only files with SHA-256 hash chain; agents have no filesystem access to audit directory | **High** — Landlock + hash chain integrity |
 | Agent bypasses policy | Policy evaluated in the Gateway before capability dispatch; agent has no direct system access | **High** — Gateway is the only entry point |
 | Unauthorized agent connects | API key authentication with SHA-256 hashing and constant-time comparison | **High** — cryptographic verification |
-| Network eavesdropping on agent traffic | TLS for external connections; the dashboard serves HTTPS by default with a self-signed certificate; gateway WebSockets bind to `127.0.0.1` so they do not traverse the network | **Medium** — gateway-to-agent WebSocket TLS is configurable but not mandatory for localhost traffic |
+| Network eavesdropping on agent traffic | TLS for external connections; the dashboard serves HTTPS by default with a self-signed certificate; the agent gateway (7700) binds `0.0.0.0` and authenticates every connection with a per-Agent bearer — front it with `wss://` (reverse proxy) or restrict it to loopback (`server.host: "127.0.0.1"`) to keep agent traffic off the wire | **Medium** — gateway-to-agent WebSocket TLS is configurable but not mandatory for local traffic in v0.0.1 |
 | Audit log modification after the fact | Hash chain detects any modification, deletion, or reordering of entries | **High** — SHA-256 integrity verification |
 
 ### 2.3 What KruxOS Does NOT Protect Against
@@ -299,7 +299,7 @@ The secrets vault (`crates/vault/`) provides encrypted storage for all credentia
 4. When the vault is locked or the process exits, the master key is zeroed in memory
 5. The master key is never written to disk, never logged, and never transmitted
 
-**Dashboard login passphrase (separate from the vault master key):** To allow the operator to log in to the web dashboard *after* the gateway has unlocked the vault, KruxOS writes a `bcrypt` hash of the operator's chosen passphrase to `${data_dir}/vault_passphrase_hash` (mode `0600`) during the first-boot wizard. The supervision WebSocket (port 7701) and dashboard login form verify operator-supplied passphrases against this bcrypt hash with a constant-time comparison. The bcrypt hash is **only** for verifying the human operator at login time; it is never used to derive any encryption key. The vault's actual encryption key still derives from the original passphrase via Argon2id at gateway startup, before the dashboard is reachable.
+**Dashboard login passphrase (separate from the vault master key):** To allow the operator to log in to the web dashboard *after* the gateway has unlocked the vault, KruxOS writes a `bcrypt` hash of the operator's chosen passphrase to `${data_dir}/vault_passphrase_hash` (mode `0600`) during the first-boot wizard. The dashboard login form verifies operator-supplied passphrases against this bcrypt hash with a constant-time comparison. (Supervision no longer uses a network port or this passphrase — it rides a root-only local control socket authenticated by Unix peer credentials; see §4.4.) The bcrypt hash is **only** for verifying the human operator at login time; it is never used to derive any encryption key. The vault's actual encryption key still derives from the original passphrase via Argon2id at gateway startup, before the dashboard is reachable.
 
 **Use-not-read access model:**
 Agents never receive raw secret values. Instead:
@@ -324,9 +324,9 @@ KruxOS distinguishes two principal types — `User` (the human operator) and `Ag
 
 | Principal | Listener | Credential | Notes |
 |-----------|----------|-----------|-------|
-| **User** (operator) | TCP **7703** (HTTP, loopback by default) | Bearer token | Issued via `kruxos user-token create`; one-time raw-token reveal; CLI tools (`mcp-bridge`, `cli-hook`) read the bearer from the vault, env, or stdin so it never appears in argv |
+| **User** (operator) | TCP **7703** (HTTP, loopback by default) | Bearer token | Issued via `kruxos user-token create`; one-time raw-token reveal. The `/code` CLI tools (`mcp-bridge`, `cli-hook`) instead mint a short-lived credential over the peer-credential **auth socket** (`/run/kruxos/auth.sock`, distinct from the uid-0-only control socket used for supervision), so no bearer appears in argv or on disk |
 | **Agent** (autonomous) | TCP **7700** (MCP, JSON-RPC fallback) | API key | Issued via `kruxos agent create`; subject to per-agent policy; revocable via `kruxos agent revoke` |
-| **Operator** (dashboard) | TCP **7800** (HTTPS, self-signed cert) | bcrypt-hashed passphrase | Verified against `${data_dir}/vault_passphrase_hash`; supervision WebSocket on 7701 uses the same hash |
+| **Operator** (dashboard) | TCP **7800** (HTTPS, self-signed cert) | bcrypt-hashed passphrase | Verified against `${data_dir}/vault_passphrase_hash`. Supervision rides a root-only local control socket (peer-credential uid 0), not a network port |
 
 **Token generation and storage:**
 
@@ -357,8 +357,9 @@ This chain detects three classes of tampering:
 
 ### 4.4 TLS Configuration
 
-- **Agent-to-Gateway:** WebSocket over `ws://` (localhost) or `wss://` (remote). TLS is recommended for remote connections but not enforced by default. The gateway binds to `127.0.0.1` by default; binding to `0.0.0.0` for remote access is an explicit configuration choice.
+- **Agent-to-Gateway:** WebSocket over `ws://` (localhost) or `wss://` (remote). The agent gateway (port 7700) binds `0.0.0.0` by default — connecting an agent from another host is a supported topology, and every connection is authenticated by a per-Agent bearer token, so the bind address is not the security boundary. Restrict it to loopback with `server.host: "127.0.0.1"` on single-box deployments where all agents are local. TLS is recommended for remote connections but not enforced by default. Supervision no longer uses a network port at all — it rides a **root-only local control socket** (`/run/kruxos/control.sock`, a Unix-domain socket, mode `0600 root:root`) authenticated by the caller's Unix peer credentials (uid 0 only). The formerly-documented supervision TCP port and its admin passphrase are retired.
 - **Dashboard:** **HTTPS by default** on port 7800. On first start, the dashboard generates a self-signed RSA certificate via `node:crypto` and persists it under the dashboard TLS directory; subsequent starts reuse it. Operators can replace the cert/key with files from a real CA by writing to `KRUXOS_TLS_CERT` / `KRUXOS_TLS_KEY`; user-supplied certificates are never overwritten. To opt out of TLS entirely (e.g., behind a reverse proxy that already terminates), set `KRUXOS_TLS_DISABLED=true`. For internet-facing deployments, fronting the dashboard with Caddy/nginx for a real certificate is still recommended.
+- **Optional tailnet access (opt-in, disabled by default):** An operator may enable a userspace Tailscale daemon (`tailscaled`, run unprivileged as a dedicated non-root user) to reach the appliance over a private WireGuard tailnet without opening any WAN port. `tailscale serve` publishes **only** the dashboard (port 7800) over the tailnet — plus the SSH console (tcp/22) when the operator has additionally opted in to SSH-over-tailnet; a kernel nftables `skuid` egress guard pins the Tailscale daemon so any new loopback connection it makes to a port outside that allowlist — the User API (7703), health (7704), or gateway (7700) — is rejected. No tailnet surface exists until the operator turns it on.
 - **External service connections:** The service proxy (Gmail, Slack, OpenAI Codex adapters) uses TLS for all API calls via `reqwest` with system certificate verification.
 
 ### 4.5 OAuth Token Management
@@ -660,7 +661,7 @@ This section documents known security limitations in KruxOS with complete transp
 
 **Limitation:** Network capabilities (`network.http_request`, `network.download`, etc.) execute in the Gateway process, sharing the Gateway's full network permissions. The domain allowlist is the only defense. If a URL parsing quirk allows a crafted URL to pass the domain check but resolve to an internal IP, the Gateway would make the request with its own network context.
 
-**Mitigation:** The domain allowlist uses the `url` crate's parser (WHATWG URL standard compliant) to extract the hostname before the request. The `reqwest` HTTP client does not follow redirects to different domains. The Gateway binds to `127.0.0.1` by default, limiting exposure to the local machine.
+**Mitigation:** The domain allowlist uses the `url` crate's parser (WHATWG URL standard compliant) to extract the hostname before the request. The `reqwest` HTTP client does not follow redirects to different domains. (The gateway's inbound bind address — `0.0.0.0` by default, per-Agent bearer authenticated — is orthogonal to this outbound SSRF risk; the domain allowlist and no-cross-domain-redirect are the controls here.)
 
 **Planned (v0.0.4):** veth-pair model where network capabilities execute inside the sandbox's network namespace with nftables egress filtering, eliminating the shared-network-context issue entirely.
 
@@ -674,9 +675,9 @@ This section documents known security limitations in KruxOS with complete transp
 
 ### 8.8 Internal Traffic Not Encrypted by Default
 
-**Limitation:** Agent-to-Gateway traffic over WebSocket uses `ws://` (unencrypted) when connecting via localhost. The supervision WebSocket (port 7701) also uses `ws://` by default.
+**Limitation:** Agent-to-Gateway traffic over WebSocket uses `ws://` (unencrypted) when connecting via localhost.
 
-**Mitigation:** The Gateway binds to `127.0.0.1` by default, so traffic does not traverse the network. Remote access requires explicit configuration to bind to `0.0.0.0`, at which point TLS should be configured. For remote access, deploy a TLS-terminating reverse proxy such as Caddy. Built-in Let's Encrypt support is planned for v0.0.4.
+**Mitigation:** The User API (7703) and health endpoint (7704) bind `127.0.0.1`, and supervision rides a root-only local Unix-domain control socket rather than a network port — so that traffic never traverses the network. Remote access to the agent gateway requires TLS; deploy a TLS-terminating reverse proxy such as Caddy. Built-in Let's Encrypt support is planned for v0.0.4.
 
 **Planned (v0.0.4):** Automatic TLS for all WebSocket connections when binding to non-localhost addresses.
 
@@ -816,7 +817,7 @@ This appendix maps KruxOS security controls to common compliance frameworks. **T
 | **4.1** Logging and auditing | Hash-chained CBOR audit log; SQLite index; 90-day retention | **Addressed** |
 | **4.2** Log integrity | SHA-256 hash chain with tamper detection; agents cannot access audit directory | **Addressed** |
 | **5.1** Access control | API key authentication; policy-based authorization; 4-tier model | **Addressed** |
-| **5.2** SSH configuration | SSH not installed on the OS image by default | **Addressed** (by omission) |
+| **5.2** SSH configuration | Opt-in OpenSSH, disabled by default; when enabled: root key-only, password authentication disabled, `tcp/22` firewalled until enabled | **Addressed** (hardened when enabled) |
 | **5.3** Privilege escalation | seccomp blocks privilege-related syscalls; user namespace maps to unprivileged | **Addressed** |
 | **6.1** System file integrity | Immutable root filesystem (ext4 mounted read-only) | **Addressed** |
 
@@ -827,7 +828,7 @@ This appendix maps KruxOS security controls to common compliance frameworks. **T
 | **AC-2** Account management | Agent identity in agents.db; create/revoke/rotate via CLI | Addressed |
 | **AC-3** Access enforcement | Policy engine evaluates every capability call; 4-tier model | Addressed |
 | **AC-6** Least privilege | Agents confined to workspace; capabilities are the only API; default-deny network | Addressed |
-| **AC-17** Remote access | WebSocket with configurable TLS; admin passphrase for supervision port | Addressed |
+| **AC-17** Remote access | Agent gateway over WebSocket (per-Agent bearer, configurable TLS); supervision on a root-only local control socket (Unix-domain, `0600 root:root`, peer-credential uid 0) — no network port, no shared passphrase; optional opt-in tailnet publishes only the dashboard (plus the opt-in SSH console when explicitly enabled) | Addressed |
 | **AU-2** Audit events | Every capability invocation, policy decision, session event logged | Addressed |
 | **AU-3** Audit content | Agent ID, session ID, capability, inputs (redacted), outputs, duration, policy decision | Addressed |
 | **AU-9** Protection of audit information | Landlock blocks agent access to audit directory; hash chain detects tampering | Addressed |

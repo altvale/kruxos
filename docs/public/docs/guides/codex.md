@@ -179,7 +179,7 @@ gateway, so the audit log records `filesystem.read`, not the mangled form.
 You should see the call in:
 
 - **KruxOS audit log**: `kruxos audit query --capability filesystem.read`
-- **Dashboard** (`http://localhost:7800`): the Codex tool call in the
+- **Dashboard** (`https://localhost:7800`): the Codex tool call in the
   session view
 - **Approval queue** (if policy is `require_approval`): a pending request
 

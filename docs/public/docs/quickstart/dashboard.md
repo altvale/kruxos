@@ -24,7 +24,7 @@ docker exec kruxos kruxos verify
 
 ### First-boot Wizard
 
-On a fresh install, the dashboard opens into an eight-step wizard:
+On a fresh install, the dashboard opens into a ten-step wizard:
 
 1. **Welcome** — orientation card explaining the four things the wizard sets up (secrets, identity, CLIs, policy).
 2. **Vault passphrase** — initialises or unlocks the encrypted vault. A live strength meter scores the passphrase before submit.
@@ -33,7 +33,9 @@ On a fresh install, the dashboard opens into an eight-step wizard:
 5. **Licence** — paste a JWT or skip. KruxOS is free for personal use.
 6. **User token** — generates a `krx_user_*` bearer token; shown **once** for CLI installs and the loopback User API. Acknowledge-and-continue is gated on a checkbox.
 7. **Install CLI Tools** — optional. Installs Claude Code and/or Codex CLI seed configs in-process. Both can be installed later from Dashboard → Integrations.
-8. **Done** — confirmation screen with a link into the main dashboard.
+8. **SSH key** — optional. Pre-seed a public key so the opt-in SSH console (Settings › System) is ready to turn on later. Skippable; keys can be managed from Settings at any time.
+9. **Remote access** — optional. Turn on Tailscale to reach the dashboard from your own devices anywhere; shows a one-time login link to open on your phone or laptop. Skippable; fully manageable later from Settings › System — see the [Remote Access guide](../guides/remote-access.md).
+10. **Done** — confirmation screen with a link into the main dashboard.
 
 The progress rail at the top of the wizard supports backward navigation by clicking any completed dot.
 
@@ -102,7 +104,7 @@ Search and filter the hash-chained audit log:
 
 ### Chat
 
-Four-column desktop layout — Agents · Conversations · Messages · Knowledge — plus a `⌘K` / `Ctrl+K` Search overlay. Multi-model with per-message Model + Thinking overrides above the composer, persisted sessions, tool-call cards with policy-tier colouring, and an inline approval flow. Collapses to a 3-state mobile navigation under 768 px.
+Four-column desktop layout — Agents · Conversations · Messages · Knowledge — plus a `⌘K` / `Ctrl+K` Search overlay. Multi-model with per-message Model + Thinking overrides above the composer, persisted sessions, tool-call cards with policy-tier colouring, and an inline approval flow. Collapses to a 3-state mobile navigation on screens 820 px and narrower — the same breakpoint at which the sidebar auto-collapses to its icon rail (expanding it overlays the page instead of pushing it).
 
 ### Code Sessions (`/code`)
 
@@ -154,11 +156,38 @@ Operator-facing health summary that auto-refreshes every 15 seconds:
 
 If the gateway is unreachable, the page now renders an explicit error banner reading "Can't reach gateway: …. Retrying …" with a **Retry now** button so a transient failure no longer presents as a silent blank page.
 
+### Alerts (`/alerts`)
+
+The operator's surface for alerts — both those an agent raises with `alerts.send` and those the system's automatic monitors raise (high CPU / memory, disk pressure, audit-write failures, a service going down). Each row shows the severity (info / warning / critical), the source agent or monitor, the message, the timestamp, and whether it has been acknowledged; **Acknowledge** marks an alert as handled. The sidebar **Alerts** entry carries a badge showing the number of pending (unacknowledged) alerts, and critical alerts also raise a banner across the top of every page — so an alert an agent sends now reaches the operator wherever they are in the dashboard rather than going unnoticed.
+
 ### Service Proxy (`/proxy`)
 
 Per-service sync status for the proxy backends (Gmail / Slack adapters), auto-refreshing every 10 seconds. The top of the page carries a five-cell **overview strip** — Total services, Synced, With errors, Buffered ops, **Dead letters**. The Dead-letters cell is now first-class at the top of the page rather than buried inside each per-service card.
 
-Below the overview strip, each service renders a card with the sync header, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending buffered writes (with countdown + **Cancel**) and dead-letter writes (with **Retry** / **Discard**). All three actions go through a confirm modal before posting to `/api/proxy/status`.
+Below the overview strip, each service renders a card with the sync header, last-started / last-completed timestamps, buffered-write and dead-letter counts, and lists of pending buffered writes (with countdown + **Cancel**) and dead-letter writes (with **Retry** / **Discard**). When a service's sync is failing, the card surfaces how many consecutive failures it has seen and the last sync error (for example, a Slack `missing_scope`), so a misconfigured connection is diagnosable from the tile instead of showing a bare "Never / Unknown" with no explanation. All three write actions go through a confirm modal before posting to `/api/proxy/status`.
+
+### Packs (`/packs`)
+
+Browse the community pack registry, install packs with one click, upload local `.tar.gz` archives, upgrade when a newer version is available, and remove packs you no longer need. Installed pack capabilities appear immediately in the policy editor and in agent tool lists — no gateway restart. See [Managing Packs](../guides/managing-packs.md).
+
+### Uploads (`/uploads`)
+
+Upload large files (GPU driver kits, pack tarballs, model weights) to `/data/kruxos/uploads/`. Files stream to disk so multi-GB uploads work. Uploaded paths can be referenced when installing drivers or packs.
+
+### Settings tabs
+
+Settings is tabbed. Each sub-page covers a distinct operator concern:
+
+| Tab | Path | What you do |
+|-----|------|-------------|
+| **Models** | `/settings` | Add/remove/test model providers; set role defaults |
+| **Inference** | `/settings/inference` | Browse catalog, pull on-appliance GGUF models, check engine status |
+| **Hardware** | `/settings/hardware` | Detect GPU, install/enable/disable NVIDIA drivers |
+| **Updates** | `/settings/updates` | Check, download, and apply A/B system updates; reboot into staged update |
+| **License** | `/settings/license` | View license status, revalidate, device-code activation |
+| **System** | `/settings/system` | Restart gateway, reboot appliance, SSH access, Tailscale remote access |
+
+See the dedicated guides: [On-Appliance Inference](../guides/on-appliance-inference.md), [GPU Drivers](../guides/gpu-drivers.md), [Updating KruxOS](../guides/updating.md), [SSH Access](../guides/ssh-access.md), [Remote Access](../guides/remote-access.md).
 
 ## Keyboard shortcuts
 

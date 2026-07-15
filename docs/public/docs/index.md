@@ -90,11 +90,11 @@ KruxOS exposes every OS operation as a **typed, documented API**:
       altvale/kruxos:latest
     ```
 
-    Open <https://localhost:7800> and complete the eight-step first-boot wizard: welcome, vault passphrase, workspace (click-through directory browser), AdminAgent (inline provider config or Skip), license, User token, Install CLI Tools, done.
+    Open <https://localhost:7800> and complete the ten-step first-boot wizard: welcome, vault passphrase, workspace (click-through directory browser), AdminAgent (inline provider config or Skip), license, User token, Install CLI Tools, SSH key (optional), Remote access (optional), done.
 
 === "VM image"
 
-    Download the `.qcow2` / `.vmdk` / Vagrant `.box` / raw `.img.gz` for x86_64 or aarch64, boot, and complete the same eight-step dashboard wizard (welcome → vault → workspace → AdminAgent → license → User token → Install CLI Tools → done). All artefacts cosign-signed with offline-verifiable `.cosign.bundle`.
+    Download the `.qcow2` / `.vmdk` / Vagrant `.box` / raw `.img.gz` for x86_64 or aarch64, boot, and complete the same ten-step dashboard wizard (welcome → vault → workspace → AdminAgent → license → User token → Install CLI Tools → SSH key → Remote access → done). All artefacts cosign-signed with offline-verifiable `.cosign.bundle`.
 
     [:octicons-arrow-right-24: Full install guide](quickstart/install.md)
 
@@ -125,7 +125,7 @@ graph TB
 
 ## Licensing
 
-KruxOS is **free for personal use** — full appliance, no time limit. Business and revenue-generating use requires a Commercial licence. See [Pricing](enterprise/pricing.md) for tiers and the full FAQ. Governed by the [End User License Agreement](https://altvale.com/legal/kruxos-eula).
+KruxOS is **free for personal use** — full appliance, no time limit. Business and revenue-generating use requires an Enterprise licence ([contact sales](mailto:sales@altvale.com)). See [Pricing](enterprise/pricing.md) for tiers and the full FAQ. Governed by the [End User License Agreement](https://altvale.com/legal/kruxos-eula).
 
 The community-extensible directories — `packs/`, `plugins/`, `themes/`, and `docs/public/` — are licensed under [Apache 2.0](https://github.com/altvale/kruxos/blob/main/packs/LICENSE), so anyone can publish capability packs, plugins, themes, and docs contributions.
 

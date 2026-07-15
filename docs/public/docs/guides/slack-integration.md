@@ -130,6 +130,14 @@ use the **Reconnect** action on the dashboard Service Proxy tile (or re-run
 service first — see [Connecting Services → Slack](connecting-services.md#slack).
 Read operations also require the sync to have run at least once.
 
+**Empty results / `slack.channels` returns nothing**: The sync may be failing
+silently. Open the dashboard **Service Proxy** page (`/proxy`) and check the
+Slack card — a failing sync shows the number of consecutive failures and the
+last sync error. The usual culprit is a missing Slack scope (e.g.
+`conversations.list failed: missing_scope`), which means the app needs the
+relevant `*:read` scope added and reinstalled. Fix the scope, reinstall the
+app, and the next sync clears the error.
+
 **"Slack write operation failed"**: Check that the bot has been invited to the target channel. Slack bots can only post to channels they've been added to.
 
 **"Batch protection triggered"**: The agent has exceeded the per-channel message limit. Either wait for the hourly window to reset, or approve the write via `kruxos approve`.

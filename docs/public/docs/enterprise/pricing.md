@@ -1,11 +1,10 @@
 # Pricing
 
-**Free for personal use. Pay when KruxOS goes to work with you.**
+**Free for personal use. Enterprise licensing when KruxOS goes to work with you.**
 
 !!! note "Early beta"
     KruxOS is in early beta — **all tiers are free**. License enforcement
     lands in v0.0.3; until then the appliance can be used for any purpose.
-    Sign up for Commercial early to lock in early-bird pricing.
 
 ## Personal — $0
 
@@ -19,26 +18,18 @@ For you and your personal projects.
 For individuals, hobbyists, learners, students, personal automation.
 **Not for business or revenue-generating use.**
 
-## Commercial — per-operator-account, annual
-
-For business and revenue-generating use.
-
-- The same full appliance as Personal
-- Legal entitlement for commercial use
-- 1 year of update support · email support
-
-Required if KruxOS contributes to revenue-generating work. Early-bird
-rates lock in before v0.0.3. Contact [sales@altvale.com](mailto:sales@altvale.com).
-
 ## Enterprise — custom
 
-For teams running KruxOS at scale.
+For business and revenue-generating use, from a single operator to teams
+running KruxOS at scale.
 
+- The same full appliance as Personal, licensed for commercial use
 - Multi-node clustering · SSO / SAML / OIDC · RBAC beyond per-User policy
 - SIEM + compliance reporting (SOC 2, HIPAA pending)
 - Dedicated Slack support · 99.9% SLA · priority security disclosure
 - Custom pack development available
 
+Required if KruxOS contributes to revenue-generating work.
 Contact [sales@altvale.com](mailto:sales@altvale.com).
 
 ## Licensing

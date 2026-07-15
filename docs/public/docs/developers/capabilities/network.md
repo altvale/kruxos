@@ -10,6 +10,7 @@ HTTP requests, DNS lookups, file downloads, and port checks.
 | [`network.dns_lookup`](#networkdns_lookup) | 🟢 Autonomous | Resolves a hostname to its IP addresses using DNS. |
 | [`network.download`](#networkdownload) | 🔵 Notify | Downloads a file from a URL and saves it to the agent's workspace. |
 | [`network.port_check`](#networkport_check) | 🟢 Autonomous | Checks whether a TCP port is open on a specified host by attempting a connection. |
+| [`network.credentialed_request`](#networkcredentialed_request) | 🔵 Notify | Makes an HTTP request with a vault-stored credential the gateway attaches at the boundary — the value is never visible to the agent. |
 
 ## `network.http_request`
 
@@ -262,5 +263,72 @@ Use network.dns_lookup if you only need to verify DNS resolution.
 - **retry**: Retry after a short delay.
 
 **Tags:** `network` `diagnostics` `safe`
+
+---
+
+## `network.credentialed_request`
+
+**Permission:** 🔵 Notify · **Version:** 1.0
+
+> Makes an HTTP request with a vault-stored credential attached by the gateway. The credential value is never visible to the caller.
+
+### When to use
+
+Use `network.credentialed_request` when an API needs a stored secret (API key, OAuth token) and you must **not** see the value. You reference the secret **by name**; the gateway resolves it from the vault and injects it at the network boundary, after the request has left the agent's reach. Use `network.http_request` for calls that need no credential.
+
+The secret must be scoped by the operator to **both** this capability **and** the target host:
+
+- The secret's `allowed_capabilities` must admit `network.credentialed_request` (an unscoped secret is system-only and will be refused — see [Secrets](secrets.md)).
+- The URL host must be in **both** the agent's egress allowlist **and** the secret's `allowed_hosts`.
+
+The injected credential — and any URL that carries it — is scrubbed from the response, headers, and error text before it returns, so a reflecting endpoint cannot leak it back.
+
+### Inputs
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|:--------:|---------|-------------|
+| `url` | `URL` | Yes | — | Full URL. Host must be in **both** the agent's egress allowlist **and** the secret's `allowed_hosts`. |
+| `secret_name` | `String` | Yes | — | Vault secret to attach. Never returned. |
+| `method` | `String` | No | `GET` | HTTP method: GET, POST, PUT, DELETE, PATCH, HEAD. |
+| `headers` | `Object` | No | — | Additional request headers. May not collide with the credential placement target. |
+| `body` | `String` | No | — | Request body as a string. |
+| `timeout` | `Integer` | No | `30` | Request timeout in seconds. Maximum 300. |
+| `credential_placement` | `Object` | No | header / `Authorization` / `Bearer {secret}` | Where the gateway injects the credential — `type` (`header` or `query`), `name` (header/param name), `format` (template containing `{secret}` once). For `oauth_token` secrets the access token is injected, not the raw JSON. |
+
+### Outputs
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status_code` | `Integer` | HTTP response status code. |
+| `headers` | `Object` | Response headers. |
+| `body` | `String` | Response body. The request (including the injected credential) is never echoed. |
+| `duration_ms` | `Integer` | Total request duration in milliseconds. |
+
+### Common patterns
+
+**Call an API with an operator-provisioned key the agent never sees**
+
+1. Operator runs `kruxos vault add --name weather-api --type api_key --allowed-capabilities 'network.credentialed_request' --allowed-hosts 'api.weatherapi.com'`
+2. `network.credentialed_request(url='https://api.weatherapi.com/v1/current.json?q=London', secret_name='weather-api')`
+
+### Errors
+
+**`ScopeViolation`** — The secret is not scoped to this capability, or is unscoped (system-only).
+
+- **check_secrets**: `secrets.list` shows each secret's `allowed_capabilities`. Ask the operator to re-scope.
+
+**`HostNotAllowed`** — The target host is not in the secret's `allowed_hosts`, or not in the agent's egress allowlist.
+
+- **alert_supervisor**: Ask the operator to add the host to the secret's `allowed_hosts`.
+
+**`SecretNotFound`** — No secret by that name.
+
+- **check_secrets**: `secrets.list` shows available secret names.
+
+**`VaultLocked`** — The vault is locked; a supervisor must unlock it.
+
+- **alert_supervisor**: Use `alerts.send` to request a vault unlock.
+
+**Tags:** `network` `secrets` `external` `credentialed`
 
 ---

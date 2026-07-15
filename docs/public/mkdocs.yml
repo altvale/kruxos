@@ -98,17 +98,32 @@ nav:
 
   - Guides:
     - guides/index.md
+    - First-Boot Wizard: guides/first-boot-wizard.md
+    - Signing In: guides/signing-in.md
+    - Activating Your Appliance: guides/activating.md
+    - Host CLI Integrations: guides/host-cli-integrations.md
     - Model Providers: guides/model-providers.md
+    - On-Appliance Inference: guides/on-appliance-inference.md
+    - GPU Drivers: guides/gpu-drivers.md
+    - Local Models (Hugging Face): guides/local-models.md
     - Managing Agents: guides/managing-agents.md
+    - Managing Packs: guides/managing-packs.md
     - Approval Workflow: guides/approval-workflow.md
     - Policies: guides/policies.md
+    - User Identities & Tokens: guides/user-identities.md
+    - Code Sessions: guides/code-sessions.md
+    - Configuration: guides/configuration.md
+    - Admin CLI Commands: guides/admin-cli.md
     - Monitoring: guides/monitoring.md
+    - Remote Access: guides/remote-access.md
+    - SSH Access: guides/ssh-access.md
     - Backup & Restore: guides/backup-restore.md
     - Updating KruxOS: guides/updating.md
     - Migration from OpenClaw: guides/migration-from-openclaw.md
     - Autonomous Agents: guides/autonomous-agents.md
     - Docker Agent Isolation: guides/docker-isolation.md
     - Connecting Services: guides/connecting-services.md
+    - Secrets (Vault): guides/secrets.md
     - Slack Integration: guides/slack-integration.md
     - File Transfer: guides/file-transfer.md
     - First Conversation: guides/first-conversation.md
@@ -126,7 +141,12 @@ nav:
     - OpenAI Codex CLI: guides/codex.md
 
   - Concepts:
+    - concepts/index.md
     - Permission Model: concepts/permission-model.md
+
+  - Release Notes:
+    - v0.0.2: release-notes/v0.0.2.md
+    - v0.0.1: release-notes/v0.0.1.md
 
   - Security:
     - Security Whitepaper: security/whitepaper.md
@@ -151,6 +171,8 @@ nav:
       - Local Models: developers/connectors/local.md
     - Pack Development:
       - Quickstart: developers/packs/quickstart.md
+      - Getting Started (Pack Authors): pack-authors/getting-started.md
+      - Capability Design Guidelines: pack-authors/capability-design-guidelines.md
       - Documentation Standard: developers/packs/documentation-standard.md
       - Service Proxy Packs: developers/packs/service-proxy-packs.md
       - Testing: developers/packs/testing.md
@@ -178,6 +200,7 @@ nav:
       - Slack: developers/capabilities/slack.md
     - Service Proxy Adapters: developers/services.md
     - Agent Experience: developers/agent-experience.md
+    - Inference Model Catalog: developers/inference-model-catalog.md
     - Contributing: developers/contributing.md
 
   - Release Notes:

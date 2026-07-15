@@ -125,6 +125,12 @@ When a capability needs a secret (e.g., an OAuth token for Gmail), the flow is:
 5. The raw value is used for the API call and immediately dropped
 6. The agent never sees any part of this process
 
+This model is **enforced and audited**, not advisory:
+
+- **Deny by default.** A secret with an empty capability scope is unusable — agents are denied until the operator scopes it. The scope is never widened to a wildcard implicitly.
+- **Every resolution is audited.** Each secret use (granted or denied) lands as a `secrets.use` entry on the Audit page, recording the agent, capability, secret **name**, and origin — never the value. Dropped *denial* events are treated as an audit gap and surfaced; enforcement stays fail-closed regardless.
+- **Reflected credentials are scrubbed.** When the gateway injects a credential at the network boundary (`network.credentialed_request`), the value — and any URL carrying it — is replaced with `[REDACTED]` in the response body, headers, and error text, so a reflecting endpoint cannot leak it back. A denied or revoked secret is reported indistinguishably from an absent one.
+
 ### Encryption
 
 | Property | Implementation |
@@ -151,6 +157,18 @@ scope:
 ```
 
 If `filesystem.read` tries to access `gmail_oauth_token`, the vault returns an error — even though the request comes from the same Gateway process.
+
+For a third-party API key attached at the network boundary (`network.credentialed_request`), the secret must also be **host-bound**: an operator provisions it scoped to the capability **and** a set of `allowed_hosts`, and a request to any other host is denied.
+
+**Operators provision secrets** from the dashboard (**Settings › Secrets** — add a scoped, host-bound key with a write-only value; list metadata only; revoke) or from the CLI:
+
+```bash
+kruxos vault add --name weather-api --type api_key \
+  --allowed-capabilities 'network.credentialed_request' \
+  --allowed-hosts 'api.weatherapi.com'
+```
+
+Omit `--allowed-capabilities` and the secret is scoped to nothing (agents denied); omit `--allowed-hosts` and it is not yet usable for `network.credentialed_request` (fail-closed). Neither is ever widened to `*` implicitly.
 
 ---
 
@@ -265,22 +283,25 @@ After 10 emails in an hour, subsequent sends require human approval until the wi
 
 ### Port map
 
-| Port | Service | Access control |
-|------|---------|---------------|
-| 7700 | Agent Gateway (WebSocket) | Agent API keys |
-| 7701 | Supervision (WebSocket + HTTP) | Admin passphrase |
-| 7702 | OpenClaw Bridge | Agent API keys (proxied to 7700) |
-| 7800 | Web Dashboard (HTTPS) | Admin passphrase |
+| Port | Service | Bind | Access control |
+|------|---------|------|---------------|
+| 7700 | Agent Gateway (WebSocket, MCP) | `0.0.0.0` | Per-Agent bearer token |
+| 7702 | UDP trigger wake | `127.0.0.1` | Loopback only |
+| 7703 | User API (HTTP) | `127.0.0.1` | User bearer token |
+| 7704 | Health endpoint (HTTP) | `127.0.0.1` | Loopback only |
+| 7800 | Web Dashboard (HTTPS) | `0.0.0.0` | Operator passphrase |
 
-- Ports 7700 and 7702 accept only agent connections
-- Port 7701 requires the admin passphrase — agents cannot connect
-- Port 7800 serves HTTPS with an auto-generated self-signed certificate (Let's Encrypt optional)
+**Network posture:**
+
+- **The agent gateway (7700) binds `0.0.0.0` by default** — connecting an agent from another host is a supported topology. The bind address is not the security boundary; every connection is authenticated by a per-Agent bearer token. On a single-box deployment where all agents are local, restrict it with `server.host: "127.0.0.1"`.
+- **The User API (7703) and health endpoint (7704) bind loopback (`127.0.0.1`)** and are never network-exposed — the User API is reached only through the dashboard.
+- **Supervision has no TCP port.** It rides a root-only local control socket (`/run/kruxos/control.sock`, `0600 root:root`, peer-credential uid 0), so an agent cannot reach it at all — there is no supervision port and no shared supervision passphrase (the former port 7701 is retired).
 
 ### TLS
 
-- Dashboard: HTTPS with auto-generated certificate on first run
-- Gateway: WebSocket (ws://) by default, WSS optional via reverse proxy
-- All internal communication is localhost-only
+- **Dashboard:** HTTPS by default with an auto-generated self-signed certificate on first run.
+- **Gateway:** WebSocket (`ws://`) by default. For agents connecting from another host, front port 7700 with a **TLS-terminating reverse proxy** (e.g. Caddy or nginx) to serve `wss://` — or keep the gateway on loopback for single-box deployments. Built-in Let's Encrypt is planned for a later release.
+- The User API and health endpoint stay loopback-only, so their traffic never leaves the host.
 
 ---
 
