@@ -145,6 +145,7 @@ nav:
     - Permission Model: concepts/permission-model.md
 
   - Release Notes:
+    - v0.0.3: release-notes/v0.0.3.md
     - v0.0.2: release-notes/v0.0.2.md
     - v0.0.1: release-notes/v0.0.1.md
 
@@ -204,5 +205,6 @@ nav:
     - Contributing: developers/contributing.md
 
   - Release Notes:
+    - v0.0.3: release-notes/v0.0.3.md
     - v0.0.2: release-notes/v0.0.2.md
     - v0.0.1: release-notes/v0.0.1.md
