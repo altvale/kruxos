@@ -12,228 +12,212 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
-- Community inference-model catalog — the appliance now merges a
-  contributor-maintained list of local GGUF models
-  (`https://docs.kruxos.com/inference/models.json`) into its built-in set, so
-  community models appear in the **Settings → Inference** picker. Every entry
-  is hash-verified before use, is additive-only (it can never modify or replace
-  a built-in model), and lands only via maintainer-reviewed pull request. New
-  **Inference Model Catalog** developer guide covers the file format, the
-  field-by-field rules, and how to obtain a real `sha256`/`size_bytes` from
-  Hugging Face LFS metadata without downloading the weights. Seeded with
-  TinyLlama 1.1B Chat (Q4_K_M, Apache-2.0).
-
-- Documented the **`network.credentialed_request`** capability: the gateway
-  attaches an operator-provisioned, vault-stored credential at the network
-  boundary; the agent references the secret by name and never sees the
-  value, and the secret must be scoped to the capability and host-bound.
-
-- Remote access (Tailscale) built in — reach your dashboard from your
-  own devices anywhere. Turn it on from an optional first-boot wizard
-  step or from Settings › System › Remote access (Tailscale): the
-  appliance joins *your own* Tailscale tailnet (owner devices only,
-  bring-your-own free account) and publishes the dashboard at a
-  valid-HTTPS `https://<node>.<your-tailnet>.ts.net` address — nothing
-  is exposed to the public internet, and the feature is off by default.
-  Finish the one-time login by opening the link the dashboard shows on
-  your phone or laptop, or join with a pasted pre-auth key (used once,
-  never stored). A guided consent step covers enabling HTTPS
-  certificates (leave the optional Funnel checkbox unchecked), the card
-  warns with a one-click re-login when your node key nears expiry, and
-  a default-off toggle lets the opt-in SSH console ride the same
-  tailnet.
-- Remote Access guide — rewritten around the built-in Tailscale
-  feature: enabling from the wizard or Settings, the one-time login
-  link, the HTTPS-certificates consent page (and why Funnel stays
-  unchecked), pre-auth keys, key expiry, SSH over Tailscale, and
-  troubleshooting. The former DIY tunnel recipes (Cloudflare Tunnel,
-  ngrok, self-hosted Headscale) are condensed into an advanced,
-  unsupported appendix.
-
-- Offline (air-gapped) OS updates — appliances without internet access can
-  now be updated from a file. Download the release's
-  `kruxos-<arch>-rootfs.img.gz` and its `.sig` on another device, upload
-  both from the new **Offline update** cards on **Settings › Updates**,
-  select the image (a badge shows whether its signature is present), and
-  apply. The update goes through the same signed A/B path as an online
-  update — the Ed25519 signature is verified against the appliance's
-  trusted keys before anything is written, and verification cannot be
-  skipped; an unsigned or tampered image is rejected and the disk is never
-  touched. Also works from the console:
-  `kruxos update apply <path-to-.img.gz>`. See the Updating guide's
-  "Offline (air-gapped) update" section, including the note about stepping
-  through releases that declare a minimum required version.
-
-- SSH access — the appliance now bundles an opt-in OpenSSH server, disabled
-  by default and enabled from **Settings › System › SSH access**. Root,
-  public-key only (password authentication is never enabled); `tcp/22` stays
-  firewalled until you add an authorized key, and closes again when the last
-  key is removed. Once enabled, SSH stays on across reboot until you disable
-  it. SFTP and `scp` ride the same channel as a first-party file-transfer
-  path. The File Transfer guide now walks through generating, pasting, and
-  fingerprint-verifying an SSH key; documented there and in the security
-  whitepaper.
+- **Shared GitHub repository links now reuse the canonical KruxOS social header.**
+- **The whole-disk fresh-install image now carries a keyless cosign supply-chain signature.**
+- **The Docker container now warns at startup when its sandbox is degraded.**
+- **Persistent license banner + nav attention marker across the whole dashboard.**
+- **Audit and Activity rows now show which CLI initiated each action.**
+- **Grok is now a model provider — sign in with your X Premium / SuperGrok subscription, or bring an xAI API key.**
+- **Air-gapped appliances can now update KruxOS from a file — no internet required.**
+- **Dashboard: one-click "Install Now" GPU driver install.**
+- **One-click GPU driver install: the appliance now fetches the NVIDIA `.run` itself, verified against a pin signed into the kit /5201).**
+- **The appliance can now fetch the GPU kit itself — and every fetched kit is signature-verified before anything touches disk.**
+- **The GPU-driver install now presents a real NVIDIA license attestation, not a bare checkbox.**
+- **Model-license ADVISORY badges on Local Models.**
+- **Max Concurrent Code Sessions is now an operator control, not just a hidden setting.**
+- **Pack runtime is now operator-configurable — `packs.python_path` and `packs.executor_timeout_secs` in `gateway.yaml`.**
+- **Agents can call an authenticated API without ever seeing the credential — `network.credentialed_request`.**
+- **Add a scoped, host-bound third-party API key from the dashboard or CLI.**
+- **Settings › Local Models: a "Recommended" badge marks the suggested model, and the tab now shows your installed models with Enable / Disable / Remove controls.**
+- **Pull any GGUF model straight from Hugging Face, and manage local models from the CLI.**
+- **Remote access (Tailscale) — a dashboard card to turn on tailnet remote access, no command line (Phase 4).**
+- **First-boot setup can turn on remote access (Tailscale) in one optional step (Phase 4b).**
+- **Remote access to your dashboard over Tailscale, controllable from the appliance API (Phase 3).**
+- **Hardware / Drivers page — install and manage a GPU driver from the dashboard.**
+- **GPU acceleration loads automatically at boot.**
+- **Opt-in SSH — a real headless console, off by default.**
+- **The SSH access card now walks you through making an SSH key.**
+- **One guided "Local model" provider — run a self-hosted model without the cloud-vendor friction.**
+- **One-click VirtualBox import — `.ova` appliance with a resizable disk.**
+- **Restart the gateway from the dashboard — new Settings › System tab.**
+- **`filesystem.edit` — find-and-replace in one call.**
+- **Agents list — Policy + Identity columns.**
+- **`kruxos vault status`.**
+- **Agent bearer tokens.**
+- **Atomic pack upgrade.**
+- **Pack dependency bundling — third-party Python libraries.**
+- **Alerts page — agents can finally reach the operator.**
+- **License tiers.**
+- **Anonymous activation telemetry, opt-out.**
+- **Offline-activated appliances register with your account — reliably.**
+- **Activate / re-activate online from the dashboard.**
+- **Activate online in the setup wizard.**
+- **Online activation + `kruxos license status`.**
+- **Live license-status surface.**
+- **Settings › License tab.**
+- **OTA update-signing key can now be rotated over the air.**
 
 ### Changed
 
-- The SSH access card now points to the shipped Remote access
-  (Tailscale) card for out-of-network access instead of saying VPN
-  support is "coming in a future release".
-
-- GPU Drivers guide rewritten around the new **one-click Install Now** flow:
-  after an NVIDIA license attestation the appliance fetches the version-pinned
-  driver directly from NVIDIA and the KruxOS GPU kit from the signed GitHub
-  Release, then verifies the kit signature and hash-checks the driver against a
-  checksum signed into the kit (an auto-fetched mismatch blocks the install; a
-  manual-upload mismatch only warns). The manual two-upload flow stays available
-  as the air-gap path. Corrected the framing that KruxOS "never downloads" the
-  driver — it never *hosts or redistributes* NVIDIA's driver, which always comes
-  straight from NVIDIA.
-- Local inference & VirtualBox AVX2 docs — how to tune the appliance's
-  built-in `llama.cpp` engine via `/data/kruxos/inference.env` (parallel
-  slots, threads, poll, extra args), and how to import the
-  `kruxos-x86_64.ova` so VirtualBox passes host AVX2 through to the guest
-  (needs VirtualBox 7.1.4+; 7.1.12+ on Windows hosts with Hyper-V/WSL2).
-  Also clarified that a plain `http://` request to the dashboard port is
-  permanently redirected (`308`) to `https://`.
+- **Grok (Subscription) now reaches the full model catalog with the right reasoning behaviour.**
+- **Cron jobs created before this release under the shared `"default"` attribution now fire confined to `<workspace_root>/default/` and are invisible to per-agent `scheduler.cron_list`.**
+- **Appliances now send an anonymous activation ping to the deployed license server.**
+- **OpenRouter app attribution now claims the wider (honest) category set.**
+- **Seat-full activation is no longer a dead end in the dashboard.**
+- **Refreshed the model dropdown catalogs for Grok, Codex, and Anthropic.**
+- **`kruxos sandbox diagnose` now reports whether per-call Landlock confinement is actually being applied, not just the kernel ABI.**
+- **`kruxos status` now renders the full health surface — per-service health and resource usage — reaching parity with the dashboard Health page.**
+- **GPU kits now publish to the public `altvale/kruxos` releases.**
+- **Root A/B slot size raised 640 MiB → 2048 MiB so a v0.0.3 appliance can OTA-update forward to future releases.**
+- **v0.0.3 launches with two license tiers: Personal (free) and Enterprise (custom — contact us).**
+- **Wizard's "Don't have a license key?" prompt now drives to signup, not pricing.**
+- **Settings › Inference tab renamed "Local Models".**
+- **The SSH access card now points to the shipped remote-access feature instead of saying VPN is "coming" (Phase 4).**
+- **The Uploads page now shows a real progress bar while a file uploads.**
+- **Hardware / Drivers page now links the exact NVIDIA `.run` file, not the generic portal (-followup).**
+- **File uploads now stream to disk — multi-GB uploads (model GGUFs, GPU driver `.run` files) no longer risk running the appliance out of memory.**
+- **Automatic license re-validation now runs ~every 6 h (was ~24 h).**
+- **Local model provider is now `type: ollama`.**
+- **`filesystem.search` can now roll up an inventory and find duplicates in one call (v1.2).**
+- **`filesystem.search_content` can now count instead of streaming matches (v1.1).**
+- **Setup wizard auto-navigates to the unlock screen after a restart.**
+- **Leaner tool results and schemas for agents.**
+- **The license signing key can now rotate without invalidating your license.**
+- **The wizard's secondary license control is now "Enter license key".**
+- **Seat-full online activation now points at both self-service paths.**
+- **Dashboard pack upgrades are now atomic — no downtime, one audit entry.**
+- **The `kruxos vault unlock` session now relocks after idle time.**
+- **Pack publishing enforces the Capability Design Guidelines.**
+- **OpenRouter requests now carry app-ranking categories.**
+- **Activation is now required to finish setup.**
+- **`process.run` sandbox is now a deny-by-default private rootfs.**
+- **Privilege separation.**
+- **`process.run` from `/code` and the User principal now runs non-root (completes 's `/code` confinement).**
+- **Pack capabilities now run as non-root on every execution path (completes 's confinement for packs).**
+- **Local IPC peer-credential authentication + plaintext vault passphrase removed (closes / ).**
+- **User API (port 7703) is now bound to loopback only.**
+- **Supervision/chat/vault moved off the cleartext-passphrase TCP port onto a root-only control socket; port 7701 retired (completes 's auth-transport hardening).**
+- **Per-CLI attribution now reaches the audit log (with ).**
+- **Installing a CLI no longer mints a per-CLI vault token.**
 
 ### Fixed
 
-- Python SDK guide corrected against the shipped `kruxos` client API. Capability
-  invocation is `agent.call_async(name, **inputs)` (async) / `agent.call(...)`
-  (sync) — there is no `capabilities.invoke`. Connections take an `agent_name`
-  and a `ws://` endpoint and close via `close_async()` / `close()` (not
-  `disconnect()`); discovery uses `list_async` / `describe_async`; state is
-  `state.get_async` / `set_async` / `list_async` / `delete_async` with a `tier=`
-  argument (not `state.session` / `persistent` / `shared` sub-objects). Shared-tier
-  writes now use optimistic locking — read the version with `get_entry_async` and
-  pass it as `expected_version` to `set_async`, catching `ConflictError` on a
-  stale version. Capability failures raise the typed error taxonomy on both
-  transports (`result.error` is not populated on the default MCP protocol).
-  Approval-gated calls are held server-side: `wait_for_approval_async(request_id)`
-  returns a terminal status string (`approved` / `rejected` / `expired` /
-  `timed_out`) and does **not** re-execute the capability, while a larger
-  `request_timeout=` on the call lets a caller wait through the hold (the SDK's
-  per-request timeout was renamed to `request_timeout` so it no longer shadows a
-  capability's own `timeout` input). The removed transactions API is no longer
-  documented; context briefings use `briefing_async()` (integer
-  `pending_approvals` / `unread_messages` counts and a `summary` string); the sync
-  wrappers raise a clear error when called from a running event loop; and the
-  Claude Desktop MCP config is produced by `generate_claude_desktop_config(...)`.
-  The `pip install kruxos` PyPI package is documented as planned for a future
-  release, not the current install path. The approval-workflow guide's example
-  was corrected to match. The Pydantic-model and error-class names in the
-  examples match the package, and every code sample was syntax-checked.
+- **One-click GPU driver install completes the Staging step.**
+- **Grok (Subscription) chat works again.**
+- **One-click GPU driver install no longer fails at the "Staging files" step.**
+- **Idle in-memory session state is now reclaimed instead of accumulating for the gateway's lifetime.**
+- **Scheduled tasks are now attributed to the agent that created them, ending cross-agent cron bleed.**
+- **The gateway no longer silently drops a client request that arrives while it is handling another.**
+- **Agent state is now isolated per agent, and session state per session, across every path.**
+- **The Python SDK now targets the real gateway capabilities — state, briefings, approvals, and error handling work end-to-end.**
+- **`kruxos migrate` now carries your model configuration and on-box-engine state across a hardware move.**
+- **Update downloads now survive a transient CDN hiccup instead of failing the whole update.**
+- **`kruxos model add` no longer tells you to run `kruxos vault add`, which can't store the key.**
+- **Context compaction now actually runs for non-Anthropic providers.**
+- **Offline update: applying an uploaded image now works end-to-end.**
+- **A stock appliance image now ships the GPU one-click install map.**
+- **"Enable GPU" now works after an install + reboot — the accel loader is idempotent and no longer wipes a valid GPU marker.**
+- **Max concurrent `/code` sessions default now scales with the appliance's actual RAM instead of a hardcoded `4`.**
+- **A bare-metal reboot could no longer silently "forget" your license, vault, or first-boot state.**
+- **The on-appliance local model now executes tool calls instead of leaking raw JSON into `/chat`, and its first turn no longer fails out-of-box on a fresh appliance.**
+- **Slow pack installs and OS-update check/apply no longer fail with a spurious 502 from the dashboard.**
+- **CLI output and `--help` text no longer show internal issue-tracker references.**
+- **Approvals, Alerts, Health, Identities and the two newest Settings tabs are readable on a phone.**
+- **No dashboard page forces sideways scrolling on a phone anymore.**
+- **Dashboard buttons are visually uniform again, and the Integrations card actions no longer clip at narrow widths.**
+- **The dashboard sidebar now auto-collapses to an icon rail on small screens.**
+- **The on-appliance inference engine no longer reserves multiple gigabytes of RAM for a small model.**
+- **Settings › Local Models: the "Disable" button now explains what it does.**
+- **Settings › Local Models: an "Advanced: engine settings" panel lets you tune the inference engine without SSHing in to hand-edit `inference.env`.**
+- **The Secrets list now warns about an allow-all key instead of showing it as a plain chip.**
+- **Adding a secret with a reserved/managed name is now rejected.**
+- **An "all hosts" host binding written as `*.` now trips the same confirmation as `*`.**
+- **Revoked secrets now stay visible with a "revoked" badge instead of vanishing.**
+- **`kruxos vault add` refuses to clobber a KruxOS-managed credential.**
+- **A denied email read/send now tells the agent exactly how to recover.**
+- **A revoked model-provider key no longer shows as "ready".**
+- **Boot warning for an unscoped secret no longer mislabels an allow-all key as "denied".**
+- **The "vault is locked" sign-in error now points to the real unlock path.**
+- **Model downloads now survive rate-limits and dropped connections instead of failing the pull.**
+- **Models you pull now stay in the model list — pulled and custom (BYOM) models no longer disappear after downloading.**
+- **Enabling GPU inference now actually activates the GPU on a clean install.**
+- **Turning on remote access no longer ends in a "timed out" error — the one-time login link now appears in a few seconds (Phase 4c).**
+- **GPU offload can now open the device nodes: the NVIDIA `/dev` nodes are created group-readable/writable for the inference engine.**
+- **GPU offload now finds NVIDIA's userspace driver library: `libcuda.so.1` is staged from the driver `.run`.**
+- **GPU offload now reaches the device: the accel directory is traversable by the inference engine.**
+- **GPU inference now actually offloads to the GPU — the inference engine picks up its accel drop-in at boot (the /etc-overlay drop-ins are merged via a daemon-reload once the overlay mounts).**
+- **Enabling GPU now activates it without a reboot, and fails closed (clear error, drop-in rolled back) if the accelerator can't be loaded.**
+- **The "GPU active" status now reflects the real accelerator marker, not just the enabled flag.**
+- **Large dashboard uploads no longer fail with a 502 after several minutes.**
+- **GPU driver install now completes — the sandboxed `.run` extractor no longer fails at Staging.**
+- **Install-driver modal: an uploaded file no longer gets wiped, plus clearer upload UX.**
+- **SSH setup: the "public key only" warning now reads as one sentence.**
+- **SSH (and on-box inference) now stay on across a reboot once enabled.**
+- **Internal issue numbers stripped from the remaining runtime log lines.**
+- **Internal issue numbers no longer leak into operator-facing surfaces.**
+- **The dashboard `/chat` now streams tokens as the model generates them — for every provider.**
+- **Chat streaming is now per-conversation — switching conversations mid-reply no longer freezes every composer (ships with ).**
+- **`/chat` no longer false-stalls a slow on-box (local) model on its first response.**
+- **The first model provider you add now becomes the system default automatically — `/chat` works without a manual "Set Default".**
+- **First-boot wizard no longer traps you on the "Create your AdminAgent" step.**
+- **A plain `http://<host>:7800` now reaches the dashboard instead of dead-ending.**
+- **The dashboard's self-signed certificate now has a SubjectAltName — no more hard cert error.**
+- **The OVA ships with room for on-box inference — bigger default disk, RAM and CPU.**
+- **OVA import is more turnkey — the dashboard is reachable, serial works, and no "Invalid settings" flag.**
+- **On-appliance inference: a reworked engine config targeting the multi-vCPU hang.**
+- **On-box inference is several times faster after a VirtualBox import — the appliance now sees your CPU's AVX2.**
+- **On-appliance inference: the engine can now read the model you pull.**
+- **On-appliance inference: a dropped download now auto-resumes.**
+- **The on-box inference engine is now usable from Settings › Models.**
+- **Settings › Inference tab is no longer unstyled text.**
+- **Settings › System "Reboot system" now actually reboots the appliance.**
+- **The appliance no longer boots reporting overall health `degraded`.**
+- **The appliance now boots on NVMe disks.**
+- **USB keyboards and USB storage now work on bare-metal installs.**
+- **No more failed network unit and ~2-minute stall on first boot.**
+- **Settings tab strip no longer widens the page on narrow screens.**
+- **Personal licenses no longer show a misleading expiry countdown.**
+- **License page "Refresh" now re-checks with the license server.**
+- **`/data` now grows to fill the disk on first boot, so appliance state is no longer capped at the 4 GB image floor.**
+- **License single-activation now works even when `/etc/machine-id` is empty.**
+- **`/etc/machine-id` is now provisioned on the appliance.**
+- **Installing/upgrading a real published pack now works — `manifest.yaml` is read correctly.**
+- **Pack runner output is now bounded — OOM protection.**
+- **Service Proxy dashboard now surfaces sync failures instead of "Never / Unknown".**
+- **Pack capabilities now execute on the confined runtime.**
+- **Console first-boot wizard now requires license activation, matching the dashboard.**
+- **Agent in-process capabilities no longer fail under an active sandbox.**
+- **Empty optional filters no longer silently match nothing.**
+- **Integrations install no longer looks hung — and retrying is safe.**
+- **Installing a host CLI from Integrations no longer fails with "Install failed (HTTP 502)".**
+- **`/health` page no longer contradicts itself when all services are healthy.**
+- **`/code` agent CLIs can reach the gateway again.**
+- **Vault passphrase no longer echoes when typed.**
+- **First-boot wizard now sets the system-default model provider.**
+- **`/code` and other User-principal sessions can no longer read the vault or other KruxOS secrets through `filesystem.*` (CRITICAL).**
+- **`filesystem.search_content` re-validates symlinked descendants when following links (Security).**
+- **First-boot setup banner no longer shows the wrong version or old branding.**
+- `process.
+- **Codex CLI approval-gate hook now loads on Codex ≥ v0.140.0.**
 
-- Monitoring guide corrected against the shipped CLI: `kruxos alerts` takes no
-  `--last`/`--severity` flags (it lists live resource alerts plus agent-raised
-  alerts; use `--json` for machine-readable output); the `alerts.send` examples
-  (Monitoring guide and SDK guide) use the real `message`/`severity`/`context`
-  fields (there is no `title` field); and the Gmail sync-status section now
-  points at `kruxos connect status` for connection state and the dashboard
-  **Service Proxy** page for detailed sync / buffer / dead-letter status. The
-  proxy overview-strip label matches the UI (**Buffered operations**).
+### Security
 
-- Security model page: documented the **enforced + audited** use-not-read
-  secrets model (deny-by-default scope, a `secrets.use` audit entry per
-  resolution, reflected-credential scrubbing) and operator secret
-  provisioning (**Settings › Secrets** and `kruxos vault add` with
-  capability/host scoping). Corrected the **network port map** — retired
-  the supervision port, added the loopback User API (7703) and health
-  (7704) ports, clarified that the agent gateway binds `0.0.0.0` (per-Agent
-  bearer is the boundary), and added a **TLS reverse-proxy** note.
-
-- Architecture page: retired the supervision port (7701) from the system
-  diagram and port map — supervision now rides the root-only local control
-  socket (`/run/kruxos/control.sock`). Corrected the port map (User API 7703
-  is loopback **HTTP**, added the loopback health endpoint 7704, the agent
-  gateway 7700 binds `0.0.0.0` with per-Agent bearer auth) and the firewall
-  line (the shipped appliance opens **TCP 7700 + 7800 only**; SSH is opt-in,
-  7702 is loopback UDP). Added a network-posture summary and a
-  remote-agent **TLS reverse-proxy** (`wss://`) note.
-
-- Backup & Restore guide: corrected the encryption description — state
-  backups are AES-256-GCM with a key derived from the **vault passphrase
-  via Argon2id** (with a per-file salt), and older backups still restore
-  (the format version is auto-detected).
-
-- Security whitepaper: supervision is now described as a **root-only local
-  control socket** (peer-credential, uid 0) instead of a network port with
-  an admin passphrase — the AC-17 mapping row, the principal table, and the
-  TLS/limitations sections were corrected. Also documents the **opt-in
-  Tailscale tailnet** surface (userspace daemon, `tailscale serve`
-  publishing only the dashboard — plus the opt-in SSH console when enabled —
-  an egress guard fencing the loopback ports). Corrected three residual
-  claims: the `/code` CLI tools mint their credential over the distinct
-  **auth socket** (`/run/kruxos/auth.sock`), not the uid-0 control socket;
-  and the agent gateway (7700) binds **`0.0.0.0`** by default (per-Agent
-  bearer is the boundary; restrict via `server.host`), not `127.0.0.1` —
-  fixed consistently across the threat model, §4.4, and the SSRF note.
-
-- Model Providers guide: documented the unified **Local model
-  (self-hosted)** provider — the engine sub-selector (Ollama native /
-  OpenAI-compatible over `/v1` / KruxOS on-box engine), the optional API
-  key for keyed OpenAI-compatible servers, and the system-managed on-box
-  engine (added from **Settings › Local Models**). Also corrected the
-  context-compaction descriptions: OpenAI/Codex use client-side, same-model
-  compaction (there is no server-side `compact_threshold`), and Anthropic's
-  native server-side compaction applies to its 4.6 models. Tightened the
-  Anthropic tool-clearing note — native tool-clearing is **Haiku 4.5 /
-  Sonnet 4+ / Opus 4+ only**; Claude 3.x is client-side only. Fixed the
-  `models.yaml` key-registration example: model-provider keys are added
-  through the managed flow (`kruxos model add` or **Settings › Models**),
-  not `kruxos vault add` — which refuses the managed `model-provider:*`
-  namespace.
-
-- Install guide: removed the retired supervision port from the Docker,
-  QEMU, VirtualBox and firewall steps and the port tables; recommended
-  **bridged** networking for the VM (real LAN IP, no forwards); and
-  replaced the misleading "20 GiB disk minimum" with the real model —
-  the image is ~8 GiB and **`/data` auto-expands to fill the disk on
-  first boot**. Clarified that grow-to-fill is a **one-time, first-boot**
-  step: size the disk *before* first boot, because enlarging it later
-  does not re-expand `/data` on its own and requires a manual partition
-  + `resize2fs` grow (it is a required step, not the optional convenience
-  it was first framed as). The first-boot firewall line now lists the
-  ports actually accepted — **TCP 7700 + 7800 only** (7702 trigger-wake
-  is UDP on loopback, with no inbound rule). Dropped stale
-  v0.0.1-specific framing.
-
-- Pack authoring guides: the manifest file is **`manifest.yaml`** (the
-  Pack SDK scaffolds and requires it — `pack.yaml` is rejected), and the
-  `capabilities:` list holds **definition-file paths** (e.g.
-  `definitions/weather.yaml`), not capability name-strings. Updated the
-  quickstart, publishing, and service-proxy pack guides.
-
-- Capability reference: corrected the counts to the current registry —
-  **92 typed capabilities across 13 categories** (was 89). The Network
-  row now shows **5** (adds the gateway-mediated credentialed request),
-  Filesystem **13**, and Git **9**; the Git row also no longer lists a
-  non-existent "stash" capability.
-
-- Monitoring guide: corrected the health endpoint reference to the real
-  API — port **7704** (was 7701), the `services` field is a JSON **array**
-  (was an object), the overall status value is **`critical`** (was
-  "unhealthy"), and the example response now matches the live field names.
-
-
-- Docs accuracy — corrected the Python SDK install timing across the
-  getting-started, quickstart (local / Claude / Gemini / OpenAI), Hermes, and
-  pack-testing pages. The SDK ships bundled inside the appliance today; a
-  published `pip install kruxos` distribution to PyPI is planned for a later
-  release, **not** v0.0.3 (the previous text incorrectly stated PyPI ships
-  with v0.0.3).
-- Developer docs — corrected the *Agent Experience: Linux vs KruxOS* guide to
-  use the real Python SDK client API. Capability calls now show
-  `await agent.call_async(name, **inputs)` and the typed-exception error model
-  (a failed call raises `FileNotFoundError`, `PermissionDeniedError`,
-  `CapabilityError`, …) instead of the never-shipped
-  `agent.capabilities.invoke(...)` / `result.success` / `result.error.type`
-  shapes; discovery now uses `capabilities.list_async()` /
-  `describe_async()`. Every snippet was syntax-checked against the shipped SDK.
-- Documentation site dark mode: restored the code-block padding that was
-  missing in the dark (slate) theme, so code samples no longer sit flush
-  against their border. Light mode was unaffected.
+- **Scheduled capability jobs now run confined to their creating agent's own workspace, like interactive and autonomous jobs.**
+- **Reconnecting Gmail/Slack with a different account now purges the previous account's cached data.**
+- **A poisoned server-supplied string can no longer inject terminal escape sequences into the operator CLI.**
+- **An alert id can no longer traverse out of the alerts directory.**
+- **A hostile allowlisted site can no longer OOM the gateway with a giant response body.**
+- **A host binding can no longer be quietly widened to "any host" by a degenerate wildcard or a trailing dot.**
+- **Reading an email body is now scoped and fully audited for operator/`/code` sessions too, not only agents.**
+- **Credentialed egress never returns the credential — even on an error or via a reflecting server.**
+- **Credentialed egress is fail-closed and cannot be aimed at an arbitrary host.**
+- **Encrypted backups are now stretched with Argon2id, and the `state.backup` capability actually backs up your state.**
+- **Agents can only use a stored credential for the capability it is scoped to — enforced, audited, and deny-by-default.**
+- **The agent name `default` is now reserved, closing an audit-attribution collision.**
+- **Reading an email body now respects the token's scope and is always audited.**
+- **Opt-in SSH ships with guardrails for granting remote root.**
+- **First boot: serial/headless boots no longer come up with passwordless root.**
+- **Firewall: dropped the dead inbound TCP 7702 rule.**
 
 ## [0.0.2] - 2026-06-08
 
