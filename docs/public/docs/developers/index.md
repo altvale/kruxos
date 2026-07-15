@@ -18,7 +18,7 @@ Build agents, create capability packs, and integrate with the KruxOS platform.
 
     ---
 
-    Complete reference for all 89 typed capabilities across 13 categories (filesystem, process, network, git, scheduler, system, agent, state, comms, secrets, email, Slack, alerts).
+    Complete reference for all 92 typed capabilities across 13 categories (filesystem, process, network, git, scheduler, system, agent, state, comms, secrets, email, Slack, alerts).
 
     [:octicons-arrow-right-24: Capabilities](capabilities/index.md)
 

@@ -35,7 +35,7 @@ graph TB
     subgraph "KruxOS"
         GW[Gateway<br/>MCP / JSON-RPC<br/>:7700]
         PE[Policy Engine<br/>YAML rules]
-        CR[Capability Registry<br/>91 capabilities]
+        CR[Capability Registry<br/>92 capabilities]
         SB[Sandbox<br/>per-agent isolation]
         VT[Vault<br/>encrypted secrets]
         AL[Audit Log<br/>hash-chained]
