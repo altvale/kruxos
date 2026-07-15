@@ -178,7 +178,7 @@ kruxos agent list
 kruxos status
 ```
 
-A healthy agent shows `active` after Claude makes its first tool call. The dashboard `/activity` page reflects the same connection in real time over the supervision WebSocket on TCP 7701.
+A healthy agent shows `active` after Claude makes its first tool call. The dashboard `/activity` page reflects the same connection in real time.
 
 ## How it works
 

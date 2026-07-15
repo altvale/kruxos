@@ -1,23 +1,18 @@
-# Supervision WebSocket Events
+# Supervision Events
 
-The Gateway exposes a supervision WebSocket on port **7701**, separate from the agent port (7700). This streams real-time events to the dashboard and CLI tools.
+!!! warning "The external supervision WebSocket (port 7701) is retired"
+    KruxOS no longer exposes supervision over a TCP WebSocket. Live activity, chat, and vault control now ride a **root-only on-box control socket** (`/run/kruxos/control.sock`, `0600 root:root`, peer-credential uid 0) with **no network port and no passphrase** — the dashboard **Activity** page and the `kruxos` CLI consume this stream locally. The event envelope and schema below still describe the events KruxOS emits; only the `wss://…:7701` transport and its `passphrase=` auth are gone.
 
-## Connection
+KruxOS emits real-time supervision events — capability invocations, policy decisions, approval requests, and health alerts. This page documents their envelope and schema.
 
-```
-Endpoint:  wss://localhost:7701/events
-Transport: WebSocket (JSON frames)
-Auth:      User token (krx_user_*) as a Bearer header, or operator session
-Keepalive: 30 s server ping / 10 s read timeout
-Max frame: 16 MiB by default
-```
+## How events are consumed
 
-```
-Authorization: Bearer krx_user_...
-```
+These events are surfaced **on-box only** — there is no external endpoint to connect to:
 
-!!! warning "Security"
-    Port 7701 is for supervisors only. Agents (64-char hex tokens, authenticated on port 7700) cannot connect to this port — only Users (`krx_user_*`). User tokens are issued by `kruxos user-token create` or the first-boot dashboard wizard.
+- **Dashboard → Activity** streams them live in the browser.
+- The `kruxos` CLI reads the same stream over the local control socket.
+
+Agents (64-char hex tokens on port 7700) cannot reach the supervision stream at all — it is gated on peer-credential uid 0 on a `0600 root:root` socket, not exposed as a network service.
 
 ## Event stream
 
@@ -232,9 +227,9 @@ Fired when a Service Proxy write is buffered (email send, delete, etc.).
 Add query parameters to filter the event stream:
 
 ```
-ws://localhost:7701/events?passphrase=...&agent=research-agent
-ws://localhost:7701/events?passphrase=...&type=capability_invoked,policy_violation
-ws://localhost:7701/events?passphrase=...&agent=deploy-agent&type=approval_requested
+agent=research-agent
+type=capability_invoked,policy_violation
+agent=deploy-agent&type=approval_requested
 ```
 
 | Parameter | Description |

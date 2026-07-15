@@ -60,7 +60,6 @@
         ports: {
           7800: { service: "Dashboard", auth: "operator passphrase" },
           7700: { service: "MCP Gateway", auth: "64-char hex API key" },
-          7701: { service: "Supervision WS", auth: "krx_user_* or operator session" },
           7703: { service: "User API", auth: "krx_user_* bearer (loopback)" },
         },
       }),

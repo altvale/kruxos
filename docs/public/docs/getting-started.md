@@ -13,7 +13,6 @@ This page walks you from zero to a working KruxOS instance with a connected AI a
       -e KRUXOS_VAULT_PASSPHRASE='choose-a-strong-passphrase' \
       -p 7800:7800 \
       -p 7700:7700 \
-      -p 7701:7701 \
       -v kruxos-data:/data/kruxos \
       altvale/kruxos:latest
     ```
@@ -111,7 +110,7 @@ Open <https://localhost:7800> in your browser (HTTPS-by-default with an auto-gen
 | Page | What it shows |
 |------|--------------|
 | **Home** | System health, active agents, recent activity, pending approvals |
-| **Supervision** | Real-time stream of every capability invocation (TCP 7701 WS) |
+| **Supervision** | Real-time stream of every capability invocation (via the on-box control socket) |
 | **Agents** | Templates (Coder / Researcher / DevOps / Email / General), model overrides, host mounts |
 | **Approvals** | Pending / Approved / Rejected / Timed Out tabs; default 24-hour hold for User MCP calls |
 | **Audit** | Searchable hash-chained audit log with Principal-aware filtering |

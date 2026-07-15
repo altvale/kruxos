@@ -18,7 +18,7 @@ Best practices for deploying KruxOS in production environments.
 - [ ] Prepare agent names and purposes for initial registration
 - [ ] Decide on external service connections (Gmail, etc.)
 - [ ] Plan backup strategy and retention period
-- [ ] Configure network firewall rules for ports 7700, 7701, 7800
+- [ ] Configure network firewall rules for ports 7700, 7800
 
 ### System requirements
 
@@ -41,7 +41,6 @@ Best practices for deploying KruxOS in production environments.
 │    7800/tcp  ← Dashboard (admin network)     │
 │                                              │
 │  Block inbound:                              │
-│    7701/tcp  ← Supervision (localhost only)  │
 │    7702/tcp  ← OpenClaw bridge (if unused)   │
 │                                              │
 │  Allow outbound:                             │
@@ -50,8 +49,8 @@ Best practices for deploying KruxOS in production environments.
 └─────────────────────────────────────────────┘
 ```
 
-!!! warning "Supervision port"
-    Port 7701 should **never** be exposed to untrusted networks. It provides session control (kill, pause) and live activity streaming. Restrict it to localhost or a management VLAN.
+!!! note "Supervision has no network port"
+    Supervision — session control (kill, pause) and live activity streaming — no longer uses a TCP port. It rides a root-only on-box control socket (`/run/kruxos/control.sock`, `0600 root:root`, peer-credential uid 0) that the dashboard and CLI reach locally, so there is nothing to expose or firewall. The former supervision port (7701) is retired.
 
 ### TLS configuration
 
@@ -164,11 +163,11 @@ Configure backup retention in your backup rotation script. Recommended:
 
 ### Health check endpoint
 
-The `/health` endpoint on port 7701 returns HTTP 200 (healthy) or 503 (unhealthy):
+The `/health` endpoint on port 7704 (loopback) returns HTTP 200 (healthy) or 503 (unhealthy):
 
 ```bash
 # Nagios / monitoring check
-curl -sf http://localhost:7701/health || echo "CRITICAL: KruxOS unhealthy"
+curl -sf http://localhost:7704/health || echo "CRITICAL: KruxOS unhealthy"
 ```
 
 ### Alerting

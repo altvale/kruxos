@@ -85,7 +85,7 @@ KruxOS exposes every OS operation as a **typed, documented API**:
     ```bash
     docker run -d --name kruxos --privileged \
       -e KRUXOS_VAULT_PASSPHRASE='choose-a-strong-passphrase' \
-      -p 7800:7800 -p 7700:7700 -p 7701:7701 \
+      -p 7800:7800 -p 7700:7700 \
       -v kruxos-data:/data/kruxos \
       altvale/kruxos:latest
     ```
@@ -116,7 +116,7 @@ graph TB
     Gateway --> Audit[Audit Logs]
     Gateway --> State[State System]
     Gateway --> Comms[Agent Comms]
-    Dashboard[Web Dashboard :7800] -->|Supervision WS :7701| Gateway
+    Dashboard[Web Dashboard :7800] -->|Supervision control socket| Gateway
     CLI[kruxos CLI] --> UserAPI[User API :7703]
     UserAPI --> Gateway
 ```
