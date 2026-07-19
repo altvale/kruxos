@@ -24,6 +24,7 @@ Day-to-day operations for running KruxOS.
 
 | Guide | What you'll learn |
 |-------|------------------|
+| [Desktop Dashboard](desktop-dashboard.md) | The OS-style supervisor desktop — windows, dock, ⌘K, and approval interrupts |
 | [Dashboard Chat](dashboard-chat.md) | Use the multi-panel chat interface |
 | [Troubleshooting](troubleshooting.md) | Common issues and solutions |
 | [Error Reference](../troubleshooting/errors.md) | Structured error catalogue |
