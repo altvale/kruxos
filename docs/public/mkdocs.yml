@@ -132,6 +132,7 @@ nav:
     - User Identities & Tokens: guides/user-identities.md
     - Code Sessions: guides/code-sessions.md
     - Admin CLI Commands: guides/admin-cli.md
+    - Desktop Dashboard: guides/desktop-dashboard.md
     - Dashboard Chat: guides/dashboard-chat.md
     - Troubleshooting: guides/troubleshooting.md
     - Error Reference: troubleshooting/errors.md

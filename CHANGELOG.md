@@ -12,6 +12,7 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
+- **An OS-style desktop dashboard (preview) — a supervisor desktop with a menu bar, free-form windows, a dock of running agents, a ⌘K command palette, Mission Control, and a notification center where approvals arrive as Approve / Reject interrupts. It's the default layout, switchable back to Classic from Settings › System.**
 - **Shared GitHub repository links now reuse the canonical KruxOS social header.**
 - **The whole-disk fresh-install image now carries a keyless cosign supply-chain signature.**
 - **The Docker container now warns at startup when its sandbox is degraded.**
