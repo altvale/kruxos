@@ -7,8 +7,8 @@ This repository hosts KruxOS's community-contributable extension surfaces — ca
 | Surface | Available | Notes |
 |---|---|---|
 | `packs/` — capability packs (Python / Node.js / service-proxy) | v0.0.2 | pack-SDK CLI + remote registry land in v0.0.2 |
-| `plugins/` — extension plugins | v0.0.3 | plugin runtime ships v0.0.3 |
-| `themes/` — dashboard themes | v0.0.3 | theme system ships v0.0.3 |
+| `plugins/` — extension plugins | planned | plugin runtime + SDK land in a future v0.0.x release |
+| `themes/` — dashboard themes | planned | theme system + SDK land in a future v0.0.x release |
 | `docs/public/` — public documentation | now | direct PRs welcome |
 
 For v0.0.1, the only contribution surface that's currently live is `docs/public/` — typo fixes, clarification PRs, additional examples. The other surfaces are placeholder-only until their respective release cycles light them up.

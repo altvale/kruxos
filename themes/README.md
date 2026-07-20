@@ -1,10 +1,10 @@
 # KruxOS Dashboard Themes
 
-This directory will host community dashboard themes starting in **v0.0.3**.
+This directory will host community dashboard themes in a **future v0.0.x release**.
 
 Themes customise the visual identity of the KruxOS dashboard — colour palette, typography, monogram, favicon, and OpenGraph share card.
 
-The theme system, theme SDK, and a documented contribution flow ship together in v0.0.3.
+The theme system, theme SDK, and a documented contribution flow ship together in a future v0.0.x release.
 
 ## Contributing
 

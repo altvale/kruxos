@@ -1,10 +1,10 @@
 # KruxOS Plugins
 
-This directory will host community plugins starting in **v0.0.3**.
+This directory will host community plugins in a **future v0.0.x release**.
 
 Plugins are larger extension surfaces than capability packs — they can register capabilities, add dashboard pages, register hooks into the agent runtime, and provide custom UI.
 
-The plugin runtime, plugin SDK, and a documented contribution flow ship together in v0.0.3.
+The plugin runtime, plugin SDK, and a documented contribution flow ship together in a future v0.0.x release.
 
 ## Contributing
 

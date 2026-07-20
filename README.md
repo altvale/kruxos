@@ -18,8 +18,8 @@ Agents run free. You stay in control.
 </div>
 
 > [!NOTE]
-> **v0.0.1 — early beta.** Single-node deployment, not for production use.
-> All features are free for everyone in v0.0.1; tier enforcement activates in v0.0.3.
+> **v0.0.3 — early beta.** Single-node deployment, not for production use.
+> Two-tier licensing is live as of v0.0.3: **Personal is free**; Enterprise licenses via [sales](https://kruxos.com/pricing).
 
 ---
 
@@ -84,8 +84,8 @@ KruxOS surfaces three extension points for community contribution:
 | Surface | Available | Notes |
 |---|---|---|
 | `packs/` — capability packs | v0.0.2 | pack-SDK CLI + remote registry land together |
-| `plugins/` — extension plugins | v0.0.3 | plugin runtime ships v0.0.3 |
-| `themes/` — dashboard themes | v0.0.3 | theme system ships v0.0.3 |
+| `plugins/` — extension plugins | planned | plugin runtime + SDK land in a future v0.0.x release |
+| `themes/` — dashboard themes | planned | theme system + SDK land in a future v0.0.x release |
 
 Each contribution declares its own license in its directory. Want to build one? Start at [`packs/`](packs/), [`plugins/`](plugins/), or [`themes/`](themes/) — or read [CONTRIBUTING.md](CONTRIBUTING.md) for the full flow.
 
@@ -123,11 +123,11 @@ Each contribution declares its own license in its directory. Want to build one? 
 
 Full documentation: **[docs.kruxos.com](https://docs.kruxos.com)** — getting-started, user guides, CLI reference, capability docs, security whitepaper.
 
-For this release: [v0.0.1 Release Notes](docs/release-notes/v0.0.1.md).
+For this release: [v0.0.3 Release Notes](docs/public/docs/release-notes/v0.0.3.md).
 
 ## Status
 
-KruxOS v0.0.1 is **early beta** — single-node deployment, not for production use.
+KruxOS v0.0.3 is **early beta** — single-node deployment, not for production use.
 
 ## License
 
