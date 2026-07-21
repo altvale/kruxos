@@ -45,7 +45,12 @@ installed yet it is pre-selected so you have an obvious first choice.
 
 The simplest path is the built-in catalog under **Get models**:
 
-1. Find a model in the list. The **Recommended** one is a good default.
+1. Find a model in the list. The **Recommended** one is a good default. Each
+   entry shows its license: conditioned licenses carry their attribution copy
+   automatically (for example *"Built with Llama"*), and an amber
+   **License: review** badge flags a non-commercial, restricted, or
+   unrecognized license, with the full note in its tooltip. The badges are
+   advisory only — they never block pulling or enabling a model.
 2. Click **Pull**.
 3. A **Confirm download** dialog states the exact size against your free model
    storage, an estimated hardware-fit grade (**Fits** / **Tight** / **May not
@@ -73,8 +78,10 @@ Under **Get models**, the **Search Hugging Face** panel lets you pull any
 
 1. Type a few letters — e.g. `qwen`, `llama`, `mistral`. Results appear as you
    type, each card showing **downloads**, **likes**, **parameter count**,
-   **context length**, and **licence**. Sort by most downloads, most likes, or
-   trending.
+   **context length**, and **licence** — with the same advisory license badges
+   as the catalog (attribution copy for conditioned licenses, amber
+   **License: review** for non-commercial, restricted, or unrecognized ones).
+   Sort by most downloads, most likes, or trending.
 2. Click **View downloads** on a model. Its GGUF files are grouped **Small** /
    **Balanced** / **Large**, with one option marked **Recommended** (the widely
    used `Q4_K_M` quantisation) — no wall of cryptic filenames.
