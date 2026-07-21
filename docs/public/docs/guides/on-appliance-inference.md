@@ -9,7 +9,7 @@ The catalog is a small built-in set plus community-contributed models that are r
 ```mermaid
 flowchart TB
     subgraph Dashboard
-        INF[Settings → Inference]
+        INF[Settings → Local Models]
         CHAT[Chat page]
     end
     subgraph Appliance
@@ -35,8 +35,13 @@ flowchart TB
 
 === "Dashboard"
 
-    1. Open **Settings → Inference**.
-    2. Browse the **catalog** — each entry shows the model name, size, and license.
+    1. Open **Settings → Local Models**.
+    2. Browse the **catalog** — each entry shows the model name, size, and
+       license. Licenses with conditions carry their attribution copy
+       automatically (for example *"Built with Llama"*); a non-commercial,
+       restricted, or unrecognized license shows an amber **License: review**
+       badge, with the full license note in its tooltip. These markers are
+       advisory only — they never block pulling or enabling a model.
     3. Click **Pull** on a model. A progress bar tracks the download.
     4. When the pull completes, the model appears under **Installed models** with a **Ready** status.
 
