@@ -21,7 +21,7 @@ Per-release notes with more narrative detail live under
 - **Grok is now a model provider — sign in with your X Premium / SuperGrok subscription, or bring an xAI API key.**
 - **Air-gapped appliances can now update KruxOS from a file — no internet required.**
 - **Dashboard: one-click "Install Now" GPU driver install.**
-- **One-click GPU driver install: the appliance now fetches the NVIDIA `.run` itself, verified against a pin signed into the kit /5201).**
+- **One-click GPU driver install: the appliance now fetches the NVIDIA `.run` itself, verified against a pin signed into the kit.**
 - **The appliance can now fetch the GPU kit itself — and every fetched kit is signature-verified before anything touches disk.**
 - **The GPU-driver install now presents a real NVIDIA license attestation, not a bare checkbox.**
 - **Model-license ADVISORY badges on Local Models.**
