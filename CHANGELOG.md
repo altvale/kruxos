@@ -12,6 +12,7 @@ Per-release notes with more narrative detail live under
 
 ### Added
 
+- **Join Wi-Fi from the appliance console during setup — the way a Wi-Fi-only machine gets online in the first place. Step 2 of the console setup wizard scans for networks, joins the one you pick (typing the name in yourself for networks that don't broadcast it), and lets you simply retype a wrong password. Saved networks rejoin automatically on later boots, including after an update. Optional throughout: it is hidden on hardware with no wireless adapter, says so when a cable is already connected, and never blocks the rest of setup. Documented in the First-Boot Wizard guide, together with the one standing limitation — unlocking an encrypted appliance over the network requires wired Ethernet.**
 - **An OS-style desktop dashboard (preview) — a supervisor desktop with a menu bar, free-form windows, a dock of running agents, a ⌘K command palette, Mission Control, and a notification center where approvals arrive as Approve / Reject interrupts. It's the default layout, switchable back to Classic from Settings › System.**
 - **Shared GitHub repository links now reuse the canonical KruxOS social header.**
 - **The whole-disk fresh-install image now carries a keyless cosign supply-chain signature.**

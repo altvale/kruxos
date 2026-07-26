@@ -13,6 +13,9 @@ Only devices signed in to **your** Tailscale account can connect. There is no pu
 !!! info "Bring your own Tailscale account"
     You sign in with your own Tailscale account — the appliance never sees your password. The **Personal** tier is free and is ample for one operator and their devices. One caveat: signing up with a custom-domain email address classes the tailnet as business use on Tailscale's side; use a personal email address for the free Personal tier.
 
+!!! note "The appliance needs a network of its own first"
+    Remote access rides on whatever connection the appliance already has — Ethernet or Wi-Fi. Wireless is set up on the dashboard's **Network** page, or, on a machine that has no network at all yet, from the appliance console during setup: see [Joining Wi-Fi from the console](first-boot-wizard.md#joining-wi-fi-from-the-console).
+
 ## How it works
 
 ```mermaid
@@ -95,6 +98,7 @@ To remove the appliance from your tailnet entirely, also delete the machine in t
 |---------|-----|
 | Login link doesn't appear | It usually appears within a few seconds. If the card says "still starting", wait a moment and click **Start login** again — it re-shows the same pending link. You can always finish later from Settings › System. |
 | Enable or login fails outright | The appliance needs **outbound HTTPS (443)** and working **DNS** to reach the Tailscale coordination service. Check the appliance's internet access — no inbound ports are required. |
+| The appliance isn't on a network yet | There is nothing for remote access to ride on. Plug in Ethernet, or join Wi-Fi from the **Network** page — or from the console if you can't reach the dashboard at all ([Joining Wi-Fi from the console](first-boot-wizard.md#joining-wi-fi-from-the-console)). |
 | "Publishing to your tailnet…" lingers | Normal for a few seconds after connecting or after a restart while the serve state settles. Use **Publish now** if it doesn't clear. |
 | `ts.net` URL doesn't load on your phone | Confirm the phone's Tailscale app is running and signed in to the **same** account, and that the card shows connected with the address published. |
 | Node key expired | The card shows an expired warning — click **Re-login** and approve the login again. Consider disabling key expiry (above). |

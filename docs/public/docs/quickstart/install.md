@@ -266,6 +266,9 @@ sync
 3. Allow inbound **7700** (agent MCP) and **7800** (operator dashboard) on your management network
 4. Supervision no longer uses a network port — it rides an in-guest **root-only control socket** (`/run/kruxos/control.sock`), so there is no supervision port to firewall
 
+!!! note "Wi-Fi-only machines: join the network at the console"
+    If the machine has no Ethernet port and no cable, the banner will show no address and there is no dashboard to open yet. Log in at the console and run `kruxos setup` — step 2 scans for wireless networks and joins one. Full walkthrough: [Joining Wi-Fi from the console](../guides/first-boot-wizard.md#joining-wi-fi-from-the-console).
+
 ### First boot
 
 Run through the same eight-step dashboard wizard described in Option 1.
